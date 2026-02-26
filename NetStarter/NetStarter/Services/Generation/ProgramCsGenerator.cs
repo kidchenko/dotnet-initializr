@@ -11,10 +11,87 @@ public static class ProgramCsGenerator
         _ => GenerateWebApplication(config),
     };
 
-    private static string GenerateConsole(ProjectConfiguration config) =>
-        $"namespace {config.Namespace};\n" +
-        $"\n" +
-        $"Console.WriteLine(\"Hello from {config.ProjectName}!\");\n";
+    private static string GenerateConsole(ProjectConfiguration config)
+    {
+        var entryPointNs = config.Architecture == ArchitecturePattern.CleanArchitecture
+            ? $"{config.Namespace}.{config.EntryPointSuffix}"
+            : config.Namespace;
+
+        return
+            $"using Microsoft.Extensions.Configuration;\n" +
+            $"using Microsoft.Extensions.DependencyInjection;\n" +
+            $"using {entryPointNs};\n" +
+            $"\n" +
+            $"var configuration = new ConfigurationBuilder()\n" +
+            $"    .AddJsonFile(\"appsettings.json\")\n" +
+            $"    .AddJsonFile(\"appsettings.Development.json\", optional: true)\n" +
+            $"    .Build();\n" +
+            $"\n" +
+            $"var services = new ServiceCollection();\n" +
+            $"services.AddAppServices(configuration);\n" +
+            $"\n" +
+            $"var serviceProvider = services.BuildServiceProvider();\n" +
+            $"\n" +
+            $"Console.WriteLine(\"Hello from {config.ProjectName}!\");\n";
+    }
+
+    public static string GenerateServiceCollectionExtensions(ProjectConfiguration config)
+    {
+        var ns = config.Architecture == ArchitecturePattern.CleanArchitecture
+            ? $"{config.Namespace}.{config.EntryPointSuffix}"
+            : config.Namespace;
+
+        var usings = $"using Microsoft.Extensions.Configuration;\n" +
+                     $"using Microsoft.Extensions.DependencyInjection;\n";
+        var body = string.Empty;
+
+        if (config.Orm == OrmOption.EfCore)
+        {
+            var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(config.Architecture);
+            usings += $"using Microsoft.EntityFrameworkCore;\n";
+            usings += $"using {config.Namespace}.{dbContextNs};\n";
+
+            var dbMethod = config.Database switch
+            {
+                DatabaseOption.PostgreSql => "UseNpgsql",
+                DatabaseOption.SqlServer => "UseSqlServer",
+                _ => "UseSqlite",
+            };
+            body += $"        services.AddDbContext<AppDbContext>(options =>\n" +
+                    $"            options.{dbMethod}(configuration.GetConnectionString(\"DefaultConnection\")));\n";
+        }
+
+        if (config.IncludeSerilog)
+        {
+            usings += $"using Serilog;\n";
+            body += $"        services.AddLogging(builder =>\n" +
+                    $"            builder.AddSerilog(new LoggerConfiguration()\n" +
+                    $"                .ReadFrom.Configuration(configuration)\n" +
+                    $"                .CreateLogger()));\n";
+        }
+
+        if (config.Mapping == MappingOption.Mapster)
+        {
+            usings += $"using Mapster;\n";
+            usings += $"using MapsterMapper;\n";
+            body += $"        services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n" +
+                    $"        services.AddScoped<IMapper, ServiceMapper>();\n";
+        }
+
+        return
+            usings +
+            $"\n" +
+            $"namespace {ns};\n" +
+            $"\n" +
+            $"public static class ServiceCollectionExtensions\n" +
+            $"{{\n" +
+            $"    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)\n" +
+            $"    {{\n" +
+            body +
+            $"        return services;\n" +
+            $"    }}\n" +
+            $"}}\n";
+    }
 
     private static string GenerateWorkerService(ProjectConfiguration config) =>
         $"using {config.Namespace};\n" +
@@ -46,7 +123,11 @@ public static class ProgramCsGenerator
         var usings = string.Empty;
 
         if (config.Orm == OrmOption.EfCore)
+        {
+            var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(config.Architecture);
             usings += $"using Microsoft.EntityFrameworkCore;\n";
+            usings += $"using {config.Namespace}.{dbContextNs};\n";
+        }
 
         if (config.Auth == AuthOption.Jwt)
         {
@@ -79,9 +160,7 @@ public static class ProgramCsGenerator
 
         if (config.IncludeSerilog)
             services += $"builder.Host.UseSerilog((context, cfg) =>\n" +
-                        $"    cfg.ReadFrom.Configuration(context.Configuration)\n" +
-                        $"       .WriteTo.Console()\n" +
-                        $"       .WriteTo.File(\"logs/log-.txt\", rollingInterval: RollingInterval.Day));\n" +
+                        $"    cfg.ReadFrom.Configuration(context.Configuration));\n" +
                         $"\n";
 
         if (config.Orm == OrmOption.EfCore)

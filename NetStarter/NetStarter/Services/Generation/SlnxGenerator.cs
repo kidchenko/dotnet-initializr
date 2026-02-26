@@ -23,7 +23,7 @@ public static class SlnxGenerator
                 srcProjects.Add($"src/{config.ProjectName}.Domain/{config.ProjectName}.Domain.csproj");
                 srcProjects.Add($"src/{config.ProjectName}.Application/{config.ProjectName}.Application.csproj");
                 srcProjects.Add($"src/{config.ProjectName}.Infrastructure/{config.ProjectName}.Infrastructure.csproj");
-                srcProjects.Add($"src/{config.ProjectName}.Api/{config.ProjectName}.Api.csproj");
+                srcProjects.Add($"src/{config.EntryPointProjectName}/{config.EntryPointProjectName}.csproj");
                 break;
             case ArchitecturePattern.VerticalSlice:
                 srcProjects.Add($"src/{config.ProjectName}/{config.ProjectName}.csproj");
@@ -52,28 +52,26 @@ public static class SlnxGenerator
         hasSrcProjects = srcProjects.Count > 0;
         hasTestsProjects = testProjects.Count > 0;
 
-        // Add src folder entry
+        // Add src folder with nested projects
         if (hasSrcProjects)
         {
-            sb.AppendLine("  <Folder Path=\"src/\" />");
+            sb.AppendLine("  <Folder Name=\"/src/\">");
+            foreach (var path in srcProjects)
+            {
+                sb.AppendLine($"    <Project Path=\"{path}\" />");
+            }
+            sb.AppendLine("  </Folder>");
         }
 
-        // Add test folder entry
+        // Add tests folder with nested projects
         if (hasTestsProjects)
         {
-            sb.AppendLine("  <Folder Path=\"tests/\" />");
-        }
-
-        // Add src project entries
-        foreach (var path in srcProjects)
-        {
-            sb.AppendLine($"  <Project Path=\"{path}\" />");
-        }
-
-        // Add test project entries
-        foreach (var path in testProjects)
-        {
-            sb.AppendLine($"  <Project Path=\"{path}\" />");
+            sb.AppendLine("  <Folder Name=\"/tests/\">");
+            foreach (var path in testProjects)
+            {
+                sb.AppendLine($"    <Project Path=\"{path}\" />");
+            }
+            sb.AppendLine("  </Folder>");
         }
 
         sb.Append("</Solution>");

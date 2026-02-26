@@ -46,7 +46,7 @@ public static class ReadmeGenerator
 
         if (isCleanArch)
         {
-            sb.AppendLine($"dotnet run --project src/{name}.Api");
+            sb.AppendLine($"dotnet run --project src/{name}.{config.EntryPointSuffix}");
         }
         else
         {
@@ -99,7 +99,7 @@ public static class ReadmeGenerator
 
             if (isCleanArch)
             {
-                sb.AppendLine($"dotnet ef database update --project src/{name}.Infrastructure --startup-project src/{name}.Api");
+                sb.AppendLine($"dotnet ef database update --project src/{name}.Infrastructure --startup-project src/{name}.{config.EntryPointSuffix}");
             }
             else
             {
@@ -193,7 +193,7 @@ public static class ReadmeGenerator
         {
             sb.AppendLine($"{name}/");
             sb.AppendLine("├── src/");
-            sb.AppendLine($"│   ├── {name}.Api/          # Web API entry point");
+            sb.AppendLine($"│   ├── {name}.{config.EntryPointSuffix}/          # Web API entry point");
             sb.AppendLine($"│   ├── {name}.Application/  # Use cases and business logic");
             sb.AppendLine($"│   ├── {name}.Domain/       # Domain entities and interfaces");
             sb.AppendLine($"│   └── {name}.Infrastructure/ # Data access and external services");

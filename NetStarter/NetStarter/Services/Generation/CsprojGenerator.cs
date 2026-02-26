@@ -58,42 +58,7 @@ public static class CsprojGenerator
         sb.Append(CommonPropertyGroup(config, sdk));
 
         var packages = new List<(string Name, string Version)>();
-
-        // EF Core packages
-        if (config.Orm == OrmOption.EfCore)
-        {
-            packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
-            packages.Add(("Microsoft.EntityFrameworkCore.Design", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Design")));
-
-            if (config.Database == DatabaseOption.PostgreSql)
-                packages.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
-            else if (config.Database == DatabaseOption.SqlServer)
-                packages.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
-        }
-
-        // Auth packages
-        if (config.Auth == AuthOption.Jwt)
-            packages.Add(("Microsoft.AspNetCore.Authentication.JwtBearer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Authentication.JwtBearer")));
-
-        // Serilog packages
-        if (config.IncludeSerilog)
-        {
-            packages.Add(("Serilog.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.AspNetCore")));
-            packages.Add(("Serilog.Sinks.File", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.Sinks.File")));
-        }
-
-        // OpenTelemetry packages
-        if (config.IncludeOpenTelemetry)
-        {
-            packages.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));
-            packages.Add(("OpenTelemetry.Instrumentation.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.AspNetCore")));
-            packages.Add(("OpenTelemetry.Instrumentation.Http", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.Http")));
-            packages.Add(("OpenTelemetry.Exporter.OpenTelemetryProtocol", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Exporter.OpenTelemetryProtocol")));
-        }
-
-        // Mapping packages
-        if (config.Mapping == MappingOption.Mapster)
-            packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
+        AppendFeaturePackages(config, packages);
 
         // Additional packages (caller-supplied)
         if (additionalPackages is not null)
@@ -106,6 +71,43 @@ public static class CsprojGenerator
         sb.AppendLine();
         sb.Append("</Project>");
         return sb.ToString();
+    }
+
+    private static void AppendFeaturePackages(ProjectConfiguration config, List<(string Name, string Version)> packages)
+    {
+        if (config.Orm == OrmOption.EfCore)
+        {
+            packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
+            packages.Add(("Microsoft.EntityFrameworkCore.Design", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Design")));
+
+            if (config.Database == DatabaseOption.PostgreSql)
+                packages.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
+            else if (config.Database == DatabaseOption.SqlServer)
+                packages.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
+        }
+
+        if (config.Auth == AuthOption.Jwt)
+            packages.Add(("Microsoft.AspNetCore.Authentication.JwtBearer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Authentication.JwtBearer")));
+
+        if (config.IncludeSerilog)
+        {
+            packages.Add(("Serilog.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.AspNetCore")));
+            packages.Add(("Serilog.Sinks.File", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.Sinks.File")));
+        }
+
+        if (config.IncludeOpenTelemetry)
+        {
+            packages.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));
+            packages.Add(("OpenTelemetry.Instrumentation.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.AspNetCore")));
+            packages.Add(("OpenTelemetry.Instrumentation.Http", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.Http")));
+            packages.Add(("OpenTelemetry.Exporter.OpenTelemetryProtocol", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Exporter.OpenTelemetryProtocol")));
+
+            if (config.Orm == OrmOption.EfCore)
+                packages.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "*"));
+        }
+
+        if (config.Mapping == MappingOption.Mapster)
+            packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
     }
 
     public static string GenerateClassLibrary(ProjectConfiguration config, string projectSuffix, List<string>? packages = null)
@@ -195,6 +197,24 @@ public static class CsprojGenerator
         var sdk = "Microsoft.NET.Sdk";
         var sb = new StringBuilder();
         sb.Append(CommonPropertyGroup(config, sdk, outputType: "Exe"));
+
+        var packages = new List<(string Name, string Version)>
+        {
+            ("Microsoft.Extensions.DependencyInjection", "*"),
+            ("Microsoft.Extensions.Configuration", "*"),
+            ("Microsoft.Extensions.Configuration.Json", "*"),
+        };
+
+        AppendFeaturePackages(config, packages);
+        sb.Append(BuildPackageReferences(packages));
+
+        // Console SDK doesn't auto-include appsettings as content
+        sb.AppendLine();
+        sb.AppendLine("  <ItemGroup>");
+        sb.AppendLine("    <Content Include=\"appsettings.json\" CopyToOutputDirectory=\"PreserveNewest\" />");
+        sb.AppendLine("    <Content Include=\"appsettings.Development.json\" CopyToOutputDirectory=\"PreserveNewest\" />");
+        sb.AppendLine("  </ItemGroup>");
+
         sb.AppendLine();
         sb.Append("</Project>");
         return sb.ToString();

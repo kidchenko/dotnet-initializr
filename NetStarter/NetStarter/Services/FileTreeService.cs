@@ -136,14 +136,16 @@ public class FileTreeService
 
         srcFolder.Children.Add(infraProject);
 
-        // API project
-        var apiProject = new FileTreeNode { Name = $"{config.ProjectName}.Api", IsFolder = true };
-        apiProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Api.csproj", IsFolder = false });
+        // Entry point project
+        var apiProject = new FileTreeNode { Name = config.EntryPointProjectName, IsFolder = true };
+        apiProject.Children.Add(new FileTreeNode { Name = $"{config.EntryPointProjectName}.csproj", IsFolder = false });
         apiProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
+        if (config.ProjectType == ProjectType.Console)
+            apiProject.Children.Add(new FileTreeNode { Name = "ServiceCollectionExtensions.cs", IsFolder = false });
         apiProject.Children.Add(new FileTreeNode { Name = "appsettings.json", IsFolder = false });
         apiProject.Children.Add(new FileTreeNode { Name = "appsettings.Development.json", IsFolder = false });
 
-        // Auth in API
+        // Auth in entry point
         if (config.Auth == AuthOption.Jwt)
         {
             var authFolder = new FileTreeNode { Name = "Auth", IsFolder = true };
@@ -181,6 +183,8 @@ public class FileTreeService
         var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true };
         mainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.csproj", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
+        if (config.ProjectType == ProjectType.Console)
+            mainProject.Children.Add(new FileTreeNode { Name = "ServiceCollectionExtensions.cs", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.json", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.Development.json", IsFolder = false });
 
@@ -244,6 +248,8 @@ public class FileTreeService
         var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true };
         mainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.csproj", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
+        if (config.ProjectType == ProjectType.Console)
+            mainProject.Children.Add(new FileTreeNode { Name = "ServiceCollectionExtensions.cs", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.json", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.Development.json", IsFolder = false });
 

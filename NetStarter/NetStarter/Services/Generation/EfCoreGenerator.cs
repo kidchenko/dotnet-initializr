@@ -7,8 +7,15 @@ public static class EfCoreGenerator
     public static string GenerateDbContext(ProjectConfiguration config, string namespaceSuffix)
     {
         var ns = $"{config.Namespace}.{namespaceSuffix}";
+        var entityNsSuffix = GetEntityNamespaceSuffix(config.Architecture);
+        var entityNs = $"{config.Namespace}.{entityNsSuffix}";
+
+        var usings = $"using Microsoft.EntityFrameworkCore;\n";
+        if (entityNs != ns)
+            usings += $"using {entityNs};\n";
+
         return
-            $"using Microsoft.EntityFrameworkCore;\n" +
+            usings +
             $"\n" +
             $"namespace {ns};\n" +
             $"\n" +

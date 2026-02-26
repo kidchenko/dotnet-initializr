@@ -29,4 +29,7 @@ public class ProjectConfiguration
     public bool IncludeDotNetAspire { get; set; }
     public bool IncludeGitHubActions { get; set; }
     public bool IncludeAzureDevOps { get; set; }
+
+    public string EntryPointSuffix => ProjectType == ProjectType.Console ? "Cli" : "Api";
+    public string EntryPointProjectName => $"{ProjectName}.{EntryPointSuffix}";
 }

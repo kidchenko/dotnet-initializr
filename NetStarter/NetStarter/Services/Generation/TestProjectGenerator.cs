@@ -11,6 +11,7 @@ public static class TestProjectGenerator
         return
             $"namespace {ns}.Tests;\n" +
             $"\n" +
+            $"using Xunit;\n" +
             $"using FluentAssertions;\n" +
             $"\n" +
             $"public class SampleTests\n" +
@@ -38,6 +39,7 @@ public static class TestProjectGenerator
             return
                 $"namespace {ns}.IntegrationTests;\n" +
                 $"\n" +
+                $"using Xunit;\n" +
                 $"using FluentAssertions;\n" +
                 $"using Microsoft.EntityFrameworkCore;\n" +
                 $"using Testcontainers.PostgreSql;\n" +
@@ -45,7 +47,7 @@ public static class TestProjectGenerator
                 $"\n" +
                 $"public class DatabaseIntegrationTests : IAsyncLifetime\n" +
                 $"{{\n" +
-                $"    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();\n" +
+                $"    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(\"postgres:16-alpine\").Build();\n" +
                 $"\n" +
                 $"    public async Task InitializeAsync() => await _container.StartAsync();\n" +
                 $"    public async Task DisposeAsync() => await _container.DisposeAsync();\n" +
@@ -67,6 +69,7 @@ public static class TestProjectGenerator
             return
                 $"namespace {ns}.IntegrationTests;\n" +
                 $"\n" +
+                $"using Xunit;\n" +
                 $"using FluentAssertions;\n" +
                 $"using Microsoft.EntityFrameworkCore;\n" +
                 $"using Testcontainers.MsSql;\n" +
@@ -74,7 +77,7 @@ public static class TestProjectGenerator
                 $"\n" +
                 $"public class DatabaseIntegrationTests : IAsyncLifetime\n" +
                 $"{{\n" +
-                $"    private readonly MsSqlContainer _container = new MsSqlBuilder().Build();\n" +
+                $"    private readonly MsSqlContainer _container = new MsSqlBuilder(\"mcr.microsoft.com/mssql/server:2022-latest\").Build();\n" +
                 $"\n" +
                 $"    public async Task InitializeAsync() => await _container.StartAsync();\n" +
                 $"    public async Task DisposeAsync() => await _container.DisposeAsync();\n" +

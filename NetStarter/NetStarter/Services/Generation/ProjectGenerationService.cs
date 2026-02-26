@@ -13,25 +13,17 @@ public class ProjectGenerationService
         files[$"{root}/{root}.slnx"] = SlnxGenerator.Generate(config);
 
         // 2. Architecture-specific project structure
-        if (config.ProjectType is ProjectType.Console or ProjectType.WorkerService)
+        switch (config.Architecture)
         {
-            // Console and Worker use a single project regardless of architecture selection
-            ArchitectureGenerator.GenerateConsoleOrWorker(config, files, root);
-        }
-        else
-        {
-            switch (config.Architecture)
-            {
-                case ArchitecturePattern.CleanArchitecture:
-                    ArchitectureGenerator.GenerateCleanArchitecture(config, files, root);
-                    break;
-                case ArchitecturePattern.VerticalSlice:
-                    ArchitectureGenerator.GenerateVerticalSlice(config, files, root);
-                    break;
-                case ArchitecturePattern.SimpleLayered:
-                    ArchitectureGenerator.GenerateSimpleLayered(config, files, root);
-                    break;
-            }
+            case ArchitecturePattern.CleanArchitecture:
+                ArchitectureGenerator.GenerateCleanArchitecture(config, files, root);
+                break;
+            case ArchitecturePattern.VerticalSlice:
+                ArchitectureGenerator.GenerateVerticalSlice(config, files, root);
+                break;
+            case ArchitecturePattern.SimpleLayered:
+                ArchitectureGenerator.GenerateSimpleLayered(config, files, root);
+                break;
         }
 
         // 3. Aspire projects (AppHost and ServiceDefaults)
@@ -94,7 +86,7 @@ public class ProjectGenerationService
         return config.Architecture switch
         {
             ArchitecturePattern.CleanArchitecture =>
-                $"../../src/{config.ProjectName}.Api/{config.ProjectName}.Api.csproj",
+                $"../../src/{config.EntryPointProjectName}/{config.EntryPointProjectName}.csproj",
             _ =>
                 $"../../src/{config.ProjectName}/{config.ProjectName}.csproj",
         };

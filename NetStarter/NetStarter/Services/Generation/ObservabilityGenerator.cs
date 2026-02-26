@@ -11,6 +11,10 @@ public static class ObservabilityGenerator
             ? "\n                       .AddEntityFrameworkCoreInstrumentation()"
             : string.Empty;
 
+        var efCoreUsing = config.Orm == OrmOption.EfCore
+            ? $"using OpenTelemetry.Instrumentation.EntityFrameworkCore;\n"
+            : string.Empty;
+
         return
             $"namespace {ns};\n" +
             $"\n" +
@@ -19,6 +23,7 @@ public static class ObservabilityGenerator
             $"using OpenTelemetry.Resources;\n" +
             $"using OpenTelemetry.Trace;\n" +
             $"using OpenTelemetry.Metrics;\n" +
+            efCoreUsing +
             $"\n" +
             $"public static class OpenTelemetryExtensions\n" +
             $"{{\n" +

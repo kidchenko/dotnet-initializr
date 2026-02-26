@@ -44,33 +44,45 @@ public static class ArchitectureGenerator
                 EfCoreGenerator.GenerateDbContext(config, dbContextNs);
         }
 
-        // Api project — references Infrastructure and Application, owns web-facing code
-        var apiCsproj = CsprojGenerator.GenerateWebProject(config);
-        apiCsproj = InjectProjectReferences(apiCsproj, [
+        // Entry point project — references Infrastructure and Application
+        var entryPointCsproj = config.ProjectType switch
+        {
+            ProjectType.Console => CsprojGenerator.GenerateConsoleProject(config),
+            ProjectType.WorkerService => CsprojGenerator.GenerateWorkerProject(config),
+            _ => CsprojGenerator.GenerateWebProject(config),
+        };
+        entryPointCsproj = InjectProjectReferences(entryPointCsproj, [
             $"../{name}.Infrastructure/{name}.Infrastructure.csproj",
             $"../{name}.Application/{name}.Application.csproj",
         ]);
-        files[$"{src}/{name}.Api/{name}.Api.csproj"] = apiCsproj;
-        files[$"{src}/{name}.Api/Program.cs"] = ProgramCsGenerator.Generate(config);
-        files[$"{src}/{name}.Api/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
-        files[$"{src}/{name}.Api/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
+        files[$"{src}/{name}.{config.EntryPointSuffix}/{name}.{config.EntryPointSuffix}.csproj"] = entryPointCsproj;
+        files[$"{src}/{name}.{config.EntryPointSuffix}/Program.cs"] = ProgramCsGenerator.Generate(config);
+        files[$"{src}/{name}.{config.EntryPointSuffix}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
+        files[$"{src}/{name}.{config.EntryPointSuffix}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
+
+        if (config.ProjectType == ProjectType.WorkerService)
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Worker.cs"] = GenerateWorkerClass(config);
+
+        if (config.ProjectType == ProjectType.Console)
+            files[$"{src}/{name}.{config.EntryPointSuffix}/ServiceCollectionExtensions.cs"] =
+                ProgramCsGenerator.GenerateServiceCollectionExtensions(config);
 
         if (config.Auth == AuthOption.Jwt)
         {
             var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
-            files[$"{src}/{name}.Api/Auth/JwtSettings.cs"] =
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Auth/JwtSettings.cs"] =
                 AuthGenerator.GenerateJwtSettings(config, authNs);
         }
 
         if (config.IncludeOpenTelemetry)
         {
             var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
-            files[$"{src}/{name}.Api/Telemetry/OpenTelemetryExtensions.cs"] =
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Telemetry/OpenTelemetryExtensions.cs"] =
                 ObservabilityGenerator.GenerateOpenTelemetryExtensions(config, telemetryNs);
         }
 
         if (config.ProjectType == ProjectType.WebApi)
-            files[$"{src}/{name}.Api/Controllers/HelloController.cs"] =
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Controllers/HelloController.cs"] =
                 GenerateHelloController(config, $"{config.Namespace}.Api.Controllers");
     }
 
@@ -80,10 +92,22 @@ public static class ArchitectureGenerator
         var src = $"{root}/src";
         var proj = $"{src}/{name}";
 
-        files[$"{proj}/{name}.csproj"] = CsprojGenerator.GenerateWebProject(config);
+        files[$"{proj}/{name}.csproj"] = config.ProjectType switch
+        {
+            ProjectType.Console => CsprojGenerator.GenerateConsoleProject(config),
+            ProjectType.WorkerService => CsprojGenerator.GenerateWorkerProject(config),
+            _ => CsprojGenerator.GenerateWebProject(config),
+        };
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
         files[$"{proj}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
         files[$"{proj}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
+
+        if (config.ProjectType == ProjectType.WorkerService)
+            files[$"{proj}/Worker.cs"] = GenerateWorkerClass(config);
+
+        if (config.ProjectType == ProjectType.Console)
+            files[$"{proj}/ServiceCollectionExtensions.cs"] =
+                ProgramCsGenerator.GenerateServiceCollectionExtensions(config);
 
         // Features folder placeholder — teams add feature slices here
         files[$"{proj}/Features/.gitkeep"] = string.Empty;
@@ -127,10 +151,22 @@ public static class ArchitectureGenerator
         var src = $"{root}/src";
         var proj = $"{src}/{name}";
 
-        files[$"{proj}/{name}.csproj"] = CsprojGenerator.GenerateWebProject(config);
+        files[$"{proj}/{name}.csproj"] = config.ProjectType switch
+        {
+            ProjectType.Console => CsprojGenerator.GenerateConsoleProject(config),
+            ProjectType.WorkerService => CsprojGenerator.GenerateWorkerProject(config),
+            _ => CsprojGenerator.GenerateWebProject(config),
+        };
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
         files[$"{proj}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
         files[$"{proj}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
+
+        if (config.ProjectType == ProjectType.WorkerService)
+            files[$"{proj}/Worker.cs"] = GenerateWorkerClass(config);
+
+        if (config.ProjectType == ProjectType.Console)
+            files[$"{proj}/ServiceCollectionExtensions.cs"] =
+                ProgramCsGenerator.GenerateServiceCollectionExtensions(config);
 
         if (config.Orm == OrmOption.EfCore)
         {

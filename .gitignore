@@ -419,3 +419,9 @@ FodyWeavers.xsd
 
 # GSD planning docs (local-only)
 .planning/
+
+# Rider
+.idea/
+out/
+
+.DS_Store

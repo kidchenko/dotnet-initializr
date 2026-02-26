@@ -19,7 +19,7 @@ public static class DockerGenerator
         var tf = NuGetVersionMap.GetTargetFramework(config.SdkVersion);
 
         var entrypoint = isCleanArch
-            ? $"""["dotnet", "{projectName}.Api.dll"]"""
+            ? $"""["dotnet", "{projectName}.{config.EntryPointSuffix}.dll"]"""
             : $"""["dotnet", "{projectName}.dll"]""";
 
         if (isCleanArch)
@@ -84,16 +84,14 @@ ENTRYPOINT {{entrypoint}}
     {
         var projectName = config.ProjectName.ToLowerInvariant();
         var hasDatabase = config.Orm == OrmOption.EfCore && config.Database.HasValue;
+        var includeAppService = config.IncludeDockerfile;
+
         var dbServiceName = config.Database switch
         {
             DatabaseOption.PostgreSql => "postgres",
             DatabaseOption.SqlServer => "sqlserver",
             _ => string.Empty,
         };
-
-        var dependsOn = hasDatabase
-            ? $"\n      depends_on:\n        - {dbServiceName}"
-            : string.Empty;
 
         var dbService = string.Empty;
 
@@ -102,7 +100,6 @@ ENTRYPOINT {{entrypoint}}
             if (config.Database == DatabaseOption.PostgreSql)
             {
                 dbService = $$"""
-
   {{dbServiceName}}:
     image: postgres:16-alpine
     environment:
@@ -118,7 +115,6 @@ ENTRYPOINT {{entrypoint}}
             else if (config.Database == DatabaseOption.SqlServer)
             {
                 dbService = $$"""
-
   {{dbServiceName}}:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -142,8 +138,14 @@ ENTRYPOINT {{entrypoint}}
                 volumes = "\nvolumes:\n  sqlserver_data:";
         }
 
-        return $$"""
-services:
+        var appService = string.Empty;
+        if (includeAppService)
+        {
+            var dependsOn = hasDatabase
+                ? $"\n    depends_on:\n      - {dbServiceName}"
+                : string.Empty;
+
+            appService = $$"""
   app:
     build:
       context: .
@@ -152,8 +154,10 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development{{dependsOn}}
-{{dbService}}{{volumes}}
 """;
+        }
+
+        return $"services:\n{appService}{dbService}{volumes}\n";
     }
 
     private static int GetSdkMajorVersion(DotNetSdkVersion sdk) => sdk switch
