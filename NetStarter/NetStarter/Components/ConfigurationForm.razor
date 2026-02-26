@@ -68,6 +68,24 @@
         </Field>
     </div>
 
+    <!-- Section 2b: Mapping -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Mapping
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Mapping Library</FieldLabel>
+            <RadioGroup TValue="MappingOption"
+                        @bind-Value="Config.Mapping"
+                        @bind-Value:after="NotifyChanged"
+                        Name="mapping">
+                <Radio Value="MappingOption.None">None</Radio>
+                <Radio Value="MappingOption.Mapster">Mapster</Radio>
+            </RadioGroup>
+        </Field>
+    </div>
+
     <!-- Section 3: Data -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
         <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
@@ -131,6 +149,9 @@
             <Check TValue="bool"
                    @bind-Value="Config.IncludeHealthChecks"
                    @bind-Value:after="NotifyChanged">Health Checks</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeOpenTelemetry"
+                   @bind-Value:after="NotifyChanged">OpenTelemetry</Check>
         </Field>
 
         <Field>
@@ -168,6 +189,9 @@
             <Check TValue="bool"
                    @bind-Value="Config.IncludeGitHubActions"
                    @bind-Value:after="NotifyChanged">GitHub Actions</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeAzureDevOps"
+                   @bind-Value:after="NotifyChanged">Azure DevOps</Check>
         </Field>
     </div>
 

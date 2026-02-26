@@ -73,6 +73,12 @@ public class FileTreeService
             root.Children.Add(githubFolder);
         }
 
+        // .azuredevops/ (Azure DevOps)
+        if (config.IncludeAzureDevOps)
+        {
+            root.Children.Add(new FileTreeNode { Name = "azure-pipelines.yml", IsFolder = false });
+        }
+
         // Dockerfile at root
         if (config.IncludeDockerfile)
         {
@@ -103,6 +109,15 @@ public class FileTreeService
         // Application project
         var appProject = new FileTreeNode { Name = $"{config.ProjectName}.Application", IsFolder = true };
         appProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Application.csproj", IsFolder = false });
+
+        // Mapster in Application
+        if (config.Mapping == MappingOption.Mapster)
+        {
+            var mappingFolder = new FileTreeNode { Name = "Mapping", IsFolder = true };
+            mappingFolder.Children.Add(new FileTreeNode { Name = "MappingConfig.cs", IsFolder = false });
+            appProject.Children.Add(mappingFolder);
+        }
+
         srcFolder.Children.Add(appProject);
 
         // Infrastructure project
@@ -134,6 +149,14 @@ public class FileTreeService
             var authFolder = new FileTreeNode { Name = "Auth", IsFolder = true };
             authFolder.Children.Add(new FileTreeNode { Name = "JwtSettings.cs", IsFolder = false });
             apiProject.Children.Add(authFolder);
+        }
+
+        // OpenTelemetry in API
+        if (config.IncludeOpenTelemetry)
+        {
+            var telemetryFolder = new FileTreeNode { Name = "Telemetry", IsFolder = true };
+            telemetryFolder.Children.Add(new FileTreeNode { Name = "OpenTelemetryExtensions.cs", IsFolder = false });
+            apiProject.Children.Add(telemetryFolder);
         }
 
         // .NET Aspire projects
@@ -181,6 +204,22 @@ public class FileTreeService
             var authFolder = new FileTreeNode { Name = "Auth", IsFolder = true };
             authFolder.Children.Add(new FileTreeNode { Name = "JwtSettings.cs", IsFolder = false });
             mainProject.Children.Add(authFolder);
+        }
+
+        // Mapster
+        if (config.Mapping == MappingOption.Mapster)
+        {
+            var mappingFolder = new FileTreeNode { Name = "Mapping", IsFolder = true };
+            mappingFolder.Children.Add(new FileTreeNode { Name = "MappingConfig.cs", IsFolder = false });
+            mainProject.Children.Add(mappingFolder);
+        }
+
+        // OpenTelemetry
+        if (config.IncludeOpenTelemetry)
+        {
+            var telemetryFolder = new FileTreeNode { Name = "Telemetry", IsFolder = true };
+            telemetryFolder.Children.Add(new FileTreeNode { Name = "OpenTelemetryExtensions.cs", IsFolder = false });
+            mainProject.Children.Add(telemetryFolder);
         }
 
         // .NET Aspire projects
@@ -240,6 +279,22 @@ public class FileTreeService
             var authFolder = new FileTreeNode { Name = "Auth", IsFolder = true };
             authFolder.Children.Add(new FileTreeNode { Name = "JwtSettings.cs", IsFolder = false });
             mainProject.Children.Add(authFolder);
+        }
+
+        // Mapster
+        if (config.Mapping == MappingOption.Mapster)
+        {
+            var mappingFolder = new FileTreeNode { Name = "Mapping", IsFolder = true };
+            mappingFolder.Children.Add(new FileTreeNode { Name = "MappingConfig.cs", IsFolder = false });
+            mainProject.Children.Add(mappingFolder);
+        }
+
+        // OpenTelemetry
+        if (config.IncludeOpenTelemetry)
+        {
+            var telemetryFolder = new FileTreeNode { Name = "Telemetry", IsFolder = true };
+            telemetryFolder.Children.Add(new FileTreeNode { Name = "OpenTelemetryExtensions.cs", IsFolder = false });
+            mainProject.Children.Add(telemetryFolder);
         }
 
         // .NET Aspire projects

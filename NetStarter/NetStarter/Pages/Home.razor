@@ -31,6 +31,7 @@
     [SupplyParameterFromQuery(Name = "orm")] public string? OrmParam { get; set; }
     [SupplyParameterFromQuery(Name = "db")] public string? DbParam { get; set; }
     [SupplyParameterFromQuery(Name = "auth")] public string? AuthParam { get; set; }
+    [SupplyParameterFromQuery(Name = "map")] public string? MapParam { get; set; }
     [SupplyParameterFromQuery(Name = "obs")] public string? ObsParam { get; set; }
     [SupplyParameterFromQuery(Name = "test")] public string? TestParam { get; set; }
     [SupplyParameterFromQuery(Name = "cont")] public string? ContParam { get; set; }
@@ -59,12 +60,16 @@
         if (!string.IsNullOrEmpty(AuthParam) && Enum.TryParse<AuthOption>(AuthParam, true, out var auth))
             _config.Auth = auth;
 
+        if (!string.IsNullOrEmpty(MapParam) && Enum.TryParse<MappingOption>(MapParam, true, out var map))
+            _config.Mapping = map;
+
         // Multi-select: comma-separated
         if (!string.IsNullOrEmpty(ObsParam))
         {
             var obs = ObsParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
             _config.IncludeSerilog = obs.Contains("serilog", StringComparer.OrdinalIgnoreCase);
             _config.IncludeHealthChecks = obs.Contains("healthchecks", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeOpenTelemetry = obs.Contains("otel", StringComparer.OrdinalIgnoreCase);
         }
         if (!string.IsNullOrEmpty(TestParam))
         {
@@ -80,7 +85,11 @@
             _config.IncludeDotNetAspire = cont.Contains("aspire", StringComparer.OrdinalIgnoreCase);
         }
         if (!string.IsNullOrEmpty(CiParam))
-            _config.IncludeGitHubActions = CiParam == "1";
+        {
+            var ciValues = CiParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            _config.IncludeGitHubActions = ciValues.Contains("github", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeAzureDevOps = ciValues.Contains("azdo", StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private void OnConfigChanged()
@@ -94,6 +103,7 @@
         var obsValues = new List<string>();
         if (_config.IncludeSerilog) obsValues.Add("serilog");
         if (_config.IncludeHealthChecks) obsValues.Add("healthchecks");
+        if (_config.IncludeOpenTelemetry) obsValues.Add("otel");
 
         var testValues = new List<string>();
         if (_config.IncludeXUnit) testValues.Add("xunit");
@@ -103,6 +113,10 @@
         if (_config.IncludeDockerfile) contValues.Add("dockerfile");
         if (_config.IncludeDockerCompose) contValues.Add("compose");
         if (_config.IncludeDotNetAspire) contValues.Add("aspire");
+
+        var ciValues = new List<string>();
+        if (_config.IncludeGitHubActions) ciValues.Add("github");
+        if (_config.IncludeAzureDevOps) ciValues.Add("azdo");
 
         var parameters = new Dictionary<string, object?>
         {
@@ -114,10 +128,11 @@
             ["orm"] = _config.Orm != OrmOption.None ? _config.Orm.ToString().ToLower() : null,
             ["db"] = _config.Orm == OrmOption.EfCore && _config.Database.HasValue ? _config.Database.Value.ToString().ToLower() : null,
             ["auth"] = _config.Auth != AuthOption.None ? _config.Auth.ToString().ToLower() : null,
+            ["map"] = _config.Mapping != MappingOption.None ? _config.Mapping.ToString().ToLower() : null,
             ["obs"] = obsValues.Count > 0 ? string.Join(",", obsValues) : null,
             ["test"] = testValues.Count > 0 ? string.Join(",", testValues) : null,
             ["cont"] = contValues.Count > 0 ? string.Join(",", contValues) : null,
-            ["ci"] = _config.IncludeGitHubActions ? "1" : null,
+            ["ci"] = ciValues.Count > 0 ? string.Join(",", ciValues) : null,
         };
 
         var uri = Nav.GetUriWithQueryParameters(parameters);

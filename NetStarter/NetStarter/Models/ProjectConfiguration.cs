@@ -6,6 +6,7 @@ public enum ArchitecturePattern { CleanArchitecture, VerticalSlice, SimpleLayere
 public enum OrmOption { None, EfCore }
 public enum DatabaseOption { PostgreSql, SqlServer }
 public enum AuthOption { None, Jwt }
+public enum MappingOption { None, Mapster }
 
 public class ProjectConfiguration
 {
@@ -17,12 +18,15 @@ public class ProjectConfiguration
     public OrmOption Orm { get; set; } = OrmOption.None;
     public DatabaseOption? Database { get; set; }
     public AuthOption Auth { get; set; } = AuthOption.None;
+    public MappingOption Mapping { get; set; } = MappingOption.None;
     public bool IncludeSerilog { get; set; }
     public bool IncludeHealthChecks { get; set; }
+    public bool IncludeOpenTelemetry { get; set; }
     public bool IncludeXUnit { get; set; }
     public bool IncludeTestcontainers { get; set; }
     public bool IncludeDockerfile { get; set; }
     public bool IncludeDockerCompose { get; set; }
     public bool IncludeDotNetAspire { get; set; }
     public bool IncludeGitHubActions { get; set; }
+    public bool IncludeAzureDevOps { get; set; }
 }
