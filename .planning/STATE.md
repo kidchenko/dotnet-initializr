@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-26T17:45:00.000Z"
+last_updated: "2026-02-26T17:47:00.000Z"
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 3 (Generation Engine and Output) — IN PROGRESS
-Plan: 4 of 4 in current phase — COMPLETE
-Status: Phase 2 Plan 4 complete — feature-specific generators (EfCoreGenerator, AuthGenerator, ObservabilityGenerator, MappingGenerator) built
-Last activity: 2026-02-26 — Completed 02-04: Four feature generator classes for EF Core, JWT auth, OpenTelemetry, and Mapster
+Plan: 5 of 7 in current phase — COMPLETE
+Status: Phase 2 Plan 5 complete — infrastructure and documentation generators (DockerGenerator, AspireGenerator, CiCdGenerator, TestProjectGenerator, ReadmeGenerator) built
+Last activity: 2026-02-26 — Completed 02-05: Five generator classes for Docker, Aspire, CI/CD pipelines, test projects, and README
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [██████░░░░] 60%
 | Phase 02-generation-engine-and-output P01 | 2 min | 2 tasks | 4 files (3 created, 1 modified) |
 | Phase 02-generation-engine-and-output P02 | 2 min | 2 tasks | 4 files (4 created) |
 | Phase 02-generation-engine-and-output P04 | 2 min | 2 tasks | 5 files (4 created, 1 modified) |
+| Phase 02-generation-engine-and-output P05 | 5 min | 3 tasks | 5 files (5 created) |
 
 ## Accumulated Context
 
@@ -90,6 +91,10 @@ Recent decisions affecting current work:
 - [Phase 02-04]: String concatenation with $ used for generated C# code containing property accessors — raw string literals cannot escape {{ }} when generating { get; set; } syntax
 - [Phase 02-04]: Namespace suffix helper methods co-located in each generator class for single-import convenience
 - [Phase 02-04]: ObservabilityGenerator EF Core instrumentation is conditional at code-generation time (not runtime), keeping generated output clean
+- [Phase 02-05]: DockerGenerator uses $$"""...""" raw string literals for Dockerfile blocks; docker-compose uses StringBuilder.AppendLine for conditional database service sections
+- [Phase 02-05]: ReadmeGenerator notes minimum SDK 8.0.400 for .slnx format in Prerequisites section
+- [Phase 02-05]: TestProjectGenerator.GenerateIntegrationTest branches on config.Database for correct Testcontainers package (PostgreSqlContainer vs MsSqlContainer)
+- [Phase 02-05]: CiCdGenerator omits Test step entirely when IncludeXUnit and IncludeTestcontainers both false
 
 ### Pending Todos
 
@@ -103,5 +108,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 02-04-PLAN.md — EfCoreGenerator, AuthGenerator, ObservabilityGenerator, MappingGenerator built
+Stopped at: Completed 02-05-PLAN.md — DockerGenerator, AspireGenerator, CiCdGenerator, TestProjectGenerator, ReadmeGenerator built
 Resume file: None

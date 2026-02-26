@@ -40,18 +40,18 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **GEN-06**: System generates JWT bearer auth configuration in Program.cs and middleware pipeline when JWT is selected
 - [x] **GEN-07**: System generates Serilog configuration with console + file sinks when Serilog is selected
 - [x] **GEN-08**: System generates health check endpoint (/health) when Health Checks is selected
-- [ ] **GEN-09**: System generates xUnit test project with FluentAssertions when testing is selected
-- [ ] **GEN-10**: System generates Testcontainers integration test setup when Testcontainers is selected and a database is configured
-- [ ] **GEN-11**: System generates multi-stage Dockerfile optimized for .NET when Dockerfile is selected
-- [ ] **GEN-12**: System generates docker-compose.yml with app + database services when docker-compose is selected
-- [ ] **GEN-13**: System generates .NET Aspire AppHost + ServiceDefaults projects when Aspire is selected
-- [ ] **GEN-14**: System generates .github/workflows/dotnet.yml with build + test steps when GitHub Actions is selected
-- [ ] **GEN-20**: System generates azure-pipelines.yml with build + test steps when Azure DevOps is selected
+- [x] **GEN-09**: System generates xUnit test project with FluentAssertions when testing is selected
+- [x] **GEN-10**: System generates Testcontainers integration test setup when Testcontainers is selected and a database is configured
+- [x] **GEN-11**: System generates multi-stage Dockerfile optimized for .NET when Dockerfile is selected
+- [x] **GEN-12**: System generates docker-compose.yml with app + database services when docker-compose is selected
+- [x] **GEN-13**: System generates .NET Aspire AppHost + ServiceDefaults projects when Aspire is selected
+- [x] **GEN-14**: System generates .github/workflows/dotnet.yml with build + test steps when GitHub Actions is selected
+- [x] **GEN-20**: System generates azure-pipelines.yml with build + test steps when Azure DevOps is selected
 - [x] **GEN-21**: System generates Mapster configuration and mapping profiles when Mapster is selected
 - [x] **GEN-22**: System generates OpenTelemetry SDK setup with OTLP exporter and ASP.NET Core/HttpClient/EF Core instrumentation when OpenTelemetry is selected
 - [x] **GEN-15**: System generates .gitignore with standard .NET patterns
 - [x] **GEN-16**: System generates .editorconfig with standard .NET code style settings
-- [ ] **GEN-17**: System generates README.md with setup instructions for the generated project
+- [x] **GEN-17**: System generates README.md with setup instructions for the generated project
 - [x] **GEN-18**: System generates appsettings.json and appsettings.Development.json with correct configuration
 - [ ] **GEN-19**: Generated code compiles successfully with `dotnet build` for all supported option combinations
 
@@ -124,18 +124,18 @@ Deferred to future release. Tracked but not in current roadmap.
 | GEN-06 | Phase 2 | Complete |
 | GEN-07 | Phase 2 | Complete |
 | GEN-08 | Phase 2 | Complete |
-| GEN-09 | Phase 2 | Pending |
-| GEN-10 | Phase 2 | Pending |
-| GEN-11 | Phase 2 | Pending |
-| GEN-12 | Phase 2 | Pending |
-| GEN-13 | Phase 2 | Pending |
-| GEN-14 | Phase 2 | Pending |
+| GEN-09 | Phase 2 | Complete |
+| GEN-10 | Phase 2 | Complete |
+| GEN-11 | Phase 2 | Complete |
+| GEN-12 | Phase 2 | Complete |
+| GEN-13 | Phase 2 | Complete |
+| GEN-14 | Phase 2 | Complete |
 | GEN-15 | Phase 2 | Complete |
 | GEN-16 | Phase 2 | Complete |
-| GEN-17 | Phase 2 | Pending |
+| GEN-17 | Phase 2 | Complete |
 | GEN-18 | Phase 2 | Complete |
 | GEN-19 | Phase 2 | Pending |
-| GEN-20 | Phase 2 | Pending |
+| GEN-20 | Phase 2 | Complete |
 | GEN-21 | Phase 2 | Complete |
 | GEN-22 | Phase 2 | Complete |
 | OUT-01 | Phase 2 | Complete |
