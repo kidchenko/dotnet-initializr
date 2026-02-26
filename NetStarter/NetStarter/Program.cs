@@ -19,6 +19,7 @@ builder.Services
 builder.Services.AddScoped<FileTreeService>();
 builder.Services.AddScoped<ZipService>();
 builder.Services.AddScoped<CliCommandService>();
+builder.Services.AddScoped<ProjectGenerationService>();
 
 builder.Services.AddScoped(sp => new HttpClient
     { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
