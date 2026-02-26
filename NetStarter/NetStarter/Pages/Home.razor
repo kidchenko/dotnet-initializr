@@ -1,24 +1,127 @@
 @page "/"
+@inject NavigationManager Nav
 
 <PageTitle>NetStarter</PageTitle>
 
 <div class="two-panel">
     <div class="panel-left">
-        <h1 style="color: #e2e8f0; font-size: 1.5rem; font-weight: 700; padding: 1.5rem;">NetStarter</h1>
-        <ConfigurationForm Config="config" OnConfigChanged="OnConfigChanged" />
+        <div class="header">
+            <h1>NetStarter</h1>
+            <p>Configure your .NET project</p>
+        </div>
+        <ConfigurationForm Config="@_config" OnConfigChanged="OnConfigChanged" />
     </div>
     <div class="panel-right">
-        <h2 style="color: #e2e8f0; font-size: 1.125rem; font-weight: 600; padding: 1.5rem;">Project Structure</h2>
-        <FileTreePreview Config="config" />
+        <div class="preview-header">
+            <h2>Project Structure</h2>
+        </div>
+        <FileTreePreview Config="@_config" />
     </div>
 </div>
 
 @code {
-    private ProjectConfiguration config = new();
+    private ProjectConfiguration _config = new();
+    private bool _initialized;
+
+    [SupplyParameterFromQuery(Name = "name")] public string? NameParam { get; set; }
+    [SupplyParameterFromQuery(Name = "ns")] public string? NsParam { get; set; }
+    [SupplyParameterFromQuery(Name = "sdk")] public string? SdkParam { get; set; }
+    [SupplyParameterFromQuery(Name = "type")] public string? TypeParam { get; set; }
+    [SupplyParameterFromQuery(Name = "arch")] public string? ArchParam { get; set; }
+    [SupplyParameterFromQuery(Name = "orm")] public string? OrmParam { get; set; }
+    [SupplyParameterFromQuery(Name = "db")] public string? DbParam { get; set; }
+    [SupplyParameterFromQuery(Name = "auth")] public string? AuthParam { get; set; }
+    [SupplyParameterFromQuery(Name = "obs")] public string? ObsParam { get; set; }
+    [SupplyParameterFromQuery(Name = "test")] public string? TestParam { get; set; }
+    [SupplyParameterFromQuery(Name = "cont")] public string? ContParam { get; set; }
+    [SupplyParameterFromQuery(Name = "ci")] public string? CiParam { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (_initialized) return;
+        _initialized = true;
+
+        // Restore from URL params (only on first load)
+        if (!string.IsNullOrEmpty(NameParam))
+            _config.ProjectName = NameParam;
+        if (!string.IsNullOrEmpty(NsParam))
+            _config.Namespace = NsParam;
+        if (!string.IsNullOrEmpty(SdkParam) && Enum.TryParse<DotNetSdkVersion>(SdkParam, true, out var sdk))
+            _config.SdkVersion = sdk;
+        if (!string.IsNullOrEmpty(TypeParam) && Enum.TryParse<ProjectType>(TypeParam, true, out var pt))
+            _config.ProjectType = pt;
+        if (!string.IsNullOrEmpty(ArchParam) && Enum.TryParse<ArchitecturePattern>(ArchParam, true, out var arch))
+            _config.Architecture = arch;
+        if (!string.IsNullOrEmpty(OrmParam) && Enum.TryParse<OrmOption>(OrmParam, true, out var orm))
+            _config.Orm = orm;
+        if (!string.IsNullOrEmpty(DbParam) && Enum.TryParse<DatabaseOption>(DbParam, true, out var db))
+            _config.Database = db;
+        if (!string.IsNullOrEmpty(AuthParam) && Enum.TryParse<AuthOption>(AuthParam, true, out var auth))
+            _config.Auth = auth;
+
+        // Multi-select: comma-separated
+        if (!string.IsNullOrEmpty(ObsParam))
+        {
+            var obs = ObsParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            _config.IncludeSerilog = obs.Contains("serilog", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeHealthChecks = obs.Contains("healthchecks", StringComparer.OrdinalIgnoreCase);
+        }
+        if (!string.IsNullOrEmpty(TestParam))
+        {
+            var tests = TestParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            _config.IncludeXUnit = tests.Contains("xunit", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeTestcontainers = tests.Contains("testcontainers", StringComparer.OrdinalIgnoreCase);
+        }
+        if (!string.IsNullOrEmpty(ContParam))
+        {
+            var cont = ContParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            _config.IncludeDockerfile = cont.Contains("dockerfile", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeDockerCompose = cont.Contains("compose", StringComparer.OrdinalIgnoreCase);
+            _config.IncludeDotNetAspire = cont.Contains("aspire", StringComparer.OrdinalIgnoreCase);
+        }
+        if (!string.IsNullOrEmpty(CiParam))
+            _config.IncludeGitHubActions = CiParam == "1";
+    }
 
     private void OnConfigChanged()
     {
-        StateHasChanged();
+        PushStateToUrl();
+        StateHasChanged(); // Re-render FileTreePreview with updated config
+    }
+
+    private void PushStateToUrl()
+    {
+        var obsValues = new List<string>();
+        if (_config.IncludeSerilog) obsValues.Add("serilog");
+        if (_config.IncludeHealthChecks) obsValues.Add("healthchecks");
+
+        var testValues = new List<string>();
+        if (_config.IncludeXUnit) testValues.Add("xunit");
+        if (_config.IncludeTestcontainers) testValues.Add("testcontainers");
+
+        var contValues = new List<string>();
+        if (_config.IncludeDockerfile) contValues.Add("dockerfile");
+        if (_config.IncludeDockerCompose) contValues.Add("compose");
+        if (_config.IncludeDotNetAspire) contValues.Add("aspire");
+
+        var parameters = new Dictionary<string, object?>
+        {
+            ["name"] = _config.ProjectName != "MyProject" ? _config.ProjectName : null,
+            ["ns"] = _config.Namespace != "MyProject" ? _config.Namespace : null,
+            ["sdk"] = _config.SdkVersion != DotNetSdkVersion.Net9 ? _config.SdkVersion.ToString().ToLower() : null,
+            ["type"] = _config.ProjectType != ProjectType.WebApi ? _config.ProjectType.ToString().ToLower() : null,
+            ["arch"] = _config.Architecture != ArchitecturePattern.CleanArchitecture ? _config.Architecture.ToString().ToLower() : null,
+            ["orm"] = _config.Orm != OrmOption.None ? _config.Orm.ToString().ToLower() : null,
+            ["db"] = _config.Orm == OrmOption.EfCore && _config.Database.HasValue ? _config.Database.Value.ToString().ToLower() : null,
+            ["auth"] = _config.Auth != AuthOption.None ? _config.Auth.ToString().ToLower() : null,
+            ["obs"] = obsValues.Count > 0 ? string.Join(",", obsValues) : null,
+            ["test"] = testValues.Count > 0 ? string.Join(",", testValues) : null,
+            ["cont"] = contValues.Count > 0 ? string.Join(",", contValues) : null,
+            ["ci"] = _config.IncludeGitHubActions ? "1" : null,
+        };
+
+        var uri = Nav.GetUriWithQueryParameters(parameters);
+        Nav.NavigateTo(uri, replace: true); // CRITICAL: replace:true avoids polluting browser history
     }
 }
 
@@ -39,5 +142,35 @@
         min-width: 380px;
         overflow-y: auto;
         background-color: #0c1222;
+    }
+
+    .header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .header h1 {
+        color: #e2e8f0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .header p {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .preview-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .preview-header h2 {
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
     }
 </style>
