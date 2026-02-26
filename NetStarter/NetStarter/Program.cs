@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using NetStarter;
 using NetStarter.Services;
+using NetStarter.Services.Generation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -16,6 +17,8 @@ builder.Services
     .AddFontAwesomeIcons();
 
 builder.Services.AddScoped<FileTreeService>();
+builder.Services.AddScoped<ZipService>();
+builder.Services.AddScoped<CliCommandService>();
 
 builder.Services.AddScoped(sp => new HttpClient
     { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
