@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-26T17:47:00.000Z"
+last_updated: "2026-02-26T17:52:00.000Z"
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 3 (Generation Engine and Output) — IN PROGRESS
-Plan: 5 of 7 in current phase — COMPLETE
-Status: Phase 2 Plan 5 complete — infrastructure and documentation generators (DockerGenerator, AspireGenerator, CiCdGenerator, TestProjectGenerator, ReadmeGenerator) built
-Last activity: 2026-02-26 — Completed 02-05: Five generator classes for Docker, Aspire, CI/CD pipelines, test projects, and README
+Plan: 6 of 7 in current phase — COMPLETE
+Status: Phase 2 Plan 6 complete — ProgramCsGenerator and ArchitectureGenerator for all architecture patterns and project types
+Last activity: 2026-02-26 — Completed 02-03: ProgramCsGenerator (conditional Program.cs for 4 project types) and ArchitectureGenerator (Clean Architecture, Vertical Slice, Simple Layered)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [███████░░░] 70%
 | Phase 02-generation-engine-and-output P02 | 2 min | 2 tasks | 4 files (4 created) |
 | Phase 02-generation-engine-and-output P04 | 2 min | 2 tasks | 5 files (4 created, 1 modified) |
 | Phase 02-generation-engine-and-output P05 | 5 min | 3 tasks | 5 files (5 created) |
+| Phase 02-generation-engine-and-output P03 | 1 min | 2 tasks | 2 files (2 created) |
 
 ## Accumulated Context
 
@@ -95,6 +96,10 @@ Recent decisions affecting current work:
 - [Phase 02-05]: ReadmeGenerator notes minimum SDK 8.0.400 for .slnx format in Prerequisites section
 - [Phase 02-05]: TestProjectGenerator.GenerateIntegrationTest branches on config.Database for correct Testcontainers package (PostgreSqlContainer vs MsSqlContainer)
 - [Phase 02-05]: CiCdGenerator omits Test step entirely when IncludeXUnit and IncludeTestcontainers both false
+- [Phase 02-03]: ProgramCsGenerator switches on ProjectType first — Console/WorkerService get entirely separate templates, not stripped-down WebApplication
+- [Phase 02-03]: ArchitectureGenerator.InjectProjectReferences inserts before closing </Project> tag — avoids re-parsing or duplicating csproj structure
+- [Phase 02-03]: Features/.gitkeep and Services/.gitkeep used for empty folders — zip archives cannot store empty directories
+- [Phase 02-03]: Worker.cs generated inline in ArchitectureGenerator.GenerateConsoleOrWorker — keeps all architecture assembly logic in one class
 
 ### Pending Todos
 
@@ -108,5 +113,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 02-05-PLAN.md — DockerGenerator, AspireGenerator, CiCdGenerator, TestProjectGenerator, ReadmeGenerator built
+Stopped at: Completed 02-03-PLAN.md — ProgramCsGenerator and ArchitectureGenerator built
 Resume file: None

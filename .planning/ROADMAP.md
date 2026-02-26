@@ -45,7 +45,7 @@ Plans:
   2. The downloaded zip passes `dotnet build` without errors for every supported SDK version and every supported project type and architecture combination
   3. Generated code correctly reflects all selected options: EF Core DbContext and connection string when ORM is selected, JWT middleware when auth is selected, Serilog/health checks when observability is selected, test project when testing is selected, Dockerfile/docker-compose/.NET Aspire files when container support is selected, GitHub Actions workflow when CI/CD is selected
   4. User can see and copy the equivalent dotnet CLI commands that approximate their generated project alongside the download button
-**Plans:** 4/7 plans executed
+**Plans:** 5/7 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — Foundation services: NuGet version map, ZipService, CliCommandService
@@ -73,5 +73,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. UI and Configuration Form | 4/4 | Complete    | 2026-02-26 |
-| 2. Generation Engine and Output | 4/7 | In Progress|  |
+| 2. Generation Engine and Output | 5/7 | In Progress|  |
 | 3. Deployment | 0/TBD | Not started | - |
