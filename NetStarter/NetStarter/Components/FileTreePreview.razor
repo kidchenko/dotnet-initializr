@@ -1,0 +1,155 @@
+@inject FileTreeService TreeService
+
+@{
+    void RenderNode(FileTreeNode node, string parentPath, int depth)
+    {
+        var fullPath = parentPath + "/" + node.Name;
+        var isAdded = _addedPaths.Contains(fullPath);
+        var cssClass = isAdded ? "file-tree-node file-tree-node-added" : "file-tree-node";
+
+        <div class="@cssClass" style="padding-left: @($"{depth * 1.25}rem")">
+            <span class="node-icon">
+                @if (node.IsFolder)
+                {
+                    <i class="fa-solid fa-folder-open"></i>
+                }
+                else
+                {
+                    <i class="fa-regular fa-file-code"></i>
+                }
+            </span>
+            <span class="node-name">@node.Name</span>
+        </div>
+
+        @if (node.IsFolder && node.IsExpanded)
+        {
+            foreach (var child in node.Children)
+            {
+                RenderNode(child, fullPath, depth + 1);
+            }
+        }
+    }
+
+    void RenderRemovedNode(FileTreeNode node, string parentPath, int depth)
+    {
+        var fullPath = parentPath + "/" + node.Name;
+
+        <div class="file-tree-node file-tree-node-removed" style="padding-left: @($"{depth * 1.25}rem")">
+            <span class="node-icon">
+                @if (node.IsFolder)
+                {
+                    <i class="fa-solid fa-folder-open"></i>
+                }
+                else
+                {
+                    <i class="fa-regular fa-file-code"></i>
+                }
+            </span>
+            <span class="node-name">@node.Name</span>
+        </div>
+
+        @if (node.IsFolder && node.IsExpanded)
+        {
+            foreach (var child in node.Children)
+            {
+                RenderRemovedNode(child, fullPath, depth + 1);
+            }
+        }
+    }
+}
+
+<div class="file-tree-container">
+    @foreach (var node in _currentTree)
+    {
+        RenderNode(node, "", 0);
+    }
+    @foreach (var node in _removedTree)
+    {
+        RenderRemovedNode(node, "", 0);
+    }
+</div>
+
+@code {
+    [Parameter] public ProjectConfiguration Config { get; set; } = new();
+
+    private List<FileTreeNode> _currentTree = new();
+    private HashSet<string> _previousPaths = new();
+    private HashSet<string> _addedPaths = new();
+    private HashSet<string> _removedPaths = new();
+    private List<FileTreeNode> _removedTree = new();
+
+    protected override void OnParametersSet()
+    {
+        var newTree = TreeService.GenerateTree(Config);
+        var newPaths = CollectPaths(newTree);
+
+        _addedPaths = new HashSet<string>(newPaths.Except(_previousPaths));
+
+        var removedPathSet = new HashSet<string>(_previousPaths.Except(newPaths));
+        if (removedPathSet.Count > 0)
+        {
+            _removedPaths = removedPathSet;
+            // Keep a snapshot of old tree nodes that were removed for fade-out animation
+            _removedTree = BuildRemovedNodeSnapshot(_currentTree, removedPathSet);
+            _ = ClearRemovedAfterDelay();
+        }
+        else
+        {
+            _removedPaths.Clear();
+            _removedTree.Clear();
+        }
+
+        _previousPaths = newPaths;
+        _currentTree = newTree;
+    }
+
+    private async Task ClearRemovedAfterDelay()
+    {
+        await Task.Delay(300);
+        _removedPaths.Clear();
+        _removedTree.Clear();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private HashSet<string> CollectPaths(List<FileTreeNode> nodes, string prefix = "")
+    {
+        var paths = new HashSet<string>();
+        foreach (var node in nodes)
+        {
+            var path = prefix + "/" + node.Name;
+            paths.Add(path);
+            if (node.IsFolder && node.Children.Count > 0)
+                paths.UnionWith(CollectPaths(node.Children, path));
+        }
+        return paths;
+    }
+
+    private List<FileTreeNode> BuildRemovedNodeSnapshot(List<FileTreeNode> nodes, HashSet<string> removedPaths, string prefix = "")
+    {
+        var result = new List<FileTreeNode>();
+        foreach (var node in nodes)
+        {
+            var path = prefix + "/" + node.Name;
+            if (removedPaths.Contains(path))
+            {
+                result.Add(node);
+            }
+            else if (node.IsFolder && node.Children.Count > 0)
+            {
+                var removedChildren = BuildRemovedNodeSnapshot(node.Children, removedPaths, path);
+                if (removedChildren.Count > 0)
+                {
+                    var snapshotFolder = new FileTreeNode
+                    {
+                        Name = node.Name,
+                        IsFolder = node.IsFolder,
+                        IsExpanded = node.IsExpanded,
+                        Children = removedChildren
+                    };
+                    result.Add(snapshotFolder);
+                }
+            }
+        }
+        return result;
+    }
+}
