@@ -1,5 +1,8 @@
 @page "/"
 @inject NavigationManager Nav
+@inject ProjectGenerationService GenerationService
+@inject ZipService ZipService
+@inject IJSRuntime JS
 
 <PageTitle>NetStarter</PageTitle>
 
@@ -10,6 +13,26 @@
             <p>Configure your .NET project</p>
         </div>
         <ConfigurationForm Config="@_config" OnConfigChanged="OnConfigChanged" />
+        <div class="generate-section">
+            @if (!string.IsNullOrWhiteSpace(_validationError))
+            {
+                <div class="validation-error">@_validationError</div>
+            }
+            <button class="generate-button" @onclick="OnGenerateClicked" disabled="@_isGenerating">
+                @if (_isGenerating)
+                {
+                    <span class="btn-spinner"></span>
+                    <span>Generating...</span>
+                }
+                else
+                {
+                    <span>Generate Project</span>
+                }
+            </button>
+        </div>
+        <div class="cli-panel-wrapper">
+            <CliCommandPanel Config="@_config" />
+        </div>
     </div>
     <div class="panel-right">
         <div class="preview-header">
@@ -22,6 +45,8 @@
 @code {
     private ProjectConfiguration _config = new();
     private bool _initialized;
+    private bool _isGenerating;
+    private string? _validationError;
 
     [SupplyParameterFromQuery(Name = "name")] public string? NameParam { get; set; }
     [SupplyParameterFromQuery(Name = "ns")] public string? NsParam { get; set; }
@@ -96,6 +121,39 @@
     {
         PushStateToUrl();
         StateHasChanged(); // Re-render FileTreePreview with updated config
+    }
+
+    private async Task OnGenerateClicked()
+    {
+        // Inline validation
+        _validationError = null;
+        if (string.IsNullOrWhiteSpace(_config.ProjectName))
+        {
+            _validationError = "Project name is required";
+            return;
+        }
+        if (_config.ProjectName.Any(c => !char.IsLetterOrDigit(c) && c != '.' && c != '-' && c != '_'))
+        {
+            _validationError = "Project name can only contain letters, digits, dots, hyphens, and underscores";
+            return;
+        }
+
+        _isGenerating = true;
+        StateHasChanged();
+        await Task.Yield(); // Let spinner render before CPU work
+
+        try
+        {
+            var files = GenerationService.Generate(_config);
+            using var zipStream = ZipService.CreateZip(files);
+            var fileName = $"{_config.ProjectName}.zip";
+            using var streamRef = new DotNetStreamReference(stream: zipStream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        finally
+        {
+            _isGenerating = false;
+        }
     }
 
     private void PushStateToUrl()
@@ -187,5 +245,64 @@
         font-size: 1rem;
         font-weight: 600;
         margin: 0;
+    }
+
+    .generate-section {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #1e293b;
+    }
+
+    .generate-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        background-color: #38bdf8;
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .generate-button:hover:not(:disabled) {
+        background-color: #7dd3fc;
+    }
+
+    .generate-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 0.375rem;
+    }
+
+    .cli-panel-wrapper {
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .btn-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(15, 23, 42, 0.3);
+        border-top-color: #0f172a;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
