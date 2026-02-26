@@ -1,0 +1,94 @@
+namespace NetStarter.Services.Generation;
+
+public static class StaticFileGenerator
+{
+    public static string GenerateGitignore()
+    {
+        return """
+            # Build output
+            bin/
+            obj/
+
+            # Visual Studio
+            .vs/
+            *.user
+            *.suo
+            *.sln.docstates
+
+            # Rider / JetBrains
+            .idea/
+            *.DotSettings.user
+
+            # Publish / deployment output
+            publish/
+
+            # Logs
+            logs/
+            *.log
+
+            # Local appsettings overrides
+            appsettings.*.local.json
+
+            # OS generated files
+            .DS_Store
+            Thumbs.db
+            """;
+    }
+
+    public static string GenerateEditorconfig()
+    {
+        return """
+            root = true
+
+            [*]
+            charset = utf-8
+            end_of_line = lf
+            indent_style = space
+            indent_size = 4
+            insert_final_newline = true
+            trim_trailing_whitespace = true
+
+            [*.{cs,csproj}]
+            charset = utf-8-bom
+            end_of_line = crlf
+
+            [*.cs]
+            # Naming conventions — dotnet
+
+            # Public members: PascalCase
+            dotnet_naming_rule.public_members_must_be_pascal_case.symbols = public_symbols
+            dotnet_naming_rule.public_members_must_be_pascal_case.style = pascal_case_style
+            dotnet_naming_rule.public_members_must_be_pascal_case.severity = warning
+
+            dotnet_naming_symbols.public_symbols.applicable_kinds = property,method,field,event,delegate
+            dotnet_naming_symbols.public_symbols.applicable_accessibilities = public,protected,protected_internal
+
+            dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+            # Private fields: _camelCase
+            dotnet_naming_rule.private_fields_must_be_camel_case.symbols = private_fields
+            dotnet_naming_rule.private_fields_must_be_camel_case.style = camel_case_underscore_style
+            dotnet_naming_rule.private_fields_must_be_camel_case.severity = warning
+
+            dotnet_naming_symbols.private_fields.applicable_kinds = field
+            dotnet_naming_symbols.private_fields.applicable_accessibilities = private,private_protected
+
+            dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
+            dotnet_naming_style.camel_case_underscore_style.required_prefix = _
+
+            # Indentation and spacing preferences
+            csharp_indent_case_contents = true
+            csharp_indent_switch_labels = true
+            csharp_space_after_cast = false
+            csharp_space_after_keywords_in_control_flow_statements = true
+            csharp_space_between_method_declaration_parameter_list_parentheses = false
+            csharp_space_between_method_call_parameter_list_parentheses = false
+
+            # Braces
+            csharp_new_line_before_open_brace = all
+            csharp_new_line_before_else = true
+            csharp_new_line_before_catch = true
+            csharp_new_line_before_finally = true
+            """;
+    }
+}
