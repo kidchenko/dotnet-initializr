@@ -34,8 +34,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **GEN-01**: System generates a complete .NET solution using .slnx format with correct project references
 - [x] **GEN-02**: System generates .csproj files with correct SDK, target framework, and NuGet package references for the selected SDK version
-- [ ] **GEN-03**: System generates a compilable Program.cs that wires up all selected options (ORM, auth, Serilog, health checks)
-- [ ] **GEN-04**: System generates architecture-specific folder structure and project organization (Clean Architecture: Domain/Application/Infrastructure/Presentation; Vertical Slice: Features/; Simple Layered: Controllers/Services/Data)
+- [x] **GEN-03**: System generates a compilable Program.cs that wires up all selected options (ORM, auth, Serilog, health checks)
+- [x] **GEN-04**: System generates architecture-specific folder structure and project organization (Clean Architecture: Domain/Application/Infrastructure/Presentation; Vertical Slice: Features/; Simple Layered: Controllers/Services/Data)
 - [x] **GEN-05**: System generates EF Core DbContext, entity configuration, and connection string in appsettings.json when EF Core is selected
 - [x] **GEN-06**: System generates JWT bearer auth configuration in Program.cs and middleware pipeline when JWT is selected
 - [x] **GEN-07**: System generates Serilog configuration with console + file sinks when Serilog is selected
@@ -53,13 +53,13 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **GEN-16**: System generates .editorconfig with standard .NET code style settings
 - [x] **GEN-17**: System generates README.md with setup instructions for the generated project
 - [x] **GEN-18**: System generates appsettings.json and appsettings.Development.json with correct configuration
-- [ ] **GEN-19**: Generated code compiles successfully with `dotnet build` for all supported option combinations
+- [x] **GEN-19**: Generated code compiles successfully with `dotnet build` for all supported option combinations
 
 ### Output
 
 - [x] **OUT-01**: User can download the generated project as a zip file (client-side generation, no backend)
 - [x] **OUT-02**: User can see and copy the equivalent dotnet CLI commands that approximate the generated project
-- [ ] **OUT-03**: Zip file contains all files under a root folder named after the project
+- [x] **OUT-03**: Zip file contains all files under a root folder named after the project
 
 ### Deployment
 
@@ -118,8 +118,8 @@ Deferred to future release. Tracked but not in current roadmap.
 | CFG-11 | Phase 1 | Complete |
 | GEN-01 | Phase 2 | Complete |
 | GEN-02 | Phase 2 | Complete |
-| GEN-03 | Phase 2 | Pending |
-| GEN-04 | Phase 2 | Pending |
+| GEN-03 | Phase 2 | Complete |
+| GEN-04 | Phase 2 | Complete |
 | GEN-05 | Phase 2 | Complete |
 | GEN-06 | Phase 2 | Complete |
 | GEN-07 | Phase 2 | Complete |
@@ -134,13 +134,13 @@ Deferred to future release. Tracked but not in current roadmap.
 | GEN-16 | Phase 2 | Complete |
 | GEN-17 | Phase 2 | Complete |
 | GEN-18 | Phase 2 | Complete |
-| GEN-19 | Phase 2 | Pending |
+| GEN-19 | Phase 2 | Complete |
 | GEN-20 | Phase 2 | Complete |
 | GEN-21 | Phase 2 | Complete |
 | GEN-22 | Phase 2 | Complete |
 | OUT-01 | Phase 2 | Complete |
 | OUT-02 | Phase 2 | Complete |
-| OUT-03 | Phase 2 | Pending |
+| OUT-03 | Phase 2 | Complete |
 | DEP-01 | Phase 3 | Pending |
 | DEP-02 | Phase 3 | Pending |
 

@@ -1,0 +1,67 @@
+@inject CliCommandService CliService
+@inject IJSRuntime JS
+@using NetStarter.Services
+@using NetStarter.Services.Generation
+
+<div class="cli-panel">
+    <div class="cli-header" @onclick="ToggleExpanded">
+        <span class="cli-label">CLI Commands</span>
+        <span class="cli-chevron">
+            @if (_isExpanded)
+            {
+                <i class="fa fa-chevron-up"></i>
+            }
+            else
+            {
+                <i class="fa fa-chevron-down"></i>
+            }
+        </span>
+    </div>
+    @if (_isExpanded)
+    {
+        <div class="cli-body">
+            <div class="cli-commands-wrapper">
+                <pre class="cli-commands"><code>@string.Join("\n", _commands)</code></pre>
+                <button class="copy-button" @onclick="CopyAllCommands">
+                    @if (_copied)
+                    {
+                        <span>Copied!</span>
+                    }
+                    else
+                    {
+                        <span>Copy All</span>
+                    }
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ProjectConfiguration Config { get; set; } = new();
+
+    private bool _isExpanded;
+    private bool _copied;
+    private List<string> _commands = new();
+
+    protected override void OnParametersSet()
+    {
+        _commands = CliService.BuildCommands(Config);
+    }
+
+    private void ToggleExpanded()
+    {
+        _isExpanded = !_isExpanded;
+    }
+
+    private async Task CopyAllCommands()
+    {
+        var text = string.Join("\n", _commands);
+        await JS.InvokeVoidAsync("copyToClipboard", text);
+        _copied = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        _copied = false;
+        StateHasChanged();
+    }
+}

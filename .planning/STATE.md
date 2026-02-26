@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-26T17:52:00.000Z"
+last_updated: "2026-02-26T17:57:00.000Z"
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 3 (Generation Engine and Output) — IN PROGRESS
-Plan: 6 of 7 in current phase — COMPLETE
-Status: Phase 2 Plan 6 complete — ProgramCsGenerator and ArchitectureGenerator for all architecture patterns and project types
-Last activity: 2026-02-26 — Completed 02-03: ProgramCsGenerator (conditional Program.cs for 4 project types) and ArchitectureGenerator (Clean Architecture, Vertical Slice, Simple Layered)
+Plan: 7 of 7 in current phase — NEXT
+Status: Phase 2 Plan 6 complete — ProjectGenerationService orchestrator composing all generators into a complete file dictionary
+Last activity: 2026-02-26 — Completed 02-06: ProjectGenerationService (single entry point, composes all 10+ static generators, registered in DI)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [████████░░] 80%
 | Phase 02-generation-engine-and-output P04 | 2 min | 2 tasks | 5 files (4 created, 1 modified) |
 | Phase 02-generation-engine-and-output P05 | 5 min | 3 tasks | 5 files (5 created) |
 | Phase 02-generation-engine-and-output P03 | 1 min | 2 tasks | 2 files (2 created) |
+| Phase 02-generation-engine-and-output P06 | 2 min | 1 task | 2 files (1 created, 1 modified) |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 02-03]: ArchitectureGenerator.InjectProjectReferences inserts before closing </Project> tag — avoids re-parsing or duplicating csproj structure
 - [Phase 02-03]: Features/.gitkeep and Services/.gitkeep used for empty folders — zip archives cannot store empty directories
 - [Phase 02-03]: Worker.cs generated inline in ArchitectureGenerator.GenerateConsoleOrWorker — keeps all architecture assembly logic in one class
+- [Phase 02-06]: ProjectGenerationService routes Console/WorkerService project types via GenerateConsoleOrWorker before checking Architecture — single-project output regardless of architecture selection
+- [Phase 02-06]: GetMainProjectPath returns CleanArchitecture-aware path (.Api suffix) vs plain ProjectName for other architectures — used for test ProjectReference
+- [Phase 02-06]: ProjectGenerationService registered as scoped (not singleton) for consistency with other scoped services in the DI container
 
 ### Pending Todos
 
@@ -113,5 +117,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 02-03-PLAN.md — ProgramCsGenerator and ArchitectureGenerator built
+Stopped at: Completed 02-06-PLAN.md — ProjectGenerationService orchestrator built and registered in DI
 Resume file: None
