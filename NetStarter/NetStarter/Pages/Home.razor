@@ -5,14 +5,22 @@
 <div class="two-panel">
     <div class="panel-left">
         <h1 style="color: #e2e8f0; font-size: 1.5rem; font-weight: 700; padding: 1.5rem;">NetStarter</h1>
-        <p style="color: #94a3b8; padding: 0 1.5rem;">Configure your .NET project below.</p>
-        <!-- ConfigurationForm component will be added in Plan 02 -->
+        <ConfigurationForm Config="config" OnConfigChanged="OnConfigChanged" />
     </div>
     <div class="panel-right">
         <h2 style="color: #e2e8f0; font-size: 1.125rem; font-weight: 600; padding: 1.5rem;">Project Structure</h2>
         <!-- FileTreePreview component will be added in Plan 03 -->
     </div>
 </div>
+
+@code {
+    private ProjectConfiguration config = new();
+
+    private void OnConfigChanged()
+    {
+        StateHasChanged();
+    }
+}
 
 <style>
     .two-panel {

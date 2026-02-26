@@ -1,0 +1,204 @@
+@using NetStarter.Models
+
+<div style="padding-top: 1rem;">
+
+    <!-- Section 1: Project Info -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Project Info
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Project Name</FieldLabel>
+            <TextInput TValue="string"
+                       @bind-Value="Config.ProjectName"
+                       @bind-Value:after="NotifyChanged"
+                       Placeholder="MyProject" />
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Root Namespace</FieldLabel>
+            <TextInput TValue="string"
+                       @bind-Value="Config.Namespace"
+                       @bind-Value:after="NotifyChanged"
+                       Placeholder="MyProject" />
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">.NET SDK Version</FieldLabel>
+            <Select TValue="DotNetSdkVersion"
+                    @bind-Value="Config.SdkVersion"
+                    @bind-Value:after="NotifyChanged">
+                <SelectItem Value="DotNetSdkVersion.Net8">.NET 8</SelectItem>
+                <SelectItem Value="DotNetSdkVersion.Net9">.NET 9</SelectItem>
+                <SelectItem Value="DotNetSdkVersion.Net10">.NET 10</SelectItem>
+            </Select>
+        </Field>
+    </div>
+
+    <!-- Section 2: Architecture -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Architecture
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Project Type</FieldLabel>
+            <RadioGroup TValue="ProjectType"
+                        @bind-Value="Config.ProjectType"
+                        @bind-Value:after="NotifyChanged"
+                        Name="projectType">
+                <Radio Value="ProjectType.WebApi">Web API</Radio>
+                <Radio Value="ProjectType.MinimalApi">Minimal API</Radio>
+                <Radio Value="ProjectType.Console">Console</Radio>
+                <Radio Value="ProjectType.WorkerService">Worker Service</Radio>
+            </RadioGroup>
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Architecture Pattern</FieldLabel>
+            <RadioGroup TValue="ArchitecturePattern"
+                        @bind-Value="Config.Architecture"
+                        @bind-Value:after="NotifyChanged"
+                        Name="architecturePattern">
+                <Radio Value="ArchitecturePattern.CleanArchitecture">Clean Architecture</Radio>
+                <Radio Value="ArchitecturePattern.VerticalSlice">Vertical Slice</Radio>
+                <Radio Value="ArchitecturePattern.SimpleLayered">Simple Layered</Radio>
+            </RadioGroup>
+        </Field>
+    </div>
+
+    <!-- Section 3: Data -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Data
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">ORM</FieldLabel>
+            <RadioGroup TValue="OrmOption"
+                        @bind-Value="Config.Orm"
+                        @bind-Value:after="OnOrmChanged"
+                        Name="orm">
+                <Radio Value="OrmOption.None">None</Radio>
+                <Radio Value="OrmOption.EfCore">EF Core</Radio>
+            </RadioGroup>
+        </Field>
+
+        @if (Config.Orm == OrmOption.EfCore)
+        {
+            <Field>
+                <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Database</FieldLabel>
+                <Select TValue="DatabaseOption"
+                        @bind-Value="SelectedDatabase"
+                        @bind-Value:after="NotifyChanged">
+                    <SelectItem Value="DatabaseOption.PostgreSql">PostgreSQL</SelectItem>
+                    <SelectItem Value="DatabaseOption.SqlServer">SQL Server</SelectItem>
+                </Select>
+            </Field>
+        }
+    </div>
+
+    <!-- Section 4: Security -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Security
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Authentication</FieldLabel>
+            <RadioGroup TValue="AuthOption"
+                        @bind-Value="Config.Auth"
+                        @bind-Value:after="NotifyChanged"
+                        Name="auth">
+                <Radio Value="AuthOption.None">None</Radio>
+                <Radio Value="AuthOption.Jwt">JWT</Radio>
+            </RadioGroup>
+        </Field>
+    </div>
+
+    <!-- Section 5: Quality -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            Quality
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Observability</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeSerilog"
+                   @bind-Value:after="NotifyChanged">Serilog</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeHealthChecks"
+                   @bind-Value:after="NotifyChanged">Health Checks</Check>
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Testing</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeXUnit"
+                   @bind-Value:after="NotifyChanged">xUnit + FluentAssertions</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeTestcontainers"
+                   @bind-Value:after="NotifyChanged">Testcontainers</Check>
+        </Field>
+    </div>
+
+    <!-- Section 6: DevOps -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+            DevOps
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Container Support</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeDockerfile"
+                   @bind-Value:after="NotifyChanged">Dockerfile</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeDockerCompose"
+                   @bind-Value:after="NotifyChanged">docker-compose</Check>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeDotNetAspire"
+                   @bind-Value:after="NotifyChanged">.NET Aspire</Check>
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">CI/CD</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeGitHubActions"
+                   @bind-Value:after="NotifyChanged">GitHub Actions</Check>
+        </Field>
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public ProjectConfiguration Config { get; set; } = new();
+    [Parameter] public EventCallback OnConfigChanged { get; set; }
+
+    // Computed property to bridge nullable DatabaseOption? with non-nullable Select binding
+    private DatabaseOption SelectedDatabase
+    {
+        get => Config.Database ?? DatabaseOption.PostgreSql;
+        set => Config.Database = value;
+    }
+
+    private async Task NotifyChanged()
+    {
+        await OnConfigChanged.InvokeAsync();
+    }
+
+    private async Task OnOrmChanged()
+    {
+        if (Config.Orm == OrmOption.None)
+        {
+            Config.Database = null;
+        }
+        else if (Config.Database is null)
+        {
+            Config.Database = DatabaseOption.PostgreSql;
+        }
+        await NotifyChanged();
+    }
+}
