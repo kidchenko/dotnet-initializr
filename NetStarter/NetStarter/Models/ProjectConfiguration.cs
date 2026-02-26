@@ -1,0 +1,28 @@
+namespace NetStarter.Models;
+
+public enum DotNetSdkVersion { Net8, Net9, Net10 }
+public enum ProjectType { WebApi, MinimalApi, Console, WorkerService }
+public enum ArchitecturePattern { CleanArchitecture, VerticalSlice, SimpleLayered }
+public enum OrmOption { None, EfCore }
+public enum DatabaseOption { PostgreSql, SqlServer }
+public enum AuthOption { None, Jwt }
+
+public class ProjectConfiguration
+{
+    public string ProjectName { get; set; } = "MyProject";
+    public string Namespace { get; set; } = "MyProject";
+    public DotNetSdkVersion SdkVersion { get; set; } = DotNetSdkVersion.Net9;
+    public ProjectType ProjectType { get; set; } = ProjectType.WebApi;
+    public ArchitecturePattern Architecture { get; set; } = ArchitecturePattern.CleanArchitecture;
+    public OrmOption Orm { get; set; } = OrmOption.None;
+    public DatabaseOption? Database { get; set; }
+    public AuthOption Auth { get; set; } = AuthOption.None;
+    public bool IncludeSerilog { get; set; }
+    public bool IncludeHealthChecks { get; set; }
+    public bool IncludeXUnit { get; set; }
+    public bool IncludeTestcontainers { get; set; }
+    public bool IncludeDockerfile { get; set; }
+    public bool IncludeDockerCompose { get; set; }
+    public bool IncludeDotNetAspire { get; set; }
+    public bool IncludeGitHubActions { get; set; }
+}

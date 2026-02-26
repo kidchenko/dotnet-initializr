@@ -1,0 +1,35 @@
+@page "/"
+
+<PageTitle>NetStarter</PageTitle>
+
+<div class="two-panel">
+    <div class="panel-left">
+        <h1 style="color: #e2e8f0; font-size: 1.5rem; font-weight: 700; padding: 1.5rem;">NetStarter</h1>
+        <p style="color: #94a3b8; padding: 0 1.5rem;">Configure your .NET project below.</p>
+        <!-- ConfigurationForm component will be added in Plan 02 -->
+    </div>
+    <div class="panel-right">
+        <h2 style="color: #e2e8f0; font-size: 1.125rem; font-weight: 600; padding: 1.5rem;">Project Structure</h2>
+        <!-- FileTreePreview component will be added in Plan 03 -->
+    </div>
+</div>
+
+<style>
+    .two-panel {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .panel-left {
+        flex: 1;
+        overflow-y: auto;
+        border-right: 1px solid #1e293b;
+    }
+
+    .panel-right {
+        width: 380px;
+        min-width: 380px;
+        overflow-y: auto;
+        background-color: #0c1222;
+    }
+</style>
