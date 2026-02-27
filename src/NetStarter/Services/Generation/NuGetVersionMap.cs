@@ -31,7 +31,37 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "9.*",
             [DotNetSdkVersion.Net10] = "10.*",
         },
+        ["Microsoft.EntityFrameworkCore.Sqlite"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Microsoft.Data.Sqlite"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
         ["Microsoft.AspNetCore.Authentication.JwtBearer"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Microsoft.AspNetCore.OpenApi"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Microsoft.Extensions.Caching.StackExchangeRedis"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Microsoft.Extensions.Http.Resilience"] = new()
         {
             [DotNetSdkVersion.Net8] = "8.*",
             [DotNetSdkVersion.Net9] = "9.*",
@@ -45,6 +75,127 @@ public static class NuGetVersionMap
         },
 
         // Independent-versioned packages (same across all SDKs)
+        ["Dapper"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
+        ["MySqlConnector"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
+        // Pomelo: pinned to 9.* — no stable 10.x as of Feb 2026 (per STATE.md decision)
+        ["Pomelo.EntityFrameworkCore.MySql"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "9.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "9.*",
+        },
+        ["StackExchange.Redis"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
+        ["NSubstitute"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "5.*",
+            [DotNetSdkVersion.Net9] = "5.*",
+            [DotNetSdkVersion.Net10] = "5.*",
+        },
+        ["NSubstitute.Analyzers.CSharp"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
+        ["Bogus"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "35.*",
+            [DotNetSdkVersion.Net9] = "35.*",
+            [DotNetSdkVersion.Net10] = "35.*",
+        },
+        ["FluentValidation"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "12.*",
+            [DotNetSdkVersion.Net9] = "12.*",
+            [DotNetSdkVersion.Net10] = "12.*",
+        },
+        ["FluentValidation.DependencyInjectionExtensions"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "12.*",
+            [DotNetSdkVersion.Net9] = "12.*",
+            [DotNetSdkVersion.Net10] = "12.*",
+        },
+        ["Hangfire"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
+        ["Hangfire.AspNetCore"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
+        ["Hangfire.SqlServer"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
+        ["Hangfire.PostgreSql"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
+        ["Hangfire.MySqlStorage"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
+        ["Quartz"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "3.*",
+            [DotNetSdkVersion.Net9] = "3.*",
+            [DotNetSdkVersion.Net10] = "3.*",
+        },
+        ["Quartz.Extensions.Hosting"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "3.*",
+            [DotNetSdkVersion.Net9] = "3.*",
+            [DotNetSdkVersion.Net10] = "3.*",
+        },
+        ["Quartz.Extensions.DependencyInjection"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "3.*",
+            [DotNetSdkVersion.Net9] = "3.*",
+            [DotNetSdkVersion.Net10] = "3.*",
+        },
+        ["NLog.Web.AspNetCore"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "6.*",
+            [DotNetSdkVersion.Net9] = "6.*",
+            [DotNetSdkVersion.Net10] = "6.*",
+        },
+        ["Swashbuckle.AspNetCore"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "10.*",
+            [DotNetSdkVersion.Net9] = "10.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Scalar.AspNetCore"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
         ["Serilog.Sinks.File"] = new()
         {
             [DotNetSdkVersion.Net8] = "7.*",
