@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NetStarter</title>
+    <base href="/" />
+    <link rel="preload" id="webassembly" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Icons.FontAwesome/v6/css/all.min.css" rel="stylesheet">
+    <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Tailwind/blazorise.tailwind.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="NetStarter.styles.css" rel="stylesheet" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <script type="importmap"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div id="loading-screen" style="
+            position: fixed; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background-color: #0f172a;
+            transition: opacity 0.4s ease-out;
+            z-index: 9999;
+        ">
+            <span style="color:#e2e8f0; font-size:2rem; font-weight:700; margin-bottom:1.5rem; font-family:'Inter',sans-serif;">
+                NetStarter
+            </span>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        Failed to load. Check your connection and try again.
+        <a href="." class="reload">Retry</a>
+        <span class="dismiss">&#10005;</span>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+    <script>
+        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        window.copyToClipboard = async (text) => {
+            await navigator.clipboard.writeText(text);
+        }
+    </script>
+</body>
+
+</html>
