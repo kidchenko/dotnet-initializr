@@ -63,8 +63,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deployment
 
-- [ ] **DEP-01**: App is deployable as static files to any static host (GitHub Pages, Cloudflare Workers/Pages, Azure Static Web Apps) with correct SPA routing
-- [ ] **DEP-02**: App includes CI/CD workflow for automated deployment
+- [x] **DEP-01**: App is deployable as static files to any static host (GitHub Pages, Cloudflare Workers/Pages, Azure Static Web Apps) with correct SPA routing
+- [x] **DEP-02**: App includes CI/CD workflow for automated deployment
 
 ## v2 Requirements
 
@@ -141,8 +141,8 @@ Deferred to future release. Tracked but not in current roadmap.
 | OUT-01 | Phase 2 | Complete |
 | OUT-02 | Phase 2 | Complete |
 | OUT-03 | Phase 2 | Complete |
-| DEP-01 | Phase 3 | Pending |
-| DEP-02 | Phase 3 | Pending |
+| DEP-01 | Phase 3 | Complete |
+| DEP-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 41 total
