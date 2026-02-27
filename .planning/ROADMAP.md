@@ -57,13 +57,17 @@ Plans:
 - [ ] 02-07-PLAN.md — UI wiring: Generate button, zip download, CLI command panel, human verification
 
 ### Phase 3: Deployment
-**Goal**: The app is live on static hosting, reachable at a public URL, with automated deploys on every push to main
+**Goal**: The app is live on GitHub Pages at starter.dotnetth.com with automated deploys on every push to main
 **Depends on**: Phase 2
 **Requirements**: DEP-01, DEP-02
 **Success Criteria** (what must be TRUE):
-  1. App loads correctly at its public URL (GitHub Pages, Cloudflare Pages, or Azure Static Web Apps) including deep-linked shareable configuration URLs without 404 errors
-  2. A push to the main branch automatically triggers a CI/CD pipeline that builds, tests, and deploys the app to the static host without manual steps
-**Plans**: TBD
+  1. App loads correctly at starter.dotnetth.com including query parameter shareable URLs without 404 errors
+  2. A push to the main branch automatically triggers a CI/CD pipeline that builds, tests, and deploys the app to GitHub Pages without manual steps
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Deployment infrastructure: .gitattributes, wwwroot static files, GitHub Actions CI/CD workflow
+- [ ] 03-02-PLAN.md — Human verification: DNS setup, GitHub Pages configuration, live deployment verification
 
 ## Progress
 
@@ -74,4 +78,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. UI and Configuration Form | 4/4 | Complete    | 2026-02-26 |
 | 2. Generation Engine and Output | 6/7 | In Progress|  |
-| 3. Deployment | 0/TBD | Not started | - |
+| 3. Deployment | 0/2 | Not started | - |
