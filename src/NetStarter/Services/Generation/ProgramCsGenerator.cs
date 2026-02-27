@@ -62,7 +62,7 @@ public static class ProgramCsGenerator
                     $"            options.{dbMethod}(configuration.GetConnectionString(\"DefaultConnection\")));\n";
         }
 
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             usings += $"using Serilog;\n";
             body += $"        services.AddLogging(builder =>\n" +
@@ -144,7 +144,7 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             sb.Append($"using Serilog;\n");
             hasUsings = true;
@@ -170,7 +170,7 @@ public static class ProgramCsGenerator
 
     private static void AddSerilogFragment(ProjectConfiguration config, StringBuilder sb)
     {
-        if (!config.IncludeSerilog) return;
+        if (config.Logging != LoggingOption.Serilog) return;
         sb.Append("builder.Host.UseSerilog((context, cfg) =>\n");
         sb.Append("    cfg.ReadFrom.Configuration(context.Configuration));\n");
         sb.Append("\n");

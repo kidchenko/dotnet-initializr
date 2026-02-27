@@ -92,7 +92,7 @@ public static class CsprojGenerator
         if (config.Auth == AuthOption.Jwt)
             packages.Add(("Microsoft.AspNetCore.Authentication.JwtBearer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Authentication.JwtBearer")));
 
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             packages.Add(("Serilog.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.AspNetCore")));
             packages.Add(("Serilog.Sinks.File", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.Sinks.File")));

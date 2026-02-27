@@ -26,7 +26,6 @@ public class ProjectConfiguration
     public DatabaseOption? Database { get; set; }
     public AuthOption Auth { get; set; } = AuthOption.None;
     public MappingOption Mapping { get; set; } = MappingOption.None;
-    public bool IncludeSerilog { get; set; }
     public bool IncludeHealthChecks { get; set; }
     public bool IncludeOpenTelemetry { get; set; }
     public TestFrameworkOption TestFramework { get; set; } = TestFrameworkOption.None;

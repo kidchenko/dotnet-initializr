@@ -144,7 +144,7 @@
         <Field>
             <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Observability</FieldLabel>
             <Check TValue="bool"
-                   @bind-Value="Config.IncludeSerilog"
+                   @bind-Value="LoggingSerilog"
                    @bind-Value:after="NotifyChanged">Serilog</Check>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeHealthChecks"
@@ -226,6 +226,14 @@
     {
         get => Config.Database ?? DatabaseOption.PostgreSql;
         set => Config.Database = value;
+    }
+
+    // Temporary bridge: maps Serilog checkbox to LoggingOption enum
+    // Phase 7 will replace this with a full logging picker (None/Serilog/NLog)
+    private bool LoggingSerilog
+    {
+        get => Config.Logging == LoggingOption.Serilog;
+        set => Config.Logging = value ? LoggingOption.Serilog : LoggingOption.None;
     }
 
     private async Task NotifyChanged()

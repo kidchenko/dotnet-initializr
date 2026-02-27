@@ -242,7 +242,7 @@ public static class ReadmeGenerator
         sb.AppendLine();
 
         // Serilog note
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             sb.AppendLine("## Logging");
             sb.AppendLine();

@@ -74,7 +74,7 @@ public class CliCommandService
         }
 
         // Serilog
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             var serilogVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.AspNetCore");
             var serilogFileVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.Sinks.File");

@@ -56,7 +56,7 @@ public static class AppSettingsGenerator
         }
 
         // Conditional: Serilog settings
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             settings["Serilog"] = new Dictionary<string, object>
             {
@@ -102,7 +102,7 @@ public static class AppSettingsGenerator
         };
 
         // Conditional: Serilog development override
-        if (config.IncludeSerilog)
+        if (config.Logging == LoggingOption.Serilog)
         {
             settings["Serilog"] = new Dictionary<string, object>
             {

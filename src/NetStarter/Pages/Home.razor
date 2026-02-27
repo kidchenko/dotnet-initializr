@@ -4,15 +4,15 @@
 @inject ZipService ZipService
 @inject IJSRuntime JS
 
-<PageTitle>.NET initialzr</PageTitle>
+<PageTitle>.NET initializr</PageTitle>
 
 <div class="two-panel">
     <div class="panel-left">
         <div class="header">
             <div class="header-brand">
-                <img src="img/dotnet-initialzr.svg" alt="dotnet-initialzr" class="header-logo" />
+                <img src="@(_isDarkMode ? "img/dotnet-initializr-dark.svg" : "img/dotnet-initializr.svg")" alt="dotnet-initializr" class="header-logo" />
                 <div>
-                    <h1><span class="brand-dotnet">.NET</span> initialzr</h1>
+                    <h1><span class="brand-dotnet">.NET</span> initializr</h1>
                     <p>Configure your .NET project</p>
                 </div>
             </div>
@@ -101,6 +101,7 @@
     [SupplyParameterFromQuery(Name = "auth")] public string? AuthParam { get; set; }
     [SupplyParameterFromQuery(Name = "map")] public string? MapParam { get; set; }
     [SupplyParameterFromQuery(Name = "obs")] public string? ObsParam { get; set; }
+    [SupplyParameterFromQuery(Name = "logging")] public string? LoggingParam { get; set; }
     [SupplyParameterFromQuery(Name = "test")] public string? TestParam { get; set; }
     [SupplyParameterFromQuery(Name = "assert")] public string? AssertParam { get; set; }
     [SupplyParameterFromQuery(Name = "tc")] public string? TcParam { get; set; }
@@ -137,10 +138,15 @@
         if (!string.IsNullOrEmpty(ObsParam))
         {
             var obs = ObsParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            _config.IncludeSerilog = obs.Contains("serilog", StringComparer.OrdinalIgnoreCase);
+            // Legacy v1.0 compat: obs=serilog → Logging enum
+            if (obs.Contains("serilog", StringComparer.OrdinalIgnoreCase))
+                _config.Logging = LoggingOption.Serilog;
             _config.IncludeHealthChecks = obs.Contains("healthchecks", StringComparer.OrdinalIgnoreCase);
             _config.IncludeOpenTelemetry = obs.Contains("otel", StringComparer.OrdinalIgnoreCase);
         }
+        // New v1.1 param (takes priority over legacy obs=serilog if both present)
+        if (!string.IsNullOrEmpty(LoggingParam) && Enum.TryParse<LoggingOption>(LoggingParam, true, out var logging))
+            _config.Logging = logging;
         if (!string.IsNullOrEmpty(TestParam) && Enum.TryParse<TestFrameworkOption>(TestParam, true, out var testFw))
             _config.TestFramework = testFw;
         if (!string.IsNullOrEmpty(AssertParam) && Enum.TryParse<AssertLibraryOption>(AssertParam, true, out var assertLib))
@@ -221,7 +227,6 @@
     private void PushStateToUrl()
     {
         var obsValues = new List<string>();
-        if (_config.IncludeSerilog) obsValues.Add("serilog");
         if (_config.IncludeHealthChecks) obsValues.Add("healthchecks");
         if (_config.IncludeOpenTelemetry) obsValues.Add("otel");
 
@@ -245,6 +250,7 @@
             ["db"] = _config.Orm == OrmOption.EfCore && _config.Database.HasValue ? _config.Database.Value.ToString().ToLower() : null,
             ["auth"] = _config.Auth != AuthOption.None ? _config.Auth.ToString().ToLower() : null,
             ["map"] = _config.Mapping != MappingOption.None ? _config.Mapping.ToString().ToLower() : null,
+            ["logging"] = _config.Logging != LoggingOption.None ? _config.Logging.ToString().ToLower() : null,
             ["obs"] = obsValues.Count > 0 ? string.Join(",", obsValues) : null,
             ["test"] = _config.TestFramework != TestFrameworkOption.None ? _config.TestFramework.ToString().ToLower() : null,
             ["assert"] = _config.AssertLibrary != AssertLibraryOption.None ? _config.AssertLibrary.ToString().ToLower() : null,
