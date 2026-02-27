@@ -4,12 +4,12 @@
 
     <!-- Section 1: Project Info -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Project Info
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Project Name</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Project Name</FieldLabel>
             <TextInput TValue="string"
                        @bind-Value="Config.ProjectName"
                        @bind-Value:after="NotifyChanged"
@@ -17,7 +17,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Root Namespace</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Root Namespace</FieldLabel>
             <TextInput TValue="string"
                        @bind-Value="Config.Namespace"
                        @bind-Value:after="NotifyChanged"
@@ -25,7 +25,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">.NET SDK Version</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">.NET SDK Version</FieldLabel>
             <Select TValue="DotNetSdkVersion"
                     @bind-Value="Config.SdkVersion"
                     @bind-Value:after="NotifyChanged">
@@ -38,12 +38,12 @@
 
     <!-- Section 2: Architecture -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Architecture
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Project Type</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Project Type</FieldLabel>
             <RadioGroup TValue="ProjectType"
                         @bind-Value="Config.ProjectType"
                         @bind-Value:after="NotifyChanged"
@@ -56,7 +56,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Architecture Pattern</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Architecture Pattern</FieldLabel>
             <RadioGroup TValue="ArchitecturePattern"
                         @bind-Value="Config.Architecture"
                         @bind-Value:after="NotifyChanged"
@@ -70,12 +70,12 @@
 
     <!-- Section 2b: Mapping -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Mapping
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Mapping Library</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Mapping Library</FieldLabel>
             <RadioGroup TValue="MappingOption"
                         @bind-Value="Config.Mapping"
                         @bind-Value:after="NotifyChanged"
@@ -88,12 +88,12 @@
 
     <!-- Section 3: Data -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Data
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">ORM</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">ORM</FieldLabel>
             <RadioGroup TValue="OrmOption"
                         @bind-Value="Config.Orm"
                         @bind-Value:after="OnOrmChanged"
@@ -106,7 +106,7 @@
         @if (Config.Orm == OrmOption.EfCore)
         {
             <Field>
-                <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Database</FieldLabel>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Database</FieldLabel>
                 <Select TValue="DatabaseOption"
                         @bind-Value="SelectedDatabase"
                         @bind-Value:after="NotifyChanged">
@@ -119,12 +119,12 @@
 
     <!-- Section 4: Security -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Security
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Authentication</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Authentication</FieldLabel>
             <RadioGroup TValue="AuthOption"
                         @bind-Value="Config.Auth"
                         @bind-Value:after="NotifyChanged"
@@ -137,12 +137,12 @@
 
     <!-- Section 5: Quality -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             Quality
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Observability</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Observability</FieldLabel>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeSerilog"
                    @bind-Value:after="NotifyChanged">Serilog</Check>
@@ -155,7 +155,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Test Framework</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Test Framework</FieldLabel>
             <RadioGroup TValue="TestFrameworkOption"
                         @bind-Value="Config.TestFramework"
                         @bind-Value:after="NotifyChanged"
@@ -167,7 +167,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Assert Library</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Assert Library</FieldLabel>
             <RadioGroup TValue="AssertLibraryOption"
                         @bind-Value="Config.AssertLibrary"
                         @bind-Value:after="NotifyChanged"
@@ -178,7 +178,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Integration Testing</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Integration Testing</FieldLabel>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeTestcontainers"
                    @bind-Value:after="NotifyChanged">Testcontainers</Check>
@@ -187,12 +187,12 @@
 
     <!-- Section 6: DevOps -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
-        <h3 style="color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #1e293b;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
             DevOps
         </h3>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Container Support</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Container Support</FieldLabel>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeDockerfile"
                    @bind-Value:after="NotifyChanged">Dockerfile</Check>
@@ -205,7 +205,7 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">CI/CD</FieldLabel>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">CI/CD</FieldLabel>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeGitHubActions"
                    @bind-Value:after="NotifyChanged">GitHub Actions</Check>

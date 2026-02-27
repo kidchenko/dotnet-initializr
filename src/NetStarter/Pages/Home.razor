@@ -4,13 +4,28 @@
 @inject ZipService ZipService
 @inject IJSRuntime JS
 
-<PageTitle>NetStarter</PageTitle>
+<PageTitle>.NET initialzr</PageTitle>
 
 <div class="two-panel">
     <div class="panel-left">
         <div class="header">
-            <h1>NetStarter</h1>
-            <p>Configure your .NET project</p>
+            <div class="header-brand">
+                <img src="img/dotnet-initialzr.svg" alt="dotnet-initialzr" class="header-logo" />
+                <div>
+                    <h1><span class="brand-dotnet">.NET</span> initialzr</h1>
+                    <p>Configure your .NET project</p>
+                </div>
+            </div>
+            <button class="theme-toggle" @onclick="ToggleTheme" title="Toggle theme">
+                @if (_isDarkMode)
+                {
+                    <Icon Name="IconName.Sun" />
+                }
+                else
+                {
+                    <Icon Name="IconName.Moon" />
+                }
+            </button>
         </div>
         <ConfigurationForm Config="@_config" OnConfigChanged="OnConfigChanged" />
         <div class="generate-section">
@@ -34,12 +49,19 @@
             <CliCommandPanel Config="@_config" />
         </div>
     </div>
-    <div class="panel-right">
+    <div class="sheet-overlay @(_sheetOpen ? "open" : "")" @onclick="CloseSheet"></div>
+    <div class="panel-right @(_sheetOpen ? "open" : "")">
         <div class="preview-header">
             <h2>Project Structure</h2>
+            <button class="sheet-close" @onclick="CloseSheet">&times;</button>
         </div>
         <FileTreePreview Config="@_config" />
     </div>
+
+    <button class="sheet-toggle" @onclick="OpenSheet">
+        <Icon Name="IconName.FolderOpen" />
+        <span>Preview</span>
+    </button>
 </div>
 
 @code {
@@ -47,6 +69,8 @@
     private bool _initialized;
     private bool _isGenerating;
     private string? _validationError;
+    private bool _sheetOpen;
+    private bool _isDarkMode = true;
 
     [SupplyParameterFromQuery(Name = "name")] public string? NameParam { get; set; }
     [SupplyParameterFromQuery(Name = "ns")] public string? NsParam { get; set; }
@@ -119,10 +143,27 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await JS.InvokeAsync<bool>("getTheme");
+            StateHasChanged();
+        }
+    }
+
+    private void OpenSheet() => _sheetOpen = true;
+    private void CloseSheet() => _sheetOpen = false;
+
     private void OnConfigChanged()
     {
         PushStateToUrl();
         StateHasChanged(); // Re-render FileTreePreview with updated config
+    }
+
+    private async Task ToggleTheme()
+    {
+        _isDarkMode = await JS.InvokeAsync<bool>("toggleTheme");
     }
 
     private async Task OnGenerateClicked()
@@ -207,41 +248,82 @@
     .panel-left {
         flex: 1;
         overflow-y: auto;
-        border-right: 1px solid #1e293b;
+        border-right: 1px solid var(--border);
     }
 
     .panel-right {
         width: 380px;
         min-width: 380px;
         overflow-y: auto;
-        background-color: #0c1222;
+        background-color: var(--bg-panel);
     }
 
     .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         padding: 1.5rem;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .header-logo {
+        width: 64px;
+        height: 64px;
     }
 
     .header h1 {
-        color: #e2e8f0;
+        color: var(--text-primary);
         font-size: 1.5rem;
         font-weight: 700;
         margin: 0 0 0.25rem 0;
     }
 
+    .brand-dotnet {
+        color: var(--accent);
+    }
+
     .header p {
-        color: #64748b;
+        color: var(--text-tertiary);
         font-size: 0.875rem;
         margin: 0;
     }
 
+    .theme-toggle {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+        color: var(--text-primary);
+        border-color: var(--border-hover);
+        background-color: var(--bg-secondary);
+    }
+
     .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid var(--border);
     }
 
     .preview-header h2 {
-        color: #e2e8f0;
+        color: var(--text-primary);
         font-size: 1rem;
         font-weight: 600;
         margin: 0;
@@ -249,7 +331,7 @@
 
     .generate-section {
         padding: 1rem 1.5rem;
-        border-top: 1px solid #1e293b;
+        border-top: 1px solid var(--border);
     }
 
     .generate-button {
@@ -259,8 +341,8 @@
         gap: 0.5rem;
         width: 100%;
         padding: 0.75rem 1.5rem;
-        background-color: #38bdf8;
-        color: #0f172a;
+        background-color: var(--accent);
+        color: var(--accent-text);
         font-size: 1rem;
         font-weight: 600;
         border: none;
@@ -270,7 +352,7 @@
     }
 
     .generate-button:hover:not(:disabled) {
-        background-color: #7dd3fc;
+        background-color: var(--accent-hover);
     }
 
     .generate-button:disabled {
@@ -279,12 +361,12 @@
     }
 
     .validation-error {
-        color: #ef4444;
+        color: var(--error);
         font-size: 0.875rem;
         margin-bottom: 0.5rem;
         padding: 0.5rem 0.75rem;
-        background-color: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background-color: var(--error-bg);
+        border: 1px solid var(--error-border);
         border-radius: 0.375rem;
     }
 
@@ -296,13 +378,102 @@
         display: inline-block;
         width: 1rem;
         height: 1rem;
-        border: 2px solid rgba(15, 23, 42, 0.3);
-        border-top-color: #0f172a;
+        border: 2px solid transparent;
+        border-top-color: var(--accent-text);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
 
     @@keyframes spin {
         to { transform: rotate(360deg); }
+    }
+
+    /* Sheet toggle button - hidden on desktop */
+    .sheet-toggle {
+        display: none;
+    }
+
+    /* Close button - hidden on desktop */
+    .sheet-close {
+        display: none;
+    }
+
+    /* Overlay - hidden on desktop */
+    .sheet-overlay {
+        display: none;
+    }
+
+    @@media (max-width: 768px) {
+        .two-panel {
+            flex-direction: column;
+        }
+
+        .panel-left {
+            border-right: none;
+        }
+
+        .panel-right {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 85vw;
+            max-width: 380px;
+            min-width: unset;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-right.open {
+            transform: translateX(0);
+        }
+
+        .sheet-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sheet-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sheet-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 998;
+            padding: 0.75rem 1.25rem;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sheet-close {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
     }
 </style>

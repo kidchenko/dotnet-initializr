@@ -418,10 +418,11 @@ FodyWeavers.xsd
 *.msp
 
 # GSD planning docs (local-only)
-.planning/
+.planning
 
 # Rider
 .idea/
 out/
+video
 
 .DS_Store

@@ -1,6 +1,6 @@
 .cli-panel {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
     border-radius: 0.5rem;
     overflow: hidden;
     margin-top: 1rem;
@@ -17,22 +17,22 @@
 }
 
 .cli-header:hover {
-    background-color: #273549;
+    background-color: var(--border-hover);
 }
 
 .cli-label {
-    color: #e2e8f0;
+    color: var(--text-primary);
     font-size: 0.875rem;
     font-weight: 600;
 }
 
 .cli-chevron {
-    color: #64748b;
+    color: var(--text-tertiary);
     font-size: 0.75rem;
 }
 
 .cli-body {
-    border-top: 1px solid #334155;
+    border-top: 1px solid var(--bg-tertiary);
 }
 
 .cli-commands-wrapper {
@@ -41,8 +41,8 @@
 }
 
 .cli-commands {
-    background-color: #0f172a;
-    color: #e2e8f0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 0.8rem;
     line-height: 1.6;
@@ -64,8 +64,8 @@
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
-    background-color: #334155;
-    color: #94a3b8;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
     border: none;
     border-radius: 0.25rem;
     padding: 0.25rem 0.6rem;
@@ -75,6 +75,6 @@
 }
 
 .copy-button:hover {
-    background-color: #475569;
-    color: #e2e8f0;
+    background-color: var(--text-tertiary);
+    color: var(--text-primary);
 }

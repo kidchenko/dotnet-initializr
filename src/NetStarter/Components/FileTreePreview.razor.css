@@ -12,7 +12,7 @@
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     white-space: nowrap;
-    color: #cbd5e1;
+    color: var(--text-primary);
 }
 
 .file-tree-node:hover {
@@ -24,11 +24,11 @@
     align-items: center;
     flex-shrink: 0;
     width: 1rem;
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .node-icon .fa-folder-open {
-    color: #f59e0b;
+    color: var(--folder-icon);
 }
 
 .node-name {
