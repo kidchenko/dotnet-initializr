@@ -12,6 +12,10 @@
   <a href="https://starter.dotnetth.com">starter.dotnetth.com</a>
 </p>
 
+<p align="center">
+  A <a href="https://dotnetth.com">.NET Thailand</a> project
+</p>
+
 ---
 
 ## What it does
@@ -63,6 +67,19 @@ Every configuration option is encoded in the URL query string. Share a link and 
 
 Deployed automatically to GitHub Pages via the `deploy.yml` workflow on every push to `main`.
 
+## Author
+
+Built by **[@kidchenko](https://github.com/kidchenko)** in Brazil
+
+- Twitter/X: [@kidchenko](https://x.com/kidchenko)
+- GitHub: [github.com/kidchenko](https://github.com/kidchenko)
+
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  Part of <a href="https://dotnetth.com">.NET Thailand</a>
+</p>
