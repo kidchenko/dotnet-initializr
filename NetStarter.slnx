@@ -2,5 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/NetStarter/NetStarter.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/NetStarter.Tests/NetStarter.Tests.csproj" />
+  </Folder>
 </Solution>
