@@ -14,7 +14,7 @@ public class ProjectConfiguration
 {
     public string ProjectName { get; set; } = "MyProject";
     public string Namespace { get; set; } = "MyProject";
-    public DotNetSdkVersion SdkVersion { get; set; } = DotNetSdkVersion.Net9;
+    public DotNetSdkVersion SdkVersion { get; set; } = DotNetSdkVersion.Net10;
     public ProjectType ProjectType { get; set; } = ProjectType.WebApi;
     public ArchitecturePattern Architecture { get; set; } = ArchitecturePattern.CleanArchitecture;
     public OrmOption Orm { get; set; } = OrmOption.None;

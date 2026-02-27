@@ -48,6 +48,25 @@
         <div class="cli-panel-wrapper">
             <CliCommandPanel Config="@_config" />
         </div>
+        <footer class="footer">
+            <span>Built with <i class="fa-solid fa-heart footer-heart"></i> by <a href="https://github.com/kidchenko" target="_blank" rel="noopener noreferrer">@@kidchenko</a></span>
+            <div class="footer-links">
+                <a class="footer-star" href="https://github.com/kidchenko/dotnet-initializr" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
+                    <i class="fa-solid fa-star"></i> Star on GitHub
+                </a>
+                <span class="footer-sep"></span>
+                <a href="https://x.com/kidchenko" target="_blank" rel="noopener noreferrer" title="Twitter/X">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <a href="https://github.com/kidchenko" target="_blank" rel="noopener noreferrer" title="GitHub Profile">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <span class="footer-sep"></span>
+                <a href="https://dotnetth.com" target="_blank" rel="noopener noreferrer" title="dotnetth.com">
+                    Part of <strong>.NET Thailand</strong>
+                </a>
+            </div>
+        </footer>
     </div>
     <div class="sheet-overlay @(_sheetOpen ? "open" : "")" @onclick="CloseSheet"></div>
     <div class="panel-right @(_sheetOpen ? "open" : "")">
@@ -219,7 +238,7 @@
         {
             ["name"] = _config.ProjectName != "MyProject" ? _config.ProjectName : null,
             ["ns"] = _config.Namespace != "MyProject" ? _config.Namespace : null,
-            ["sdk"] = _config.SdkVersion != DotNetSdkVersion.Net9 ? _config.SdkVersion.ToString().ToLower() : null,
+            ["sdk"] = _config.SdkVersion != DotNetSdkVersion.Net10 ? _config.SdkVersion.ToString().ToLower() : null,
             ["type"] = _config.ProjectType != ProjectType.WebApi ? _config.ProjectType.ToString().ToLower() : null,
             ["arch"] = _config.Architecture != ArchitecturePattern.CleanArchitecture ? _config.Architecture.ToString().ToLower() : null,
             ["orm"] = _config.Orm != OrmOption.None ? _config.Orm.ToString().ToLower() : null,
@@ -372,6 +391,73 @@
 
     .cli-panel-wrapper {
         padding: 0 1.5rem 1.5rem;
+    }
+
+    .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8125rem;
+        color: var(--text-tertiary);
+    }
+
+    .footer-heart {
+        color: var(--accent);
+        font-size: 0.75rem;
+    }
+
+    .footer a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+
+    .footer a:hover {
+        color: var(--accent);
+    }
+
+    .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .footer-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8125rem;
+    }
+
+    .footer-links .fa-x-twitter,
+    .footer-links .fa-github {
+        font-size: 1rem;
+    }
+
+    .footer-star {
+        border: 1px solid var(--border);
+        padding: 0.25rem 0.625rem;
+        border-radius: 1rem;
+        font-size: 0.75rem !important;
+        transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .footer-star:hover {
+        border-color: var(--accent);
+    }
+
+    .footer-star .fa-star {
+        color: var(--accent);
+        font-size: 0.6875rem;
+    }
+
+    .footer-sep {
+        width: 1px;
+        height: 1rem;
+        background-color: var(--border);
     }
 
     .btn-spinner {
