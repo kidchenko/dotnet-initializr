@@ -1,3 +1,4 @@
+using System.Text;
 using NetStarter.Models;
 
 namespace NetStarter.Services.Generation;
@@ -104,136 +105,156 @@ public static class ProgramCsGenerator
 
     private static string GenerateWebApplication(ProjectConfiguration config)
     {
-        var usings = BuildUsings(config);
-        var services = BuildServiceRegistrations(config);
-        var middleware = BuildMiddleware(config);
-
-        return usings +
-               $"var builder = WebApplication.CreateBuilder(args);\n" +
-               services +
-               $"\n" +
-               $"var app = builder.Build();\n" +
-               $"\n" +
-               middleware +
-               $"app.Run();\n";
+        var sb = new StringBuilder();
+        AddUsingsFragment(config, sb);
+        sb.Append("var builder = WebApplication.CreateBuilder(args);\n");
+        sb.Append("\n");
+        AddSerilogFragment(config, sb);
+        AddDatabaseFragment(config, sb);
+        AddAuthFragment(config, sb);
+        AddHealthChecksFragment(config, sb);
+        AddOpenTelemetryFragment(config, sb);
+        AddMappingFragment(config, sb);
+        AddControllersFragment(config, sb);
+        sb.Append("\n");
+        sb.Append("var app = builder.Build();\n");
+        sb.Append("\n");
+        AddMiddlewareFragment(config, sb);
+        sb.Append("app.Run();\n");
+        return sb.ToString();
     }
 
-    private static string BuildUsings(ProjectConfiguration config)
+    private static void AddUsingsFragment(ProjectConfiguration config, StringBuilder sb)
     {
-        var usings = string.Empty;
+        var hasUsings = false;
 
         if (config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(config.Architecture);
-            usings += $"using Microsoft.EntityFrameworkCore;\n";
-            usings += $"using {config.Namespace}.{dbContextNs};\n";
+            sb.Append($"using Microsoft.EntityFrameworkCore;\n");
+            sb.Append($"using {config.Namespace}.{dbContextNs};\n");
+            hasUsings = true;
         }
 
         if (config.Auth == AuthOption.Jwt)
         {
-            usings += $"using Microsoft.AspNetCore.Authentication.JwtBearer;\n";
-            usings += $"using Microsoft.IdentityModel.Tokens;\n";
-            usings += $"using System.Text;\n";
+            sb.Append($"using Microsoft.AspNetCore.Authentication.JwtBearer;\n");
+            sb.Append($"using Microsoft.IdentityModel.Tokens;\n");
+            sb.Append($"using System.Text;\n");
+            hasUsings = true;
         }
 
         if (config.IncludeSerilog)
-            usings += $"using Serilog;\n";
+        {
+            sb.Append($"using Serilog;\n");
+            hasUsings = true;
+        }
 
         if (config.IncludeOpenTelemetry)
         {
             var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(config.Architecture);
-            usings += $"using {config.Namespace}.{telemetryNs};\n";
+            sb.Append($"using {config.Namespace}.{telemetryNs};\n");
+            hasUsings = true;
         }
 
         if (config.Mapping == MappingOption.Mapster)
         {
-            usings += $"using Mapster;\n";
-            usings += $"using MapsterMapper;\n";
+            sb.Append($"using Mapster;\n");
+            sb.Append($"using MapsterMapper;\n");
+            hasUsings = true;
         }
 
-        return string.IsNullOrEmpty(usings) ? string.Empty : usings + "\n";
+        if (hasUsings)
+            sb.Append("\n");
     }
 
-    private static string BuildServiceRegistrations(ProjectConfiguration config)
+    private static void AddSerilogFragment(ProjectConfiguration config, StringBuilder sb)
     {
-        var services = string.Empty;
+        if (!config.IncludeSerilog) return;
+        sb.Append("builder.Host.UseSerilog((context, cfg) =>\n");
+        sb.Append("    cfg.ReadFrom.Configuration(context.Configuration));\n");
+        sb.Append("\n");
+    }
 
-        if (config.IncludeSerilog)
-            services += $"builder.Host.UseSerilog((context, cfg) =>\n" +
-                        $"    cfg.ReadFrom.Configuration(context.Configuration));\n" +
-                        $"\n";
-
-        if (config.Orm == OrmOption.EfCore)
+    private static void AddDatabaseFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Orm != OrmOption.EfCore) return;
+        var dbMethod = config.Database switch
         {
-            var dbMethod = config.Database switch
-            {
-                DatabaseOption.PostgreSql => "UseNpgsql",
-                DatabaseOption.SqlServer => "UseSqlServer",
-                _ => "UseSqlite",
-            };
-            var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(config.Architecture);
-            services += $"builder.Services.AddDbContext<AppDbContext>(options =>\n" +
-                        $"    options.{dbMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n";
-        }
+            DatabaseOption.PostgreSql => "UseNpgsql",
+            DatabaseOption.SqlServer => "UseSqlServer",
+            _ => "UseSqlite",
+        };
+        sb.Append($"builder.Services.AddDbContext<AppDbContext>(options =>\n");
+        sb.Append($"    options.{dbMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n");
+    }
+
+    private static void AddAuthFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Auth != AuthOption.Jwt) return;
+        sb.Append("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n");
+        sb.Append("    .AddJwtBearer(options =>\n");
+        sb.Append("    {\n");
+        sb.Append("        options.TokenValidationParameters = new TokenValidationParameters\n");
+        sb.Append("        {\n");
+        sb.Append("            ValidateIssuer = true,\n");
+        sb.Append("            ValidateAudience = true,\n");
+        sb.Append("            ValidateLifetime = true,\n");
+        sb.Append("            ValidateIssuerSigningKey = true,\n");
+        sb.Append("            ValidIssuer = builder.Configuration[\"Jwt:Issuer\"],\n");
+        sb.Append("            ValidAudience = builder.Configuration[\"Jwt:Audience\"],\n");
+        sb.Append("            IssuerSigningKey = new SymmetricSecurityKey(\n");
+        sb.Append("                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n");
+        sb.Append("        };\n");
+        sb.Append("    });\n");
+    }
+
+    private static void AddHealthChecksFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (!config.IncludeHealthChecks) return;
+        sb.Append("builder.Services.AddHealthChecks();\n");
+    }
+
+    private static void AddOpenTelemetryFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (!config.IncludeOpenTelemetry) return;
+        sb.Append("builder.Services.AddAppOpenTelemetry(builder.Configuration);\n");
+    }
+
+    private static void AddMappingFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Mapping != MappingOption.Mapster) return;
+        sb.Append("builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n");
+        sb.Append("builder.Services.AddScoped<IMapper, ServiceMapper>();\n");
+    }
+
+    private static void AddControllersFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.ProjectType == ProjectType.WebApi)
+            sb.Append("builder.Services.AddControllers();\n");
+        else if (config.ProjectType == ProjectType.MinimalApi)
+            sb.Append("builder.Services.AddEndpointsApiExplorer();\n");
+    }
+
+    private static void AddMiddlewareFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        var middlewareStart = sb.Length;
 
         if (config.Auth == AuthOption.Jwt)
         {
-            services +=
-                $"builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n" +
-                $"    .AddJwtBearer(options =>\n" +
-                $"    {{\n" +
-                $"        options.TokenValidationParameters = new TokenValidationParameters\n" +
-                $"        {{\n" +
-                $"            ValidateIssuer = true,\n" +
-                $"            ValidateAudience = true,\n" +
-                $"            ValidateLifetime = true,\n" +
-                $"            ValidateIssuerSigningKey = true,\n" +
-                $"            ValidIssuer = builder.Configuration[\"Jwt:Issuer\"],\n" +
-                $"            ValidAudience = builder.Configuration[\"Jwt:Audience\"],\n" +
-                $"            IssuerSigningKey = new SymmetricSecurityKey(\n" +
-                $"                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n" +
-                $"        }};\n" +
-                $"    }});\n";
+            sb.Append("app.UseAuthentication();\n");
+            sb.Append("app.UseAuthorization();\n");
         }
 
         if (config.IncludeHealthChecks)
-            services += $"builder.Services.AddHealthChecks();\n";
-
-        if (config.IncludeOpenTelemetry)
-            services += $"builder.Services.AddAppOpenTelemetry(builder.Configuration);\n";
-
-        if (config.Mapping == MappingOption.Mapster)
-        {
-            services += $"builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n";
-            services += $"builder.Services.AddScoped<IMapper, ServiceMapper>();\n";
-        }
+            sb.Append("app.MapHealthChecks(\"/health\");\n");
 
         if (config.ProjectType == ProjectType.WebApi)
-            services += $"builder.Services.AddControllers();\n";
+            sb.Append("app.MapControllers();\n");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            services += $"builder.Services.AddEndpointsApiExplorer();\n";
+            sb.Append($"app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n");
 
-        return string.IsNullOrEmpty(services) ? string.Empty : "\n" + services;
-    }
-
-    private static string BuildMiddleware(ProjectConfiguration config)
-    {
-        var middleware = string.Empty;
-
-        if (config.Auth == AuthOption.Jwt)
-        {
-            middleware += $"app.UseAuthentication();\n";
-            middleware += $"app.UseAuthorization();\n";
-        }
-
-        if (config.IncludeHealthChecks)
-            middleware += $"app.MapHealthChecks(\"/health\");\n";
-
-        if (config.ProjectType == ProjectType.WebApi)
-            middleware += $"app.MapControllers();\n";
-        else if (config.ProjectType == ProjectType.MinimalApi)
-            middleware += $"app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n";
-
-        return string.IsNullOrEmpty(middleware) ? string.Empty : middleware + "\n";
+        if (sb.Length > middlewareStart)
+            sb.Append("\n");
     }
 }
