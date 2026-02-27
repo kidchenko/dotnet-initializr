@@ -3,12 +3,17 @@ namespace NetStarter.Models;
 public enum DotNetSdkVersion { Net8, Net9, Net10 }
 public enum ProjectType { WebApi, MinimalApi, Console, WorkerService }
 public enum ArchitecturePattern { CleanArchitecture, VerticalSlice, SimpleLayered }
-public enum OrmOption { None, EfCore }
-public enum DatabaseOption { PostgreSql, SqlServer }
-public enum AuthOption { None, Jwt }
+public enum OrmOption { None, EfCore, Dapper }
+public enum DatabaseOption { PostgreSql, SqlServer, MySql, Sqlite }
+public enum AuthOption { None, Jwt, AspNetIdentity, Keycloak, ApiKey }
 public enum MappingOption { None, Mapster }
 public enum TestFrameworkOption { None, XUnit, NUnit }
 public enum AssertLibraryOption { None, Shouldly }
+public enum LoggingOption { None, Serilog, NLog }
+public enum ApiDocsUiOption { None, Scalar, SwaggerUI, Redoc }
+public enum BackgroundJobsOption { None, IHostedService, Hangfire, Quartz }
+
+public record ValidationError(string Code, string Message, string[] AffectedFields);
 
 public class ProjectConfiguration
 {
@@ -33,8 +38,41 @@ public class ProjectConfiguration
     public bool IncludeGitHubActions { get; set; }
     public bool IncludeAzureDevOps { get; set; }
 
+    // v1.1 enum properties (single-select, default None)
+    public LoggingOption Logging { get; set; } = LoggingOption.None;
+    public ApiDocsUiOption ApiDocsUi { get; set; } = ApiDocsUiOption.None;
+    public BackgroundJobsOption BackgroundJobs { get; set; } = BackgroundJobsOption.None;
+
+    // v1.1 bool properties (combinable options, default false)
+    public bool IncludeNSubstitute { get; set; }
+    public bool IncludeBogus { get; set; }
+    public bool IncludeFluentValidation { get; set; }
+    public bool IncludeResilience { get; set; }
+    public bool IncludeRedis { get; set; }
+
     public bool HasTestFramework => TestFramework != TestFrameworkOption.None;
 
     public string EntryPointSuffix => ProjectType == ProjectType.Console ? "Cli" : "Api";
     public string EntryPointProjectName => $"{ProjectName}.{EntryPointSuffix}";
+
+    public List<ValidationError> Validate()
+    {
+        var errors = new List<ValidationError>();
+
+        // Identity requires EF Core (AUTH-02)
+        if (Auth == AuthOption.AspNetIdentity && Orm != OrmOption.EfCore)
+            errors.Add(new ValidationError(
+                "IDENTITY_REQUIRES_EFCORE",
+                "ASP.NET Identity requires EF Core. Select EF Core as your ORM.",
+                [nameof(Auth), nameof(Orm)]));
+
+        // Hangfire requires a database (JOBS-03)
+        if (BackgroundJobs == BackgroundJobsOption.Hangfire && Database is null)
+            errors.Add(new ValidationError(
+                "HANGFIRE_REQUIRES_DATABASE",
+                "Hangfire requires a database. Select a database option.",
+                [nameof(BackgroundJobs), nameof(Database)]));
+
+        return errors;
+    }
 }
