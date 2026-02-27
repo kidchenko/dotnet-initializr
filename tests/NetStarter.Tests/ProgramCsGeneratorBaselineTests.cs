@@ -22,7 +22,7 @@ public class ProgramCsGeneratorBaselineTests
         Orm = OrmOption.EfCore,
         Database = DatabaseOption.PostgreSql,
         Auth = AuthOption.Jwt,
-        IncludeSerilog = true,
+        Logging = LoggingOption.Serilog,
         IncludeHealthChecks = true,
         IncludeOpenTelemetry = true,
         Mapping = MappingOption.Mapster,
@@ -38,9 +38,6 @@ public class ProgramCsGeneratorBaselineTests
         Architecture = ArchitecturePattern.SimpleLayered,
         Orm = OrmOption.None,
         Auth = AuthOption.None,
-        IncludeSerilog = false,
-        IncludeHealthChecks = false,
-        IncludeOpenTelemetry = false,
         Mapping = MappingOption.None,
     };
 
@@ -55,9 +52,7 @@ public class ProgramCsGeneratorBaselineTests
         Orm = OrmOption.EfCore,
         Database = DatabaseOption.SqlServer,
         Auth = AuthOption.None,
-        IncludeSerilog = true,
-        IncludeHealthChecks = false,
-        IncludeOpenTelemetry = false,
+        Logging = LoggingOption.Serilog,
         Mapping = MappingOption.None,
     };
 
