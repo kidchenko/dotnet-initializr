@@ -8,7 +8,7 @@ public static class CiCdGenerator
     public static string GenerateGitHubActions(ProjectConfiguration config)
     {
         var major = GetSdkMajorVersion(config.SdkVersion);
-        var hasTests = config.IncludeXUnit || config.IncludeTestcontainers;
+        var hasTests = config.HasTestFramework || config.IncludeTestcontainers;
 
         var sb = new StringBuilder();
         sb.AppendLine("name: .NET");
@@ -50,7 +50,7 @@ public static class CiCdGenerator
     public static string GenerateAzurePipelines(ProjectConfiguration config)
     {
         var major = GetSdkMajorVersion(config.SdkVersion);
-        var hasTests = config.IncludeXUnit || config.IncludeTestcontainers;
+        var hasTests = config.HasTestFramework || config.IncludeTestcontainers;
 
         var sb = new StringBuilder();
         sb.AppendLine("trigger:");

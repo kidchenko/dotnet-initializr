@@ -102,23 +102,21 @@ public class CliCommandService
             commands.Add($"dotnet add {srcPath} package OpenTelemetry.Instrumentation.Http --version {otelHttpVersion}");
         }
 
-        // xUnit test project
-        if (config.IncludeXUnit)
+        // Test project
+        if (config.HasTestFramework)
         {
             commands.Add($"mkdir -p tests");
             var testProjectName = $"{config.ProjectName}.Tests";
             var testPath = $"tests/{testProjectName}";
-            commands.Add($"dotnet new xunit -n {testProjectName} -o {testPath} -f {tfm}");
+            var testTemplate = config.TestFramework == TestFrameworkOption.NUnit ? "nunit" : "xunit";
+            commands.Add($"dotnet new {testTemplate} -n {testProjectName} -o {testPath} -f {tfm}");
             commands.Add($"dotnet add {testPath} reference {srcPath}");
 
-            var xunitVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit");
-            var xunitRunnerVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio");
-            var fluentVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentAssertions");
+            AddTestFrameworkPackages(commands, config, testPath);
+            AddAssertLibraryPackages(commands, config, testPath);
+
             var testSdkVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk");
             var coverletVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector");
-            commands.Add($"dotnet add {testPath} package xunit --version {xunitVersion}");
-            commands.Add($"dotnet add {testPath} package xunit.runner.visualstudio --version {xunitRunnerVersion}");
-            commands.Add($"dotnet add {testPath} package FluentAssertions --version {fluentVersion}");
             commands.Add($"dotnet add {testPath} package Microsoft.NET.Test.Sdk --version {testSdkVersion}");
             commands.Add($"dotnet add {testPath} package coverlet.collector --version {coverletVersion}");
         }
@@ -126,22 +124,20 @@ public class CliCommandService
         // Testcontainers integration test project (separate from unit tests)
         if (config.IncludeTestcontainers && config.Database.HasValue)
         {
-            if (!config.IncludeXUnit)
+            if (!config.HasTestFramework)
                 commands.Add($"mkdir -p tests");
 
             var integrationProjectName = $"{config.ProjectName}.IntegrationTests";
             var integrationPath = $"tests/{integrationProjectName}";
-            commands.Add($"dotnet new xunit -n {integrationProjectName} -o {integrationPath} -f {tfm}");
+            var integrationTemplate = config.TestFramework == TestFrameworkOption.NUnit ? "nunit" : "xunit";
+            commands.Add($"dotnet new {integrationTemplate} -n {integrationProjectName} -o {integrationPath} -f {tfm}");
             commands.Add($"dotnet add {integrationPath} reference {srcPath}");
 
-            var xunitVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit");
-            var xunitRunnerVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio");
-            var fluentVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentAssertions");
+            AddTestFrameworkPackages(commands, config, integrationPath);
+            AddAssertLibraryPackages(commands, config, integrationPath);
+
             var testSdkVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk");
             var coverletVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector");
-            commands.Add($"dotnet add {integrationPath} package xunit --version {xunitVersion}");
-            commands.Add($"dotnet add {integrationPath} package xunit.runner.visualstudio --version {xunitRunnerVersion}");
-            commands.Add($"dotnet add {integrationPath} package FluentAssertions --version {fluentVersion}");
             commands.Add($"dotnet add {integrationPath} package Microsoft.NET.Test.Sdk --version {testSdkVersion}");
             commands.Add($"dotnet add {integrationPath} package coverlet.collector --version {coverletVersion}");
 
@@ -167,7 +163,7 @@ public class CliCommandService
             commands.Add($"dotnet sln add src/{config.ProjectName}.Infrastructure/{config.ProjectName}.Infrastructure.csproj");
         }
 
-        if (config.IncludeXUnit)
+        if (config.HasTestFramework)
         {
             var testProjectName = $"{config.ProjectName}.Tests";
             commands.Add($"dotnet sln add tests/{testProjectName}/{testProjectName}.csproj");
@@ -180,5 +176,35 @@ public class CliCommandService
         }
 
         return commands;
+    }
+
+    private static void AddTestFrameworkPackages(List<string> commands, ProjectConfiguration config, string projectPath)
+    {
+        switch (config.TestFramework)
+        {
+            case TestFrameworkOption.XUnit:
+                var xunitVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit");
+                var xunitRunnerVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio");
+                commands.Add($"dotnet add {projectPath} package xunit --version {xunitVersion}");
+                commands.Add($"dotnet add {projectPath} package xunit.runner.visualstudio --version {xunitRunnerVersion}");
+                break;
+            case TestFrameworkOption.NUnit:
+                var nunitVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit");
+                var nunitAdapterVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit3TestAdapter");
+                var nunitAnalyzersVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit.Analyzers");
+                commands.Add($"dotnet add {projectPath} package NUnit --version {nunitVersion}");
+                commands.Add($"dotnet add {projectPath} package NUnit3TestAdapter --version {nunitAdapterVersion}");
+                commands.Add($"dotnet add {projectPath} package NUnit.Analyzers --version {nunitAnalyzersVersion}");
+                break;
+        }
+    }
+
+    private static void AddAssertLibraryPackages(List<string> commands, ProjectConfiguration config, string projectPath)
+    {
+        if (config.AssertLibrary == AssertLibraryOption.Shouldly)
+        {
+            var shouldlyVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Shouldly");
+            commands.Add($"dotnet add {projectPath} package Shouldly --version {shouldlyVersion}");
+        }
     }
 }

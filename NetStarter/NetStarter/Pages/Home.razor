@@ -59,6 +59,8 @@
     [SupplyParameterFromQuery(Name = "map")] public string? MapParam { get; set; }
     [SupplyParameterFromQuery(Name = "obs")] public string? ObsParam { get; set; }
     [SupplyParameterFromQuery(Name = "test")] public string? TestParam { get; set; }
+    [SupplyParameterFromQuery(Name = "assert")] public string? AssertParam { get; set; }
+    [SupplyParameterFromQuery(Name = "tc")] public string? TcParam { get; set; }
     [SupplyParameterFromQuery(Name = "cont")] public string? ContParam { get; set; }
     [SupplyParameterFromQuery(Name = "ci")] public string? CiParam { get; set; }
 
@@ -96,12 +98,12 @@
             _config.IncludeHealthChecks = obs.Contains("healthchecks", StringComparer.OrdinalIgnoreCase);
             _config.IncludeOpenTelemetry = obs.Contains("otel", StringComparer.OrdinalIgnoreCase);
         }
-        if (!string.IsNullOrEmpty(TestParam))
-        {
-            var tests = TestParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            _config.IncludeXUnit = tests.Contains("xunit", StringComparer.OrdinalIgnoreCase);
-            _config.IncludeTestcontainers = tests.Contains("testcontainers", StringComparer.OrdinalIgnoreCase);
-        }
+        if (!string.IsNullOrEmpty(TestParam) && Enum.TryParse<TestFrameworkOption>(TestParam, true, out var testFw))
+            _config.TestFramework = testFw;
+        if (!string.IsNullOrEmpty(AssertParam) && Enum.TryParse<AssertLibraryOption>(AssertParam, true, out var assertLib))
+            _config.AssertLibrary = assertLib;
+        if (!string.IsNullOrEmpty(TcParam) && bool.TryParse(TcParam, out var tc) && tc)
+            _config.IncludeTestcontainers = true;
         if (!string.IsNullOrEmpty(ContParam))
         {
             var cont = ContParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -163,10 +165,6 @@
         if (_config.IncludeHealthChecks) obsValues.Add("healthchecks");
         if (_config.IncludeOpenTelemetry) obsValues.Add("otel");
 
-        var testValues = new List<string>();
-        if (_config.IncludeXUnit) testValues.Add("xunit");
-        if (_config.IncludeTestcontainers) testValues.Add("testcontainers");
-
         var contValues = new List<string>();
         if (_config.IncludeDockerfile) contValues.Add("dockerfile");
         if (_config.IncludeDockerCompose) contValues.Add("compose");
@@ -188,7 +186,9 @@
             ["auth"] = _config.Auth != AuthOption.None ? _config.Auth.ToString().ToLower() : null,
             ["map"] = _config.Mapping != MappingOption.None ? _config.Mapping.ToString().ToLower() : null,
             ["obs"] = obsValues.Count > 0 ? string.Join(",", obsValues) : null,
-            ["test"] = testValues.Count > 0 ? string.Join(",", testValues) : null,
+            ["test"] = _config.TestFramework != TestFrameworkOption.None ? _config.TestFramework.ToString().ToLower() : null,
+            ["assert"] = _config.AssertLibrary != AssertLibraryOption.None ? _config.AssertLibrary.ToString().ToLower() : null,
+            ["tc"] = _config.IncludeTestcontainers ? "true" : null,
             ["cont"] = contValues.Count > 0 ? string.Join(",", contValues) : null,
             ["ci"] = ciValues.Count > 0 ? string.Join(",", ciValues) : null,
         };

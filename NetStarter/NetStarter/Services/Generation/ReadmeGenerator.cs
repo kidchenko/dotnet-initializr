@@ -111,7 +111,7 @@ public static class ReadmeGenerator
         }
 
         // Running Tests
-        if (config.IncludeXUnit || config.IncludeTestcontainers)
+        if (config.HasTestFramework || config.IncludeTestcontainers)
         {
             sb.AppendLine("## Running Tests");
             sb.AppendLine();
@@ -119,7 +119,16 @@ public static class ReadmeGenerator
             sb.AppendLine("dotnet test");
             sb.AppendLine("```");
             sb.AppendLine();
-            sb.AppendLine("This project uses [FluentAssertions 6.x (MIT license)](https://fluentassertions.com/) for test assertions.");
+            var frameworkName = config.TestFramework switch
+            {
+                TestFrameworkOption.XUnit => "[xUnit](https://xunit.net/)",
+                TestFrameworkOption.NUnit => "[NUnit](https://nunit.org/)",
+                _ => "the configured test framework"
+            };
+            sb.AppendLine($"This project uses {frameworkName} as the test framework.");
+
+            if (config.AssertLibrary == AssertLibraryOption.Shouldly)
+                sb.AppendLine("Assertions use [Shouldly](https://docs.shouldly.org/).");
 
             if (config.IncludeTestcontainers)
             {
@@ -204,10 +213,10 @@ public static class ReadmeGenerator
                 sb.AppendLine($"│   └── {name}.ServiceDefaults/ # Shared Aspire defaults");
             }
 
-            if (config.IncludeXUnit || config.IncludeTestcontainers)
+            if (config.HasTestFramework || config.IncludeTestcontainers)
             {
                 sb.AppendLine("└── tests/");
-                if (config.IncludeXUnit)
+                if (config.HasTestFramework)
                     sb.AppendLine($"    ├── {name}.Tests/   # Unit tests");
                 if (config.IncludeTestcontainers)
                     sb.AppendLine($"    └── {name}.IntegrationTests/ # Integration tests");
@@ -219,10 +228,10 @@ public static class ReadmeGenerator
             sb.AppendLine("├── src/");
             sb.AppendLine($"│   └── {name}/              # Application code");
 
-            if (config.IncludeXUnit || config.IncludeTestcontainers)
+            if (config.HasTestFramework || config.IncludeTestcontainers)
             {
                 sb.AppendLine("└── tests/");
-                if (config.IncludeXUnit)
+                if (config.HasTestFramework)
                     sb.AppendLine($"    ├── {name}.Tests/   # Unit tests");
                 if (config.IncludeTestcontainers)
                     sb.AppendLine($"    └── {name}.IntegrationTests/ # Integration tests");

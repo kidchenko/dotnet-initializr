@@ -5,7 +5,7 @@ namespace NetStarter.Services.Generation;
 
 public static class CsprojGenerator
 {
-    private static string CommonPropertyGroup(ProjectConfiguration config, string sdk, string? outputType = null, bool isPackable = true, bool isAspireHost = false)
+    private static string CommonPropertyGroup(ProjectConfiguration config, string sdk, string? outputType = null, bool isPackable = true, bool isAspireHost = false, bool treatWarningsAsErrors = true)
     {
         var tfm = NuGetVersionMap.GetTargetFramework(config.SdkVersion);
         var sb = new StringBuilder();
@@ -17,8 +17,11 @@ public static class CsprojGenerator
             sb.AppendLine($"    <OutputType>{outputType}</OutputType>");
         sb.AppendLine("    <Nullable>enable</Nullable>");
         sb.AppendLine("    <ImplicitUsings>enable</ImplicitUsings>");
-        sb.AppendLine("    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>");
-        sb.AppendLine("    <AnalysisLevel>latest-recommended</AnalysisLevel>");
+        if (treatWarningsAsErrors)
+        {
+            sb.AppendLine("    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>");
+            sb.AppendLine("    <AnalysisLevel>latest-minimum</AnalysisLevel>");
+        }
         if (!isPackable)
             sb.AppendLine("    <IsPackable>false</IsPackable>");
         if (isAspireHost)
@@ -103,7 +106,7 @@ public static class CsprojGenerator
             packages.Add(("OpenTelemetry.Exporter.OpenTelemetryProtocol", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Exporter.OpenTelemetryProtocol")));
 
             if (config.Orm == OrmOption.EfCore)
-                packages.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "*"));
+                packages.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "1.*-*"));
         }
 
         if (config.Mapping == MappingOption.Mapster)
@@ -146,16 +149,13 @@ public static class CsprojGenerator
     {
         var sdk = "Microsoft.NET.Sdk";
         var sb = new StringBuilder();
-        sb.Append(CommonPropertyGroup(config, sdk, isPackable: false));
+        sb.Append(CommonPropertyGroup(config, sdk, isPackable: false, treatWarningsAsErrors: false));
 
-        var packages = new List<(string Name, string Version)>
-        {
-            ("xunit", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit")),
-            ("xunit.runner.visualstudio", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio")),
-            ("FluentAssertions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentAssertions")),
-            ("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")),
-            ("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")),
-        };
+        var packages = new List<(string Name, string Version)>();
+        AppendTestFrameworkPackages(config, packages);
+        AppendAssertLibraryPackages(config, packages);
+        packages.Add(("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")));
+        packages.Add(("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")));
 
         sb.Append(BuildPackageReferences(packages));
         sb.Append(BuildProjectReference(mainProjectPath));
@@ -168,17 +168,14 @@ public static class CsprojGenerator
     {
         var sdk = "Microsoft.NET.Sdk";
         var sb = new StringBuilder();
-        sb.Append(CommonPropertyGroup(config, sdk, isPackable: false));
+        sb.Append(CommonPropertyGroup(config, sdk, isPackable: false, treatWarningsAsErrors: false));
 
-        var packages = new List<(string Name, string Version)>
-        {
-            ("xunit", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit")),
-            ("xunit.runner.visualstudio", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio")),
-            ("FluentAssertions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentAssertions")),
-            ("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")),
-            ("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")),
-            ("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")),
-        };
+        var packages = new List<(string Name, string Version)>();
+        AppendTestFrameworkPackages(config, packages);
+        AppendAssertLibraryPackages(config, packages);
+        packages.Add(("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")));
+        packages.Add(("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")));
+        packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
 
         if (config.Database == DatabaseOption.PostgreSql)
             packages.Add(("Testcontainers.PostgreSql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Testcontainers.PostgreSql")));
@@ -190,6 +187,28 @@ public static class CsprojGenerator
         sb.AppendLine();
         sb.Append("</Project>");
         return sb.ToString();
+    }
+
+    private static void AppendTestFrameworkPackages(ProjectConfiguration config, List<(string Name, string Version)> packages)
+    {
+        switch (config.TestFramework)
+        {
+            case TestFrameworkOption.XUnit:
+                packages.Add(("xunit", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit")));
+                packages.Add(("xunit.runner.visualstudio", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "xunit.runner.visualstudio")));
+                break;
+            case TestFrameworkOption.NUnit:
+                packages.Add(("NUnit", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit")));
+                packages.Add(("NUnit3TestAdapter", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit3TestAdapter")));
+                packages.Add(("NUnit.Analyzers", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NUnit.Analyzers")));
+                break;
+        }
+    }
+
+    private static void AppendAssertLibraryPackages(ProjectConfiguration config, List<(string Name, string Version)> packages)
+    {
+        if (config.AssertLibrary == AssertLibraryOption.Shouldly)
+            packages.Add(("Shouldly", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Shouldly")));
     }
 
     public static string GenerateConsoleProject(ProjectConfiguration config)

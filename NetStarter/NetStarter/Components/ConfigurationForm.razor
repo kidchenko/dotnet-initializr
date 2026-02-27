@@ -155,10 +155,30 @@
         </Field>
 
         <Field>
-            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Testing</FieldLabel>
-            <Check TValue="bool"
-                   @bind-Value="Config.IncludeXUnit"
-                   @bind-Value:after="NotifyChanged">xUnit + FluentAssertions</Check>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Test Framework</FieldLabel>
+            <RadioGroup TValue="TestFrameworkOption"
+                        @bind-Value="Config.TestFramework"
+                        @bind-Value:after="NotifyChanged"
+                        Name="testFramework">
+                <Radio Value="TestFrameworkOption.None">None</Radio>
+                <Radio Value="TestFrameworkOption.XUnit">xUnit</Radio>
+                <Radio Value="TestFrameworkOption.NUnit">NUnit</Radio>
+            </RadioGroup>
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Assert Library</FieldLabel>
+            <RadioGroup TValue="AssertLibraryOption"
+                        @bind-Value="Config.AssertLibrary"
+                        @bind-Value:after="NotifyChanged"
+                        Name="assertLibrary">
+                <Radio Value="AssertLibraryOption.None">None</Radio>
+                <Radio Value="AssertLibraryOption.Shouldly">Shouldly</Radio>
+            </RadioGroup>
+        </Field>
+
+        <Field>
+            <FieldLabel style="color: #94a3b8; font-size: 0.875rem;">Integration Testing</FieldLabel>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeTestcontainers"
                    @bind-Value:after="NotifyChanged">Testcontainers</Check>

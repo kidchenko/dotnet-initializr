@@ -40,7 +40,7 @@ public class ProjectGenerationService
         }
 
         // 4. Test projects
-        if (config.IncludeXUnit)
+        if (config.HasTestFramework)
         {
             var mainProjectRef = GetMainProjectPath(config);
             files[$"{root}/tests/{root}.Tests/{root}.Tests.csproj"] =

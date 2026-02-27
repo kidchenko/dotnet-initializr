@@ -39,7 +39,7 @@ public static class SlnxGenerator
             srcProjects.Add($"src/{config.ProjectName}.ServiceDefaults/{config.ProjectName}.ServiceDefaults.csproj");
         }
 
-        if (config.IncludeXUnit)
+        if (config.HasTestFramework)
         {
             testProjects.Add($"tests/{config.ProjectName}.Tests/{config.ProjectName}.Tests.csproj");
         }

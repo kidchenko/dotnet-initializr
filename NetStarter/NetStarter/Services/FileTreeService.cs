@@ -43,7 +43,7 @@ public class FileTreeService
         root.Children.Add(srcFolder);
 
         // tests/ folder (xUnit)
-        if (config.IncludeXUnit)
+        if (config.HasTestFramework)
         {
             var testsFolder = new FileTreeNode { Name = "tests", IsFolder = true };
             var unitTestProject = new FileTreeNode { Name = $"{config.ProjectName}.Tests", IsFolder = true };

@@ -47,9 +47,9 @@ public static class NuGetVersionMap
         // Independent-versioned packages (same across all SDKs)
         ["Serilog.Sinks.File"] = new()
         {
-            [DotNetSdkVersion.Net8] = "6.*",
-            [DotNetSdkVersion.Net9] = "6.*",
-            [DotNetSdkVersion.Net10] = "6.*",
+            [DotNetSdkVersion.Net8] = "7.*",
+            [DotNetSdkVersion.Net9] = "7.*",
+            [DotNetSdkVersion.Net10] = "7.*",
         },
         ["OpenTelemetry.Exporter.OpenTelemetryProtocol"] = new()
         {
@@ -93,11 +93,29 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "2.*",
             [DotNetSdkVersion.Net10] = "2.*",
         },
-        ["FluentAssertions"] = new()
+        ["Shouldly"] = new()
         {
-            [DotNetSdkVersion.Net8] = "6.*",
-            [DotNetSdkVersion.Net9] = "6.*",
-            [DotNetSdkVersion.Net10] = "6.*",
+            [DotNetSdkVersion.Net8] = "4.*",
+            [DotNetSdkVersion.Net9] = "4.*",
+            [DotNetSdkVersion.Net10] = "4.*",
+        },
+        ["NUnit"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "4.*",
+            [DotNetSdkVersion.Net9] = "4.*",
+            [DotNetSdkVersion.Net10] = "4.*",
+        },
+        ["NUnit3TestAdapter"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "4.*",
+            [DotNetSdkVersion.Net9] = "4.*",
+            [DotNetSdkVersion.Net10] = "4.*",
+        },
+        ["NUnit.Analyzers"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "4.*",
+            [DotNetSdkVersion.Net9] = "4.*",
+            [DotNetSdkVersion.Net10] = "4.*",
         },
         ["Testcontainers.PostgreSql"] = new()
         {
