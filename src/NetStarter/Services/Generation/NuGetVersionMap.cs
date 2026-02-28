@@ -49,6 +49,12 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "9.*",
             [DotNetSdkVersion.Net10] = "10.*",
         },
+        ["Microsoft.AspNetCore.Identity.EntityFrameworkCore"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
         ["Microsoft.AspNetCore.OpenApi"] = new()
         {
             [DotNetSdkVersion.Net8] = "8.*",
