@@ -87,6 +87,23 @@ public static class CsprojGenerator
                 packages.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
             else if (config.Database == DatabaseOption.SqlServer)
                 packages.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
+            else if (config.Database == DatabaseOption.MySql)
+                packages.Add(("Pomelo.EntityFrameworkCore.MySql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Pomelo.EntityFrameworkCore.MySql")));
+            else if (config.Database == DatabaseOption.Sqlite)
+                packages.Add(("Microsoft.EntityFrameworkCore.Sqlite", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Sqlite")));
+        }
+
+        if (config.Orm == OrmOption.Dapper)
+        {
+            packages.Add(("Dapper", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Dapper")));
+            var driver = config.Database switch
+            {
+                DatabaseOption.MySql => "MySqlConnector",
+                DatabaseOption.Sqlite => "Microsoft.Data.Sqlite",
+                DatabaseOption.SqlServer => "Microsoft.Data.SqlClient",
+                _ => "Npgsql",  // PostgreSQL default
+            };
+            packages.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
         }
 
         if (config.Auth == AuthOption.Jwt)
@@ -111,6 +128,11 @@ public static class CsprojGenerator
 
         if (config.Mapping == MappingOption.Mapster)
             packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
+
+        if (config.IncludeRedis)
+        {
+            packages.Add(("Microsoft.Extensions.Caching.StackExchangeRedis", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Caching.StackExchangeRedis")));
+        }
     }
 
     public static string GenerateClassLibrary(ProjectConfiguration config, string projectSuffix, List<string>? packages = null)

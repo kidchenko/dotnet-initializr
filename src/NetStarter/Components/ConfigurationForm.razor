@@ -100,21 +100,39 @@
                         Name="orm">
                 <Radio Value="OrmOption.None">None</Radio>
                 <Radio Value="OrmOption.EfCore">EF Core</Radio>
+                <Radio Value="OrmOption.Dapper">Dapper</Radio>
             </RadioGroup>
         </Field>
 
-        @if (Config.Orm == OrmOption.EfCore)
+        @if (Config.Orm != OrmOption.None)
         {
             <Field>
                 <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Database</FieldLabel>
-                <Select TValue="DatabaseOption"
-                        @bind-Value="SelectedDatabase"
-                        @bind-Value:after="NotifyChanged">
-                    <SelectItem Value="DatabaseOption.PostgreSql">PostgreSQL</SelectItem>
-                    <SelectItem Value="DatabaseOption.SqlServer">SQL Server</SelectItem>
-                </Select>
+                <RadioGroup TValue="DatabaseOption"
+                            @bind-Value="SelectedDatabase"
+                            @bind-Value:after="NotifyChanged"
+                            Name="database">
+                    <Radio Value="DatabaseOption.PostgreSql">PostgreSQL</Radio>
+                    <Radio Value="DatabaseOption.SqlServer">SQL Server</Radio>
+                    <Radio Value="DatabaseOption.MySql">MySQL</Radio>
+                    <Radio Value="DatabaseOption.Sqlite">SQLite</Radio>
+                </RadioGroup>
             </Field>
         }
+    </div>
+
+    <!-- Section 3b: Cache -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+            Cache
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Caching</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeRedis"
+                   @bind-Value:after="NotifyChanged">Redis</Check>
+        </Field>
     </div>
 
     <!-- Section 4: Security -->
