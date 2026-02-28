@@ -109,9 +109,6 @@ public static class CsprojGenerator
         if (config.Auth is AuthOption.Jwt or AuthOption.Keycloak)
             packages.Add(("Microsoft.AspNetCore.Authentication.JwtBearer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Authentication.JwtBearer")));
 
-        if (config.Auth == AuthOption.AspNetIdentity)
-            packages.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
-
         if (config.Logging == LoggingOption.Serilog)
         {
             packages.Add(("Serilog.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.AspNetCore")));
@@ -128,9 +125,6 @@ public static class CsprojGenerator
             if (config.Orm == OrmOption.EfCore)
                 packages.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "1.*-*"));
         }
-
-        if (config.Mapping == MappingOption.Mapster)
-            packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
 
         if (config.IncludeRedis)
         {
@@ -152,6 +146,13 @@ public static class CsprojGenerator
 
         var pkgList = new List<(string Name, string Version)>();
 
+        // For Application layer: add Mapster package
+        if (projectSuffix is "Application" && config.Mapping == MappingOption.Mapster)
+        {
+            pkgList.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
+            pkgList.Add(("Mapster.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster.DependencyInjection")));
+        }
+
         // For Infrastructure layer: add EF Core packages
         if (projectSuffix is "Infrastructure" && config.Orm == OrmOption.EfCore)
         {
@@ -162,6 +163,9 @@ public static class CsprojGenerator
                 pkgList.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
             else if (config.Database == DatabaseOption.SqlServer)
                 pkgList.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
+
+            if (config.Auth == AuthOption.AspNetIdentity)
+                pkgList.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
         }
 
         if (packages is not null)

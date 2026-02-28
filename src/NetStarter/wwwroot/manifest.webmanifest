@@ -1,6 +1,6 @@
 {
-  "name": "dotnet-initialzr",
-  "short_name": "dotnet-initialzr",
+  "name": "dotnet-initializr",
+  "short_name": "dotnet-initializr",
   "description": "Configure, preview, and download ready-to-go .NET solutions",
   "id": "./",
   "start_url": "./",

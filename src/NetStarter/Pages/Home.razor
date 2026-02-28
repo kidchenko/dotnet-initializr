@@ -107,6 +107,9 @@
     [SupplyParameterFromQuery(Name = "tc")] public string? TcParam { get; set; }
     [SupplyParameterFromQuery(Name = "cont")] public string? ContParam { get; set; }
     [SupplyParameterFromQuery(Name = "ci")] public string? CiParam { get; set; }
+    [SupplyParameterFromQuery(Name = "fv")] public string? FvParam { get; set; }
+    [SupplyParameterFromQuery(Name = "mock")] public string? MockParam { get; set; }
+    [SupplyParameterFromQuery(Name = "bogus")] public string? BogusParam { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -166,6 +169,12 @@
             _config.IncludeGitHubActions = ciValues.Contains("github", StringComparer.OrdinalIgnoreCase);
             _config.IncludeAzureDevOps = ciValues.Contains("azdo", StringComparer.OrdinalIgnoreCase);
         }
+        if (!string.IsNullOrEmpty(FvParam) && bool.TryParse(FvParam, out var fv) && fv)
+            _config.IncludeFluentValidation = true;
+        if (!string.IsNullOrEmpty(MockParam) && bool.TryParse(MockParam, out var mock) && mock)
+            _config.IncludeNSubstitute = true;
+        if (!string.IsNullOrEmpty(BogusParam) && bool.TryParse(BogusParam, out var bogus) && bogus)
+            _config.IncludeBogus = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -257,6 +266,9 @@
             ["tc"] = _config.IncludeTestcontainers ? "true" : null,
             ["cont"] = contValues.Count > 0 ? string.Join(",", contValues) : null,
             ["ci"] = ciValues.Count > 0 ? string.Join(",", ciValues) : null,
+            ["fv"] = _config.IncludeFluentValidation ? "true" : null,
+            ["mock"] = _config.IncludeNSubstitute ? "true" : null,
+            ["bogus"] = _config.IncludeBogus ? "true" : null,
         };
 
         var uri = Nav.GetUriWithQueryParameters(parameters);

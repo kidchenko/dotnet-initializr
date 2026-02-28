@@ -46,7 +46,7 @@
             <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Project Type</FieldLabel>
             <RadioGroup TValue="ProjectType"
                         @bind-Value="Config.ProjectType"
-                        @bind-Value:after="NotifyChanged"
+                        @bind-Value:after="OnProjectTypeChanged"
                         Name="projectType">
                 <Radio Value="ProjectType.WebApi">Web API</Radio>
                 <Radio Value="ProjectType.MinimalApi">Minimal API</Radio>
@@ -149,7 +149,7 @@
                         Name="auth">
                 <Radio Value="AuthOption.None">None</Radio>
                 <Radio Value="AuthOption.Jwt">JWT</Radio>
-                @if (Config.Orm == OrmOption.EfCore)
+                @if (Config.Orm == OrmOption.EfCore && Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
                 {
                     <Radio Value="AuthOption.AspNetIdentity">ASP.NET Identity</Radio>
                 }
@@ -307,6 +307,16 @@
         }
 
         if (Config.Auth == AuthOption.AspNetIdentity && Config.Orm != OrmOption.EfCore)
+        {
+            Config.Auth = AuthOption.None;
+        }
+
+        await NotifyChanged();
+    }
+
+    private async Task OnProjectTypeChanged()
+    {
+        if (Config.Auth == AuthOption.AspNetIdentity && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
         {
             Config.Auth = AuthOption.None;
         }

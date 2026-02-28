@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="src/NetStarter/wwwroot/img/dotnet-initialzr_128x128.png" alt=".NET initialzr" width="128" height="128" />
+  <img src="src/NetStarter/wwwroot/img/dotnet-initializr_128x128.png" alt=".NET initializr" width="128" height="128" />
 </p>
 
-<h1 align="center">.NET initialzr</h1>
+<h1 align="center">.NET initializr</h1>
 
 <p align="center">
   A browser-based project scaffolding tool for .NET — configure, preview, and download ready-to-go solutions.
