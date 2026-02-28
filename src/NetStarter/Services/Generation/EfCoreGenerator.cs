@@ -25,6 +25,31 @@ public static class EfCoreGenerator
             $"}}\n";
     }
 
+    public static string GenerateIdentityDbContext(ProjectConfiguration config, string namespaceSuffix)
+    {
+        var ns = $"{config.Namespace}.{namespaceSuffix}";
+        var entityNsSuffix = GetEntityNamespaceSuffix(config.Architecture);
+        var entityNs = $"{config.Namespace}.{entityNsSuffix}";
+
+        var usings =
+            $"using Microsoft.AspNetCore.Identity;\n" +
+            $"using Microsoft.AspNetCore.Identity.EntityFrameworkCore;\n" +
+            $"using Microsoft.EntityFrameworkCore;\n";
+        if (entityNs != ns)
+            usings += $"using {entityNs};\n";
+
+        return
+            usings +
+            $"\n" +
+            $"namespace {ns};\n" +
+            $"\n" +
+            $"public class AppDbContext(DbContextOptions<AppDbContext> options)\n" +
+            $"    : IdentityDbContext<IdentityUser>(options)\n" +
+            $"{{\n" +
+            $"    public DbSet<SampleEntity> Samples => Set<SampleEntity>();\n" +
+            $"}}\n";
+    }
+
     public static string GenerateSampleEntity(ProjectConfiguration config, string namespaceSuffix)
     {
         var ns = $"{config.Namespace}.{namespaceSuffix}";

@@ -145,6 +145,25 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
+        if (config.Auth == AuthOption.Keycloak)
+        {
+            sb.Append($"using Microsoft.AspNetCore.Authentication.JwtBearer;\n");
+            hasUsings = true;
+        }
+
+        if (config.Auth == AuthOption.ApiKey)
+        {
+            sb.Append($"using {config.Namespace}.{AuthGenerator.GetNamespaceSuffix(config.Architecture)};\n");
+            sb.Append($"using Microsoft.AspNetCore.Authentication;\n");
+            hasUsings = true;
+        }
+
+        if (config.Auth == AuthOption.AspNetIdentity)
+        {
+            sb.Append($"using Microsoft.AspNetCore.Identity;\n");
+            hasUsings = true;
+        }
+
         if (config.Logging == LoggingOption.Serilog)
         {
             sb.Append($"using Serilog;\n");
@@ -222,22 +241,47 @@ public static class ProgramCsGenerator
 
     private static void AddAuthFragment(ProjectConfiguration config, StringBuilder sb)
     {
-        if (config.Auth != AuthOption.Jwt) return;
-        sb.Append("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n");
-        sb.Append("    .AddJwtBearer(options =>\n");
-        sb.Append("    {\n");
-        sb.Append("        options.TokenValidationParameters = new TokenValidationParameters\n");
-        sb.Append("        {\n");
-        sb.Append("            ValidateIssuer = true,\n");
-        sb.Append("            ValidateAudience = true,\n");
-        sb.Append("            ValidateLifetime = true,\n");
-        sb.Append("            ValidateIssuerSigningKey = true,\n");
-        sb.Append("            ValidIssuer = builder.Configuration[\"Jwt:Issuer\"],\n");
-        sb.Append("            ValidAudience = builder.Configuration[\"Jwt:Audience\"],\n");
-        sb.Append("            IssuerSigningKey = new SymmetricSecurityKey(\n");
-        sb.Append("                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n");
-        sb.Append("        };\n");
-        sb.Append("    });\n");
+        switch (config.Auth)
+        {
+            case AuthOption.Jwt:
+                sb.Append("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n");
+                sb.Append("    .AddJwtBearer(options =>\n");
+                sb.Append("    {\n");
+                sb.Append("        options.TokenValidationParameters = new TokenValidationParameters\n");
+                sb.Append("        {\n");
+                sb.Append("            ValidateIssuer = true,\n");
+                sb.Append("            ValidateAudience = true,\n");
+                sb.Append("            ValidateLifetime = true,\n");
+                sb.Append("            ValidateIssuerSigningKey = true,\n");
+                sb.Append("            ValidIssuer = builder.Configuration[\"Jwt:Issuer\"],\n");
+                sb.Append("            ValidAudience = builder.Configuration[\"Jwt:Audience\"],\n");
+                sb.Append("            IssuerSigningKey = new SymmetricSecurityKey(\n");
+                sb.Append("                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n");
+                sb.Append("        };\n");
+                sb.Append("    });\n");
+                break;
+            case AuthOption.Keycloak:
+                sb.Append("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n");
+                sb.Append("    .AddJwtBearer(options =>\n");
+                sb.Append("    {\n");
+                sb.Append("        options.Authority = builder.Configuration[\"Keycloak:Authority\"];\n");
+                sb.Append("        options.Audience = builder.Configuration[\"Keycloak:Audience\"];\n");
+                sb.Append("        options.RequireHttpsMetadata = false;\n");
+                sb.Append("    });\n");
+                sb.Append("builder.Services.AddAuthorization();\n");
+                break;
+            case AuthOption.ApiKey:
+                sb.Append("builder.Services.AddAuthentication(\"ApiKey\")\n");
+                sb.Append("    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(\"ApiKey\", _ => { });\n");
+                sb.Append("builder.Services.AddAuthorization();\n");
+                break;
+            case AuthOption.AspNetIdentity:
+                sb.Append("builder.Services.AddIdentity<IdentityUser, IdentityRole>()\n");
+                sb.Append("    .AddEntityFrameworkStores<AppDbContext>()\n");
+                sb.Append("    .AddDefaultTokenProviders();\n");
+                sb.Append("builder.Services.AddAuthorization();\n");
+                break;
+        }
     }
 
     private static void AddHealthChecksFragment(ProjectConfiguration config, StringBuilder sb)
@@ -271,7 +315,7 @@ public static class ProgramCsGenerator
     {
         var middlewareStart = sb.Length;
 
-        if (config.Auth == AuthOption.Jwt)
+        if (config.Auth is AuthOption.Jwt or AuthOption.Keycloak or AuthOption.ApiKey or AuthOption.AspNetIdentity)
         {
             sb.Append("app.UseAuthentication();\n");
             sb.Append("app.UseAuthorization();\n");
