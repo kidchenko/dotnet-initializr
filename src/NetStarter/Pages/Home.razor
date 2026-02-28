@@ -107,6 +107,7 @@
     [SupplyParameterFromQuery(Name = "tc")] public string? TcParam { get; set; }
     [SupplyParameterFromQuery(Name = "cont")] public string? ContParam { get; set; }
     [SupplyParameterFromQuery(Name = "ci")] public string? CiParam { get; set; }
+    [SupplyParameterFromQuery(Name = "redis")] public string? RedisParam { get; set; }
     [SupplyParameterFromQuery(Name = "fv")] public string? FvParam { get; set; }
     [SupplyParameterFromQuery(Name = "mock")] public string? MockParam { get; set; }
     [SupplyParameterFromQuery(Name = "bogus")] public string? BogusParam { get; set; }
@@ -169,6 +170,8 @@
             _config.IncludeGitHubActions = ciValues.Contains("github", StringComparer.OrdinalIgnoreCase);
             _config.IncludeAzureDevOps = ciValues.Contains("azdo", StringComparer.OrdinalIgnoreCase);
         }
+        if (!string.IsNullOrEmpty(RedisParam) && bool.TryParse(RedisParam, out var redis) && redis)
+            _config.IncludeRedis = true;
         if (!string.IsNullOrEmpty(FvParam) && bool.TryParse(FvParam, out var fv) && fv)
             _config.IncludeFluentValidation = true;
         if (!string.IsNullOrEmpty(MockParam) && bool.TryParse(MockParam, out var mock) && mock)
@@ -215,6 +218,13 @@
             return;
         }
 
+        var validationErrors = _config.Validate();
+        if (validationErrors.Count > 0)
+        {
+            _validationError = string.Join("; ", validationErrors.Select(e => e.Message));
+            return;
+        }
+
         _isGenerating = true;
         StateHasChanged();
         await Task.Yield(); // Let spinner render before CPU work
@@ -256,7 +266,7 @@
             ["type"] = _config.ProjectType != ProjectType.WebApi ? _config.ProjectType.ToString().ToLower() : null,
             ["arch"] = _config.Architecture != ArchitecturePattern.CleanArchitecture ? _config.Architecture.ToString().ToLower() : null,
             ["orm"] = _config.Orm != OrmOption.None ? _config.Orm.ToString().ToLower() : null,
-            ["db"] = _config.Orm == OrmOption.EfCore && _config.Database.HasValue ? _config.Database.Value.ToString().ToLower() : null,
+            ["db"] = _config.Orm != OrmOption.None && _config.Database.HasValue ? _config.Database.Value.ToString().ToLower() : null,
             ["auth"] = _config.Auth != AuthOption.None ? _config.Auth.ToString().ToLower() : null,
             ["map"] = _config.Mapping != MappingOption.None ? _config.Mapping.ToString().ToLower() : null,
             ["logging"] = _config.Logging != LoggingOption.None ? _config.Logging.ToString().ToLower() : null,
@@ -266,6 +276,7 @@
             ["tc"] = _config.IncludeTestcontainers ? "true" : null,
             ["cont"] = contValues.Count > 0 ? string.Join(",", contValues) : null,
             ["ci"] = ciValues.Count > 0 ? string.Join(",", ciValues) : null,
+            ["redis"] = _config.IncludeRedis ? "true" : null,
             ["fv"] = _config.IncludeFluentValidation ? "true" : null,
             ["mock"] = _config.IncludeNSubstitute ? "true" : null,
             ["bogus"] = _config.IncludeBogus ? "true" : null,
