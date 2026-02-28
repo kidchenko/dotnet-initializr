@@ -149,7 +149,27 @@
                         Name="auth">
                 <Radio Value="AuthOption.None">None</Radio>
                 <Radio Value="AuthOption.Jwt">JWT</Radio>
+                @if (Config.Orm == OrmOption.EfCore)
+                {
+                    <Radio Value="AuthOption.AspNetIdentity">ASP.NET Identity</Radio>
+                }
+                <Radio Value="AuthOption.Keycloak">Keycloak/OIDC</Radio>
+                <Radio Value="AuthOption.ApiKey">API Key</Radio>
             </RadioGroup>
+        </Field>
+    </div>
+
+    <!-- Section 4b: Validation -->
+    <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+        <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+            Validation
+        </h3>
+
+        <Field>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Validation Library</FieldLabel>
+            <Check TValue="bool"
+                   @bind-Value="Config.IncludeFluentValidation"
+                   @bind-Value:after="NotifyChanged">FluentValidation</Check>
         </Field>
     </div>
 
@@ -201,6 +221,22 @@
                    @bind-Value="Config.IncludeTestcontainers"
                    @bind-Value:after="NotifyChanged">Testcontainers</Check>
         </Field>
+
+        @if (Config.HasTestFramework)
+        {
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Mock Library</FieldLabel>
+                <Check TValue="bool"
+                       @bind-Value="Config.IncludeNSubstitute"
+                       @bind-Value:after="NotifyChanged">NSubstitute</Check>
+            </Field>
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Utility</FieldLabel>
+                <Check TValue="bool"
+                       @bind-Value="Config.IncludeBogus"
+                       @bind-Value:after="NotifyChanged">Bogus</Check>
+            </Field>
+        }
     </div>
 
     <!-- Section 6: DevOps -->
@@ -269,6 +305,12 @@
         {
             Config.Database = DatabaseOption.PostgreSql;
         }
+
+        if (Config.Auth == AuthOption.AspNetIdentity && Config.Orm != OrmOption.EfCore)
+        {
+            Config.Auth = AuthOption.None;
+        }
+
         await NotifyChanged();
     }
 }
