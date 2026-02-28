@@ -115,6 +115,7 @@ public static class ProgramCsGenerator
         AddHealthChecksFragment(config, sb);
         AddOpenTelemetryFragment(config, sb);
         AddMappingFragment(config, sb);
+        AddRedisCacheFragment(config, sb);
         AddControllersFragment(config, sb);
         sb.Append("\n");
         sb.Append("var app = builder.Build();\n");
@@ -178,15 +179,45 @@ public static class ProgramCsGenerator
 
     private static void AddDatabaseFragment(ProjectConfiguration config, StringBuilder sb)
     {
-        if (config.Orm != OrmOption.EfCore) return;
-        var dbMethod = config.Database switch
+        if (config.Orm == OrmOption.EfCore)
         {
-            DatabaseOption.PostgreSql => "UseNpgsql",
-            DatabaseOption.SqlServer => "UseSqlServer",
-            _ => "UseSqlite",
-        };
-        sb.Append($"builder.Services.AddDbContext<AppDbContext>(options =>\n");
-        sb.Append($"    options.{dbMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n");
+            if (config.Database == DatabaseOption.MySql)
+            {
+                sb.Append("builder.Services.AddDbContext<AppDbContext>(options =>\n");
+                sb.Append("    options.UseMySql(\n");
+                sb.Append("        builder.Configuration.GetConnectionString(\"DefaultConnection\"),\n");
+                sb.Append("        ServerVersion.AutoDetect(\n");
+                sb.Append("            builder.Configuration.GetConnectionString(\"DefaultConnection\"))));\n");
+            }
+            else
+            {
+                var dbMethod = config.Database switch
+                {
+                    DatabaseOption.PostgreSql => "UseNpgsql",
+                    DatabaseOption.SqlServer => "UseSqlServer",
+                    _ => "UseSqlite",
+                };
+                sb.Append($"builder.Services.AddDbContext<AppDbContext>(options =>\n");
+                sb.Append($"    options.{dbMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n");
+            }
+            return;
+        }
+
+        if (config.Orm == OrmOption.Dapper)
+        {
+            sb.Append("builder.Services.AddDapperConnection(builder.Configuration);\n");
+            return;
+        }
+    }
+
+    private static void AddRedisCacheFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (!config.IncludeRedis) return;
+        sb.Append("builder.Services.AddStackExchangeRedisCache(options =>\n");
+        sb.Append("{\n");
+        sb.Append("    options.Configuration = builder.Configuration.GetConnectionString(\"Redis\");\n");
+        sb.Append($"    options.InstanceName = \"{config.ProjectName}:\";\n");
+        sb.Append("});\n");
     }
 
     private static void AddAuthFragment(ProjectConfiguration config, StringBuilder sb)

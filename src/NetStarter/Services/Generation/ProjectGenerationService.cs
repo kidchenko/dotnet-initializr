@@ -26,7 +26,14 @@ public class ProjectGenerationService
                 break;
         }
 
-        // 3. Aspire projects (AppHost and ServiceDefaults)
+        // 3. Dapper extension method file
+        if (config.Orm == OrmOption.Dapper && config.Database.HasValue)
+        {
+            var dapperPath = DapperGenerator.GetFilePath(config);
+            files[$"{root}/{dapperPath}"] = DapperGenerator.Generate(config);
+        }
+
+        // 4. Aspire projects (AppHost and ServiceDefaults)
         if (config.IncludeDotNetAspire)
         {
             files[$"{root}/src/{root}.AppHost/{root}.AppHost.csproj"] =
@@ -39,7 +46,7 @@ public class ProjectGenerationService
                 AspireGenerator.GenerateServiceDefaultsExtensions(config);
         }
 
-        // 4. Test projects
+        // 5. Test projects
         if (config.HasTestFramework)
         {
             var mainProjectRef = GetMainProjectPath(config);
@@ -57,19 +64,19 @@ public class ProjectGenerationService
             }
         }
 
-        // 5. CI/CD files
+        // 6. CI/CD files
         if (config.IncludeGitHubActions)
             files[$"{root}/.github/workflows/dotnet.yml"] = CiCdGenerator.GenerateGitHubActions(config);
         if (config.IncludeAzureDevOps)
             files[$"{root}/azure-pipelines.yml"] = CiCdGenerator.GenerateAzurePipelines(config);
 
-        // 6. Docker files
+        // 7. Docker files
         if (config.IncludeDockerfile)
             files[$"{root}/Dockerfile"] = DockerGenerator.GenerateDockerfile(config);
         if (config.IncludeDockerCompose)
             files[$"{root}/docker-compose.yml"] = DockerGenerator.GenerateDockerCompose(config);
 
-        // 7. Always-present root files
+        // 8. Always-present root files
         files[$"{root}/.gitignore"] = StaticFileGenerator.GenerateGitignore();
         files[$"{root}/.editorconfig"] = StaticFileGenerator.GenerateEditorconfig();
         files[$"{root}/README.md"] = ReadmeGenerator.Generate(config);
