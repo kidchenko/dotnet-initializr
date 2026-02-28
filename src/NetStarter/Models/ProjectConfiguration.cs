@@ -65,11 +65,11 @@ public class ProjectConfiguration
                 "ASP.NET Identity requires EF Core. Select EF Core as your ORM.",
                 [nameof(Auth), nameof(Orm)]));
 
-        // Identity requires a web project type
-        if (Auth == AuthOption.AspNetIdentity && ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+        // Authentication requires a web project type
+        if (Auth != AuthOption.None && ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
             errors.Add(new ValidationError(
-                "IDENTITY_REQUIRES_WEB",
-                "ASP.NET Identity requires a web project (Web API or Minimal API).",
+                "AUTH_REQUIRES_WEB",
+                "Authentication requires a web project (Web API or Minimal API).",
                 [nameof(Auth), nameof(ProjectType)]));
 
         // Hangfire requires a database (JOBS-03)

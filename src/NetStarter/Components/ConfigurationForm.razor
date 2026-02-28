@@ -141,22 +141,25 @@
             Security
         </h3>
 
-        <Field>
-            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Authentication</FieldLabel>
-            <RadioGroup TValue="AuthOption"
-                        @bind-Value="Config.Auth"
-                        @bind-Value:after="NotifyChanged"
-                        Name="auth">
-                <Radio Value="AuthOption.None">None</Radio>
-                <Radio Value="AuthOption.Jwt">JWT</Radio>
-                @if (Config.Orm == OrmOption.EfCore && Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
-                {
-                    <Radio Value="AuthOption.AspNetIdentity">ASP.NET Identity</Radio>
-                }
-                <Radio Value="AuthOption.Keycloak">Keycloak/OIDC</Radio>
-                <Radio Value="AuthOption.ApiKey">API Key</Radio>
-            </RadioGroup>
-        </Field>
+        @if (Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Authentication</FieldLabel>
+                <RadioGroup TValue="AuthOption"
+                            @bind-Value="Config.Auth"
+                            @bind-Value:after="NotifyChanged"
+                            Name="auth">
+                    <Radio Value="AuthOption.None">None</Radio>
+                    <Radio Value="AuthOption.Jwt">JWT</Radio>
+                    @if (Config.Orm == OrmOption.EfCore)
+                    {
+                        <Radio Value="AuthOption.AspNetIdentity">ASP.NET Identity</Radio>
+                    }
+                    <Radio Value="AuthOption.Keycloak">Keycloak/OIDC</Radio>
+                    <Radio Value="AuthOption.ApiKey">API Key</Radio>
+                </RadioGroup>
+            </Field>
+        }
     </div>
 
     <!-- Section 4b: Validation -->
@@ -316,7 +319,7 @@
 
     private async Task OnProjectTypeChanged()
     {
-        if (Config.Auth == AuthOption.AspNetIdentity && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+        if (Config.Auth != AuthOption.None && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
         {
             Config.Auth = AuthOption.None;
         }
