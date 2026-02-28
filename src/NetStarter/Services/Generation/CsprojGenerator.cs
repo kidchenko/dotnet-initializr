@@ -136,6 +136,12 @@ public static class CsprojGenerator
         {
             packages.Add(("Microsoft.Extensions.Caching.StackExchangeRedis", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Caching.StackExchangeRedis")));
         }
+
+        if (config.IncludeFluentValidation)
+        {
+            packages.Add(("FluentValidation", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation")));
+            packages.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
+        }
     }
 
     public static string GenerateClassLibrary(ProjectConfiguration config, string projectSuffix, List<string>? packages = null)
@@ -179,6 +185,7 @@ public static class CsprojGenerator
         var packages = new List<(string Name, string Version)>();
         AppendTestFrameworkPackages(config, packages);
         AppendAssertLibraryPackages(config, packages);
+        AppendMockingPackages(config, packages);
         packages.Add(("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")));
         packages.Add(("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")));
 
@@ -198,6 +205,7 @@ public static class CsprojGenerator
         var packages = new List<(string Name, string Version)>();
         AppendTestFrameworkPackages(config, packages);
         AppendAssertLibraryPackages(config, packages);
+        AppendMockingPackages(config, packages);
         packages.Add(("Microsoft.NET.Test.Sdk", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.NET.Test.Sdk")));
         packages.Add(("coverlet.collector", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "coverlet.collector")));
         packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
@@ -234,6 +242,19 @@ public static class CsprojGenerator
     {
         if (config.AssertLibrary == AssertLibraryOption.Shouldly)
             packages.Add(("Shouldly", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Shouldly")));
+    }
+
+    private static void AppendMockingPackages(ProjectConfiguration config, List<(string Name, string Version)> packages)
+    {
+        if (config.IncludeNSubstitute)
+        {
+            packages.Add(("NSubstitute", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NSubstitute")));
+            packages.Add(("NSubstitute.Analyzers.CSharp", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NSubstitute.Analyzers.CSharp")));
+        }
+        if (config.IncludeBogus)
+        {
+            packages.Add(("Bogus", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Bogus")));
+        }
     }
 
     public static string GenerateConsoleProject(ProjectConfiguration config)

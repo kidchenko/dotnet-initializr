@@ -116,6 +116,7 @@ public static class ProgramCsGenerator
         AddOpenTelemetryFragment(config, sb);
         AddMappingFragment(config, sb);
         AddRedisCacheFragment(config, sb);
+        AddFluentValidationFragment(config, sb);
         AddControllersFragment(config, sb);
         sb.Append("\n");
         sb.Append("var app = builder.Build();\n");
@@ -181,6 +182,12 @@ public static class ProgramCsGenerator
         {
             sb.Append($"using Mapster;\n");
             sb.Append($"using MapsterMapper;\n");
+            hasUsings = true;
+        }
+
+        if (config.IncludeFluentValidation)
+        {
+            sb.Append($"using FluentValidation;\n");
             hasUsings = true;
         }
 
@@ -301,6 +308,12 @@ public static class ProgramCsGenerator
         if (config.Mapping != MappingOption.Mapster) return;
         sb.Append("builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n");
         sb.Append("builder.Services.AddScoped<IMapper, ServiceMapper>();\n");
+    }
+
+    private static void AddFluentValidationFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (!config.IncludeFluentValidation) return;
+        sb.Append("builder.Services.AddValidatorsFromAssemblyContaining<Program>();\n");
     }
 
     private static void AddControllersFragment(ProjectConfiguration config, StringBuilder sb)
