@@ -40,8 +40,9 @@ public static class ArchitectureGenerator
         if (config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
-            files[$"{src}/{name}.Infrastructure/Data/AppDbContext.cs"] =
-                EfCoreGenerator.GenerateDbContext(config, dbContextNs);
+            files[$"{src}/{name}.Infrastructure/Data/AppDbContext.cs"] = config.Auth == AuthOption.AspNetIdentity
+                ? EfCoreGenerator.GenerateIdentityDbContext(config, dbContextNs)
+                : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
         }
 
         // Entry point project — references Infrastructure and Application
@@ -72,6 +73,12 @@ public static class ArchitectureGenerator
             var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
             files[$"{src}/{name}.{config.EntryPointSuffix}/Auth/JwtSettings.cs"] =
                 AuthGenerator.GenerateJwtSettings(config, authNs);
+        }
+        else if (config.Auth == AuthOption.ApiKey)
+        {
+            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Auth/ApiKeyAuthenticationHandler.cs"] =
+                AuthGenerator.GenerateApiKeyAuthHandler(config, authNs);
         }
 
         if (config.IncludeOpenTelemetry)
@@ -115,8 +122,9 @@ public static class ArchitectureGenerator
         if (config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(ArchitecturePattern.VerticalSlice);
-            files[$"{proj}/Data/AppDbContext.cs"] =
-                EfCoreGenerator.GenerateDbContext(config, dbContextNs);
+            files[$"{proj}/Data/AppDbContext.cs"] = config.Auth == AuthOption.AspNetIdentity
+                ? EfCoreGenerator.GenerateIdentityDbContext(config, dbContextNs)
+                : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
 
             var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.VerticalSlice);
             files[$"{proj}/Data/Entities/SampleEntity.cs"] =
@@ -128,6 +136,12 @@ public static class ArchitectureGenerator
             var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.VerticalSlice);
             files[$"{proj}/Auth/JwtSettings.cs"] =
                 AuthGenerator.GenerateJwtSettings(config, authNs);
+        }
+        else if (config.Auth == AuthOption.ApiKey)
+        {
+            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.VerticalSlice);
+            files[$"{proj}/Auth/ApiKeyAuthenticationHandler.cs"] =
+                AuthGenerator.GenerateApiKeyAuthHandler(config, authNs);
         }
 
         if (config.IncludeOpenTelemetry)
@@ -171,8 +185,9 @@ public static class ArchitectureGenerator
         if (config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(ArchitecturePattern.SimpleLayered);
-            files[$"{proj}/Data/AppDbContext.cs"] =
-                EfCoreGenerator.GenerateDbContext(config, dbContextNs);
+            files[$"{proj}/Data/AppDbContext.cs"] = config.Auth == AuthOption.AspNetIdentity
+                ? EfCoreGenerator.GenerateIdentityDbContext(config, dbContextNs)
+                : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
 
             var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.SimpleLayered);
             files[$"{proj}/Data/Entities/SampleEntity.cs"] =
@@ -184,6 +199,12 @@ public static class ArchitectureGenerator
             var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.SimpleLayered);
             files[$"{proj}/Auth/JwtSettings.cs"] =
                 AuthGenerator.GenerateJwtSettings(config, authNs);
+        }
+        else if (config.Auth == AuthOption.ApiKey)
+        {
+            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.SimpleLayered);
+            files[$"{proj}/Auth/ApiKeyAuthenticationHandler.cs"] =
+                AuthGenerator.GenerateApiKeyAuthHandler(config, authNs);
         }
 
         if (config.IncludeOpenTelemetry)

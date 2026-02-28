@@ -81,6 +81,26 @@ public static class AppSettingsGenerator
             };
         }
 
+        // Conditional: Keycloak settings
+        if (config.Auth == AuthOption.Keycloak)
+        {
+            settings["Keycloak"] = new Dictionary<string, object>
+            {
+                ["Authority"] = "http://localhost:8080/realms/YOUR_REALM",
+                ["Audience"] = "YOUR_CLIENT_ID",
+                ["Realm"] = "YOUR_REALM",
+            };
+        }
+
+        // Conditional: ApiKey settings
+        if (config.Auth == AuthOption.ApiKey)
+        {
+            settings["ApiKey"] = new Dictionary<string, object>
+            {
+                ["Value"] = "YOUR-API-KEY-REPLACE-WITH-A-SECURE-VALUE",
+            };
+        }
+
         // Conditional: Serilog settings
         if (config.Logging == LoggingOption.Serilog)
         {

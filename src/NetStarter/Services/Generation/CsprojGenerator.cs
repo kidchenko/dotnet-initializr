@@ -106,8 +106,11 @@ public static class CsprojGenerator
             packages.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
         }
 
-        if (config.Auth == AuthOption.Jwt)
+        if (config.Auth is AuthOption.Jwt or AuthOption.Keycloak)
             packages.Add(("Microsoft.AspNetCore.Authentication.JwtBearer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Authentication.JwtBearer")));
+
+        if (config.Auth == AuthOption.AspNetIdentity)
+            packages.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
 
         if (config.Logging == LoggingOption.Serilog)
         {

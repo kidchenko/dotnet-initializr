@@ -145,6 +145,22 @@ ENTRYPOINT {{entrypoint}}
             }
         }
 
+        var hasKeycloak = config.Auth == AuthOption.Keycloak;
+        var keycloakService = string.Empty;
+        if (hasKeycloak)
+        {
+            keycloakService = """
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+""";
+        }
+
         var redisService = string.Empty;
         if (hasRedis)
         {
@@ -182,10 +198,15 @@ ENTRYPOINT {{entrypoint}}
                 dependsOnEntries.Add($"      - {dbServiceName}");
             if (hasRedis)
                 dependsOnEntries.Add("      - redis");
+            if (hasKeycloak)
+                dependsOnEntries.Add("      - keycloak");
 
             var dependsOn = dependsOnEntries.Count > 0
                 ? $"\n    depends_on:\n{string.Join("\n", dependsOnEntries)}"
                 : string.Empty;
+
+            // Keycloak uses 8080 — map app to 8090 to avoid port conflict
+            var appHostPort = hasKeycloak ? "8090" : "8080";
 
             appService = $$"""
   app:
@@ -193,13 +214,13 @@ ENTRYPOINT {{entrypoint}}
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "{{appHostPort}}:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development{{dependsOn}}
 """;
         }
 
-        return $"services:\n{appService}{dbService}{redisService}{volumes}\n";
+        return $"services:\n{appService}{dbService}{keycloakService}{redisService}{volumes}\n";
     }
 
     private static int GetSdkMajorVersion(DotNetSdkVersion sdk) => sdk switch
