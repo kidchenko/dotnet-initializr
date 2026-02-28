@@ -83,13 +83,15 @@ ENTRYPOINT {{entrypoint}}
     public static string GenerateDockerCompose(ProjectConfiguration config)
     {
         var projectName = config.ProjectName.ToLowerInvariant();
-        var hasDatabase = config.Orm == OrmOption.EfCore && config.Database.HasValue;
+        var hasDatabase = (config.Orm is OrmOption.EfCore or OrmOption.Dapper) && config.Database.HasValue && config.Database != DatabaseOption.Sqlite;
+        var hasRedis = config.IncludeRedis;
         var includeAppService = config.IncludeDockerfile;
 
         var dbServiceName = config.Database switch
         {
             DatabaseOption.PostgreSql => "postgres",
             DatabaseOption.SqlServer => "sqlserver",
+            DatabaseOption.MySql => "mysql",
             _ => string.Empty,
         };
 
@@ -127,22 +129,62 @@ ENTRYPOINT {{entrypoint}}
       - sqlserver_data:/var/opt/mssql
 """;
             }
+            else if (config.Database == DatabaseOption.MySql)
+            {
+                dbService = $$"""
+  {{dbServiceName}}:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: {{projectName}}db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+""";
+            }
+        }
+
+        var redisService = string.Empty;
+        if (hasRedis)
+        {
+            redisService = """
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+""";
         }
 
         var volumes = string.Empty;
-        if (hasDatabase)
+        if (hasDatabase || hasRedis)
         {
-            if (config.Database == DatabaseOption.PostgreSql)
-                volumes = "\nvolumes:\n  postgres_data:";
-            else if (config.Database == DatabaseOption.SqlServer)
-                volumes = "\nvolumes:\n  sqlserver_data:";
+            var volumeEntries = new List<string>();
+            if (hasDatabase)
+            {
+                if (config.Database == DatabaseOption.PostgreSql)
+                    volumeEntries.Add("  postgres_data:");
+                else if (config.Database == DatabaseOption.SqlServer)
+                    volumeEntries.Add("  sqlserver_data:");
+                else if (config.Database == DatabaseOption.MySql)
+                    volumeEntries.Add("  mysql_data:");
+            }
+
+            if (volumeEntries.Count > 0)
+                volumes = "\nvolumes:\n" + string.Join("\n", volumeEntries);
         }
 
         var appService = string.Empty;
         if (includeAppService)
         {
-            var dependsOn = hasDatabase
-                ? $"\n    depends_on:\n      - {dbServiceName}"
+            var dependsOnEntries = new List<string>();
+            if (hasDatabase)
+                dependsOnEntries.Add($"      - {dbServiceName}");
+            if (hasRedis)
+                dependsOnEntries.Add("      - redis");
+
+            var dependsOn = dependsOnEntries.Count > 0
+                ? $"\n    depends_on:\n{string.Join("\n", dependsOnEntries)}"
                 : string.Empty;
 
             appService = $$"""
@@ -157,7 +199,7 @@ ENTRYPOINT {{entrypoint}}
 """;
         }
 
-        return $"services:\n{appService}{dbService}{volumes}\n";
+        return $"services:\n{appService}{dbService}{redisService}{volumes}\n";
     }
 
     private static int GetSdkMajorVersion(DotNetSdkVersion sdk) => sdk switch

@@ -25,13 +25,22 @@ public static class AppSettingsGenerator
             ["AllowedHosts"] = "*",
         };
 
-        // Conditional: EF Core connection strings
-        if (config.Orm == OrmOption.EfCore && config.Database.HasValue)
+        // Conditional: EF Core / Dapper connection strings
+        if (config.Orm is OrmOption.EfCore or OrmOption.Dapper && config.Database.HasValue)
         {
+            var projectNameLower = config.ProjectName.ToLowerInvariant();
             var connectionString = config.Database switch
             {
-                DatabaseOption.PostgreSql => $"Host=localhost;Database={config.ProjectName};Username=postgres;Password=postgres",
-                DatabaseOption.SqlServer => $"Server=localhost;Database={config.ProjectName};Trusted_Connection=true;TrustServerCertificate=true",
+                DatabaseOption.PostgreSql => config.IncludeDockerCompose
+                    ? $"Host=localhost;Port=5432;Database={projectNameLower}db;Username=postgres;Password=postgres"
+                    : $"Host=YOUR_HOST;Port=5432;Database=YOUR_DB;Username=YOUR_USER;Password=YOUR_PASSWORD",
+                DatabaseOption.SqlServer => config.IncludeDockerCompose
+                    ? $"Server=localhost;Database={projectNameLower}db;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true"
+                    : $"Server=YOUR_HOST;Database=YOUR_DB;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=true",
+                DatabaseOption.MySql => config.IncludeDockerCompose
+                    ? $"Server=localhost;Port=3306;Database={projectNameLower}db;User=root;Password=root"
+                    : $"Server=YOUR_HOST;Port=3306;Database=YOUR_DB;User=YOUR_USER;Password=YOUR_PASSWORD",
+                DatabaseOption.Sqlite => "Data Source=app.db",
                 _ => string.Empty,
             };
 
@@ -40,6 +49,23 @@ public static class AppSettingsGenerator
                 settings["ConnectionStrings"] = new Dictionary<string, object>
                 {
                     ["DefaultConnection"] = connectionString,
+                };
+            }
+        }
+
+        // Conditional: Redis connection string
+        if (config.IncludeRedis)
+        {
+            var redisConn = config.IncludeDockerCompose ? "localhost:6379" : "YOUR_REDIS_HOST:6379";
+            if (settings.TryGetValue("ConnectionStrings", out var existingCs) && existingCs is Dictionary<string, object> csDict)
+            {
+                csDict["Redis"] = redisConn;
+            }
+            else
+            {
+                settings["ConnectionStrings"] = new Dictionary<string, object>
+                {
+                    ["Redis"] = redisConn,
                 };
             }
         }
