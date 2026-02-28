@@ -87,6 +87,18 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "2.*",
             [DotNetSdkVersion.Net10] = "2.*",
         },
+        ["Npgsql"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "9.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "9.*",
+        },
+        ["Microsoft.Data.SqlClient"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "5.*",
+            [DotNetSdkVersion.Net9] = "5.*",
+            [DotNetSdkVersion.Net10] = "5.*",
+        },
         // Pomelo: pinned to 9.* — no stable 10.x as of Feb 2026 (per STATE.md decision)
         ["Pomelo.EntityFrameworkCore.MySql"] = new()
         {
