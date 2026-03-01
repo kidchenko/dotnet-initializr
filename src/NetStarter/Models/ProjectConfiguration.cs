@@ -10,7 +10,7 @@ public enum MappingOption { None, Mapster }
 public enum TestFrameworkOption { None, XUnit, NUnit }
 public enum AssertLibraryOption { None, Shouldly }
 public enum LoggingOption { None, Serilog, NLog }
-public enum ApiDocsUiOption { None, Scalar, SwaggerUI, Redoc }
+public enum OpenApiUi { None, Scalar, SwaggerUI, Redoc }
 public enum BackgroundJobsOption { None, IHostedService, Hangfire, Quartz }
 
 public record ValidationError(string Code, string Message, string[] AffectedFields);
@@ -39,7 +39,7 @@ public class ProjectConfiguration
 
     // v1.1 enum properties (single-select, default None)
     public LoggingOption Logging { get; set; } = LoggingOption.None;
-    public ApiDocsUiOption ApiDocsUi { get; set; } = ApiDocsUiOption.None;
+    public OpenApiUi ApiDocsUi { get; set; } = OpenApiUi.None;
     public BackgroundJobsOption BackgroundJobs { get; set; } = BackgroundJobsOption.None;
 
     // v1.1 bool properties (combinable options, default false)
@@ -78,6 +78,13 @@ public class ProjectConfiguration
                 "RESILIENCE_REQUIRES_WEB",
                 "HTTP Resilience requires a web project (Web API or Minimal API).",
                 [nameof(IncludeResilience), nameof(ProjectType)]));
+
+        // OpenAPI documentation requires a web project type (DOCS-06)
+        if (ApiDocsUi != OpenApiUi.None && ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+            errors.Add(new ValidationError(
+                "OPENAPI_REQUIRES_WEB",
+                "API documentation requires a web project (Web API or Minimal API).",
+                [nameof(ApiDocsUi), nameof(ProjectType)]));
 
         // Hangfire requires a database (JOBS-03)
         if (BackgroundJobs == BackgroundJobsOption.Hangfire && Database is null)
