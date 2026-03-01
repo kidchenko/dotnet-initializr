@@ -41,9 +41,9 @@ Requirements for v1.2 Infrastructure, UX & Polish. Each maps to roadmap phases.
 
 ### URL Serialization
 
-- [ ] **URL-01**: All new v1.2 options (logging, docs, jobs, resilience) are serialized in shareable URL query parameters
-- [ ] **URL-02**: Existing v1.0 and v1.1 URLs continue to work without breaking (backward compatibility)
-- [ ] **URL-03**: Pre-existing `IncludeResilience` URL serialization gap from v1.1 is closed
+- [x] **URL-01**: All new v1.2 options (logging, docs, jobs, resilience) are serialized in shareable URL query parameters
+- [x] **URL-02**: Existing v1.0 and v1.1 URLs continue to work without breaking (backward compatibility)
+- [x] **URL-03**: Pre-existing `IncludeResilience` URL serialization gap from v1.1 is closed
 
 ### Code Preview
 
@@ -109,9 +109,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | JOBS-04 | Phase 9 | Complete |
 | JOBS-05 | Phase 9 | Complete |
 | JOBS-06 | Phase 9 | Complete |
-| URL-01 | Phase 10 | Pending |
-| URL-02 | Phase 10 | Pending |
-| URL-03 | Phase 10 | Pending |
+| URL-01 | Phase 10 | Complete |
+| URL-02 | Phase 10 | Complete |
+| URL-03 | Phase 10 | Complete |
 | PREV-01 | Phase 11 | Pending |
 | PREV-02 | Phase 11 | Pending |
 | PREV-03 | Phase 11 | Pending |

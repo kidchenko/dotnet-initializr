@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Infrastructure, UX & Polish
 status: unknown
-last_updated: "2026-03-01T06:17:36.916Z"
+last_updated: "2026-03-01T06:21:22.941Z"
 progress:
   total_phases: 3
   completed_phases: 3
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can generate a fully configured .NET project with their chosen architecture, ORM, auth, observability, and testing setup in seconds — no manual scaffolding.
-**Current focus:** Phase 9 — Background Jobs (Plan 02 complete)
+**Current focus:** Phase 10 — URL Serialization (Plan 01 complete)
 
 ## Current Position
 
-Phase: 9 of 11 (Background Jobs) — IN PROGRESS
-Plan: 2 of 2 complete (09-02)
-Status: Phase 9 Plan 02 complete — Background Jobs radio group UI in ConfigurationForm.razor + comprehensive JOBS-01 through JOBS-06 tests (206 total tests)
-Last activity: 2026-03-01 — Phase 9 Plan 02 complete (Background Jobs UI, reset logic, 52 new tests, 206 total)
+Phase: 10 of 11 (URL Serialization) — IN PROGRESS
+Plan: 1 of 1 complete (10-01)
+Status: Phase 10 Plan 01 complete — docs and jobs query params wired in Home.razor + 14 round-trip/backward-compat tests (220 total tests)
+Last activity: 2026-03-01 — Phase 10 Plan 01 complete (URL serialization for docs/jobs params, 14 new tests, 220 total)
 
-Progress: [████░░░░░░] 50%
+Progress: [█████░░░░░] 60%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [████░░░░░░] 50%
 | 7. NLog and Polly | 3/3 | Complete |
 | 8. OpenAPI Documentation | 2/2 | Complete |
 | 9. Background Jobs | 2/2 | Complete |
+| 10. URL Serialization | 1/1 | Complete |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Key decisions carried forward to v1.2:
 - Console project type excluded from all background job emission
 - [Phase 09-background-jobs]: Background Jobs section visible for WebApi, MinimalApi, WorkerService (not Console only like OpenAPI); Hangfire conditional on Config.Database.HasValue
 - [Phase 09-background-jobs]: Reset guard in OnOrmChanged checks Hangfire AND Database is null after ORM change nulls DB — two-step sequence
+- [Phase 10-url-serialization]: docs and jobs URL params added to Home.razor; URL serialize convention: None enum values → null (omitted), non-None → .ToString().ToLower(); variable names docsUi/jobsOpt avoid shadowing dict key strings
 
 ### Pending Todos
 
@@ -88,5 +90,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 9 Plan 02 complete — Background Jobs UI (ConfigurationForm.razor radio group + reset logic) and comprehensive tests JOBS-01 through JOBS-06; 206 total tests, 0 failures
+Stopped at: Phase 10 Plan 01 complete — docs and jobs query params in Home.razor + Phase10UrlSerializationTests.cs (14 tests, URL-01/02/03); 220 total tests, 0 failures
 Resume file: None

@@ -34,7 +34,7 @@
 - [x] **Phase 7: NLog and Polly** - Wire NLog logging option and Polly resilience scaffold into the generator
 - [x] **Phase 8: OpenAPI Documentation** - Add the OpenAPI document layer and Scalar/SwaggerUI/Redoc UI picker with SDK-version-aware generated code
 - [x] **Phase 9: Background Jobs** - Add IHostedService, Hangfire, and Quartz.NET scaffolding with file tree and Jobs/Workers folder support (completed 2026-03-01)
-- [ ] **Phase 10: URL Serialization** - Serialize all new v1.2 options as query parameters with full backward-compatible parsing
+- [x] **Phase 10: URL Serialization** - Serialize all new v1.2 options as query parameters with full backward-compatible parsing (completed 2026-03-01)
 - [ ] **Phase 11: Code Preview and Responsive Design** - Add code preview modal with highlight.js syntax highlighting and make the UI fully responsive
 
 ## Phase Details
@@ -79,8 +79,8 @@ Plans:
   5. File tree includes a `Jobs/` or `Workers/` folder for all three architecture patterns when any background job option is selected
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 09-01-PLAN.md — Backend generators: BackgroundJobsGenerator.cs, CsprojGenerator packages, ProgramCsGenerator fragments, FileTreeService Jobs/ folder, ProjectGenerationService wiring
-- [ ] 09-02-PLAN.md — UI wiring (ConfigurationForm.razor Background Jobs radio group, reset logic) + comprehensive automated tests
+- [x] 09-01-PLAN.md — Backend generators: BackgroundJobsGenerator.cs, CsprojGenerator packages, ProgramCsGenerator fragments, FileTreeService Jobs/ folder, ProjectGenerationService wiring
+- [x] 09-02-PLAN.md — UI wiring (ConfigurationForm.razor Background Jobs radio group, reset logic) + comprehensive automated tests
 
 ### Phase 10: URL Serialization
 **Goal**: All v1.2 generator options are serialized in shareable URLs and all existing v1.0/v1.1 URLs continue to resolve correctly
@@ -92,7 +92,7 @@ Plans:
   3. The pre-existing v1.1 gap where `IncludeResilience` was not serialized in `PushStateToUrl()` is closed and covered by the round-trip test
 **Plans:** 1 plan
 Plans:
-- [ ] 10-01-PLAN.md — TDD: URL round-trip tests + Home.razor docs/jobs query param wiring
+- [x] 10-01-PLAN.md — TDD: URL round-trip tests + Home.razor docs/jobs query param wiring
 
 ### Phase 11: Code Preview and Responsive Design
 **Goal**: Users can preview the content of any generated file with syntax highlighting directly in the browser, and the generator UI works correctly on phones and tablets
@@ -123,5 +123,5 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
 | 9. Background Jobs | 2/2 | Complete    | 2026-03-01 | - |
-| 10. URL Serialization | v1.2 | 0/1 | Not started | - |
+| 10. URL Serialization | v1.2 | 1/1 | Complete | 2026-03-01 |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
