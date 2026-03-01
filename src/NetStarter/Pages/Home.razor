@@ -111,6 +111,7 @@
     [SupplyParameterFromQuery(Name = "fv")] public string? FvParam { get; set; }
     [SupplyParameterFromQuery(Name = "mock")] public string? MockParam { get; set; }
     [SupplyParameterFromQuery(Name = "bogus")] public string? BogusParam { get; set; }
+    [SupplyParameterFromQuery(Name = "resil")] public string? ResilParam { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -178,6 +179,8 @@
             _config.IncludeNSubstitute = true;
         if (!string.IsNullOrEmpty(BogusParam) && bool.TryParse(BogusParam, out var bogus) && bogus)
             _config.IncludeBogus = true;
+        if (!string.IsNullOrEmpty(ResilParam) && bool.TryParse(ResilParam, out var resil) && resil)
+            _config.IncludeResilience = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -280,6 +283,7 @@
             ["fv"] = _config.IncludeFluentValidation ? "true" : null,
             ["mock"] = _config.IncludeNSubstitute ? "true" : null,
             ["bogus"] = _config.IncludeBogus ? "true" : null,
+            ["resil"] = _config.IncludeResilience ? "true" : null,
         };
 
         var uri = Nav.GetUriWithQueryParameters(parameters);
