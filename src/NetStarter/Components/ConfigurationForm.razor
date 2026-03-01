@@ -193,6 +193,29 @@
         </div>
     }
 
+    <!-- Section 4d: OpenAPI -->
+    @if (Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+    {
+        <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+            <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                OpenAPI
+            </h3>
+
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">API Documentation</FieldLabel>
+                <RadioGroup TValue="OpenApiUi"
+                            @bind-Value="Config.ApiDocsUi"
+                            @bind-Value:after="NotifyChanged"
+                            Name="apiDocsUi">
+                    <Radio Value="OpenApiUi.None">None</Radio>
+                    <Radio Value="OpenApiUi.Scalar">Scalar</Radio>
+                    <Radio Value="OpenApiUi.SwaggerUI">Swagger UI</Radio>
+                    <Radio Value="OpenApiUi.Redoc">Redoc</Radio>
+                </RadioGroup>
+            </Field>
+        </div>
+    }
+
     <!-- Section 5: Quality -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
         <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
@@ -345,6 +368,11 @@
         if (Config.IncludeResilience && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
         {
             Config.IncludeResilience = false;
+        }
+
+        if (Config.ApiDocsUi != OpenApiUi.None && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+        {
+            Config.ApiDocsUi = OpenApiUi.None;
         }
 
         await NotifyChanged();
