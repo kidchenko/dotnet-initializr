@@ -77,7 +77,10 @@ Plans:
   3. Hangfire selection auto-matches the storage NuGet package to the selected database (PostgreSQL, SQL Server, or InMemory fallback); Hangfire dashboard middleware is generated only for WebApi/MinimalApi projects
   4. Quartz.NET selection generates all three required packages (`Quartz`, `Quartz.Extensions.Hosting`, `Quartz.Extensions.DependencyInjection`) and a sample `IJob` implementation
   5. File tree includes a `Jobs/` or `Workers/` folder for all three architecture patterns when any background job option is selected
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 09-01-PLAN.md — Backend generators: BackgroundJobsGenerator.cs, CsprojGenerator packages, ProgramCsGenerator fragments, FileTreeService Jobs/ folder, ProjectGenerationService wiring
+- [ ] 09-02-PLAN.md — UI wiring (ConfigurationForm.razor Background Jobs radio group, reset logic) + comprehensive automated tests
 
 ### Phase 10: URL Serialization
 **Goal**: All v1.2 generator options are serialized in shareable URLs and all existing v1.0/v1.1 URLs continue to resolve correctly
@@ -116,7 +119,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Auth, Validation, and Testing | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6.1 Validation and URL Persistence Fixes | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
-| 8. OpenAPI Documentation | v1.2 | 2/2 | Complete | 2026-03-01 |
-| 9. Background Jobs | v1.2 | 0/? | Not started | - |
+| 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
+| 9. Background Jobs | v1.2 | 0/2 | Planned | - |
 | 10. URL Serialization | v1.2 | 0/? | Not started | - |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
