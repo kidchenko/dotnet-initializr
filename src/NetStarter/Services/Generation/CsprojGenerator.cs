@@ -185,6 +185,34 @@ public static class CsprojGenerator
                 }
             }
         }
+
+        // Background Jobs packages
+        if (config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            if (config.BackgroundJobs == BackgroundJobsOption.Hangfire && config.Database.HasValue)
+            {
+                packages.Add(("Hangfire", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire")));
+                packages.Add(("Hangfire.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire.AspNetCore")));
+
+                var storagePackage = config.Database switch
+                {
+                    DatabaseOption.PostgreSql => "Hangfire.PostgreSql",
+                    DatabaseOption.SqlServer  => "Hangfire.SqlServer",
+                    DatabaseOption.MySql      => "Hangfire.MySqlStorage",
+                    _                         => null  // SQLite: no official Hangfire storage
+                };
+                if (storagePackage is not null)
+                    packages.Add((storagePackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, storagePackage)));
+            }
+            else if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+            {
+                packages.Add(("Quartz", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz")));
+                packages.Add(("Quartz.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.Hosting")));
+                packages.Add(("Quartz.Extensions.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.DependencyInjection")));
+            }
+            // IHostedService: no NuGet packages needed
+        }
     }
 
     public static string GenerateClassLibrary(ProjectConfiguration config, string projectSuffix, List<string>? packages = null)
