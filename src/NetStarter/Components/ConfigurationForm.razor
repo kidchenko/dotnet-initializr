@@ -216,6 +216,32 @@
         </div>
     }
 
+    <!-- Section 4e: Background Jobs -->
+    @if (Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi or ProjectType.WorkerService)
+    {
+        <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+            <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                Background Jobs
+            </h3>
+
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Background Jobs</FieldLabel>
+                <RadioGroup TValue="BackgroundJobsOption"
+                            @bind-Value="Config.BackgroundJobs"
+                            @bind-Value:after="NotifyChanged"
+                            Name="backgroundJobs">
+                    <Radio Value="BackgroundJobsOption.None">None</Radio>
+                    <Radio Value="BackgroundJobsOption.IHostedService">IHostedService</Radio>
+                    @if (Config.Database.HasValue)
+                    {
+                        <Radio Value="BackgroundJobsOption.Hangfire">Hangfire</Radio>
+                    }
+                    <Radio Value="BackgroundJobsOption.Quartz">Quartz.NET</Radio>
+                </RadioGroup>
+            </Field>
+        </div>
+    }
+
     <!-- Section 5: Quality -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
         <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
@@ -355,6 +381,12 @@
             Config.Auth = AuthOption.None;
         }
 
+        if (Config.BackgroundJobs == BackgroundJobsOption.Hangfire
+            && Config.Database is null)
+        {
+            Config.BackgroundJobs = BackgroundJobsOption.None;
+        }
+
         await NotifyChanged();
     }
 
@@ -373,6 +405,12 @@
         if (Config.ApiDocsUi != OpenApiUi.None && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
         {
             Config.ApiDocsUi = OpenApiUi.None;
+        }
+
+        if (Config.BackgroundJobs != BackgroundJobsOption.None
+            && Config.ProjectType == ProjectType.Console)
+        {
+            Config.BackgroundJobs = BackgroundJobsOption.None;
         }
 
         await NotifyChanged();
