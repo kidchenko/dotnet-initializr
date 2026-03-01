@@ -33,6 +33,20 @@ public class ProjectGenerationService
             files[$"{root}/{dapperPath}"] = DapperGenerator.Generate(config);
         }
 
+        // 3.5. Background job sample class
+        if (config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            var jobPath = BackgroundJobsGenerator.GetFilePath(config);
+            files[$"{root}/{jobPath}"] = config.BackgroundJobs switch
+            {
+                BackgroundJobsOption.IHostedService => BackgroundJobsGenerator.GenerateSampleBackgroundService(config),
+                BackgroundJobsOption.Hangfire       => BackgroundJobsGenerator.GenerateSampleHangfireJob(config),
+                BackgroundJobsOption.Quartz         => BackgroundJobsGenerator.GenerateSampleQuartzJob(config),
+                _                                   => string.Empty
+            };
+        }
+
         // 4. Aspire projects (AppHost and ServiceDefaults)
         if (config.IncludeDotNetAspire)
         {

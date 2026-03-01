@@ -175,6 +175,23 @@ public class FileTreeService
             srcFolder.Children.Add(serviceDefaultsProject);
         }
 
+        // Background Jobs folder
+        if (config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            var jobsFolder = new FileTreeNode { Name = "Jobs", IsFolder = true };
+            var sampleFileName = config.BackgroundJobs switch
+            {
+                BackgroundJobsOption.IHostedService => "SampleBackgroundService.cs",
+                BackgroundJobsOption.Hangfire       => "SampleHangfireJob.cs",
+                BackgroundJobsOption.Quartz         => "SampleQuartzJob.cs",
+                _                                   => null
+            };
+            if (sampleFileName is not null)
+                jobsFolder.Children.Add(new FileTreeNode { Name = sampleFileName, IsFolder = false });
+            apiProject.Children.Add(jobsFolder);
+        }
+
         srcFolder.Children.Add(apiProject);
     }
 
@@ -238,6 +255,23 @@ public class FileTreeService
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults.csproj", IsFolder = false });
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = "Extensions.cs", IsFolder = false });
             srcFolder.Children.Add(serviceDefaultsProject);
+        }
+
+        // Background Jobs folder
+        if (config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            var jobsFolder = new FileTreeNode { Name = "Jobs", IsFolder = true };
+            var sampleFileName = config.BackgroundJobs switch
+            {
+                BackgroundJobsOption.IHostedService => "SampleBackgroundService.cs",
+                BackgroundJobsOption.Hangfire       => "SampleHangfireJob.cs",
+                BackgroundJobsOption.Quartz         => "SampleQuartzJob.cs",
+                _                                   => null
+            };
+            if (sampleFileName is not null)
+                jobsFolder.Children.Add(new FileTreeNode { Name = sampleFileName, IsFolder = false });
+            mainProject.Children.Add(jobsFolder);
         }
 
         srcFolder.Children.Add(mainProject);
@@ -315,6 +349,23 @@ public class FileTreeService
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults.csproj", IsFolder = false });
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = "Extensions.cs", IsFolder = false });
             srcFolder.Children.Add(serviceDefaultsProject);
+        }
+
+        // Background Jobs folder
+        if (config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            var jobsFolder = new FileTreeNode { Name = "Jobs", IsFolder = true };
+            var sampleFileName = config.BackgroundJobs switch
+            {
+                BackgroundJobsOption.IHostedService => "SampleBackgroundService.cs",
+                BackgroundJobsOption.Hangfire       => "SampleHangfireJob.cs",
+                BackgroundJobsOption.Quartz         => "SampleQuartzJob.cs",
+                _                                   => null
+            };
+            if (sampleFileName is not null)
+                jobsFolder.Children.Add(new FileTreeNode { Name = sampleFileName, IsFolder = false });
+            mainProject.Children.Add(jobsFolder);
         }
 
         srcFolder.Children.Add(mainProject);

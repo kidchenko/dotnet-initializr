@@ -107,6 +107,9 @@ public static class ProgramCsGenerator
         if (config.Logging == LoggingOption.NLog)
             sb.Append("using NLog.Extensions.Hosting;\n");
 
+        if (config.BackgroundJobs == BackgroundJobsOption.Hangfire)
+            sb.Append("using Hangfire;\n");
+
         sb.Append($"using {config.Namespace};\n");
         sb.Append("\n");
         sb.Append("var builder = Host.CreateApplicationBuilder(args);\n");
@@ -118,6 +121,7 @@ public static class ProgramCsGenerator
         }
 
         sb.Append("builder.Services.AddHostedService<Worker>();\n");
+        AddBackgroundJobsServicesFragment(config, sb);
         sb.Append("\n");
         sb.Append("var host = builder.Build();\n");
         sb.Append("host.Run();\n");
@@ -143,6 +147,7 @@ public static class ProgramCsGenerator
         AddResilienceFragment(config, sb);
         AddControllersFragment(config, sb);
         AddOpenApiServicesFragment(config, sb);
+        AddBackgroundJobsServicesFragment(config, sb);
         sb.Append("\n");
         sb.Append("var app = builder.Build();\n");
         sb.Append("\n");
@@ -226,6 +231,12 @@ public static class ProgramCsGenerator
         if (config.ApiDocsUi == OpenApiUi.Scalar)
         {
             sb.Append("using Scalar.AspNetCore;\n");
+            hasUsings = true;
+        }
+
+        if (config.BackgroundJobs == BackgroundJobsOption.Hangfire)
+        {
+            sb.Append("using Hangfire;\n");
             hasUsings = true;
         }
 
@@ -392,6 +403,48 @@ public static class ProgramCsGenerator
             sb.Append("builder.Services.AddOpenApi();\n");
     }
 
+    private static void AddBackgroundJobsServicesFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.BackgroundJobs == BackgroundJobsOption.None || config.ProjectType == ProjectType.Console) return;
+
+        switch (config.BackgroundJobs)
+        {
+            case BackgroundJobsOption.IHostedService:
+                sb.Append("builder.Services.AddHostedService<SampleBackgroundService>();\n");
+                break;
+            case BackgroundJobsOption.Hangfire when config.Database.HasValue:
+                var storageMethod = config.Database switch
+                {
+                    DatabaseOption.PostgreSql => "UsePostgreSqlStorage",
+                    DatabaseOption.SqlServer  => "UseSqlServerStorage",
+                    DatabaseOption.MySql      => "UseMySqlStorage",
+                    _                         => "UseMemoryStorage",
+                };
+                sb.Append("builder.Services.AddHangfire(config => config\n");
+                sb.Append("    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)\n");
+                sb.Append("    .UseSimpleAssemblyNameTypeSerializer()\n");
+                sb.Append("    .UseRecommendedSerializerSettings()\n");
+                sb.Append($"    .{storageMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n");
+                sb.Append("builder.Services.AddHangfireServer();\n");
+                break;
+            case BackgroundJobsOption.Quartz:
+                sb.Append("builder.Services.AddQuartz(q => { q.UseMicrosoftDependencyInjectionJobFactory(); });\n");
+                sb.Append("builder.Services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);\n");
+                break;
+        }
+    }
+
+    private static void AddHangfireDashboardFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.BackgroundJobs != BackgroundJobsOption.Hangfire) return;
+        if (config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi)) return;
+
+        sb.Append("if (app.Environment.IsDevelopment())\n");
+        sb.Append("{\n");
+        sb.Append("    app.UseHangfireDashboard(\"/hangfire\");\n");
+        sb.Append("}\n");
+    }
+
     private static void AddOpenApiMiddlewareFragment(ProjectConfiguration config, StringBuilder sb)
     {
         if (config.ApiDocsUi == OpenApiUi.None) return;
@@ -445,6 +498,7 @@ public static class ProgramCsGenerator
         }
 
         AddOpenApiMiddlewareFragment(config, sb);
+        AddHangfireDashboardFragment(config, sb);
 
         if (config.IncludeHealthChecks)
             sb.Append("app.MapHealthChecks(\"/health\");\n");
