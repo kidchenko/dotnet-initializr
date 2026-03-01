@@ -35,7 +35,7 @@
 - [x] **Phase 8: OpenAPI Documentation** - Add the OpenAPI document layer and Scalar/SwaggerUI/Redoc UI picker with SDK-version-aware generated code
 - [x] **Phase 9: Background Jobs** - Add IHostedService, Hangfire, and Quartz.NET scaffolding with file tree and Jobs/Workers folder support (completed 2026-03-01)
 - [x] **Phase 10: URL Serialization** - Serialize all new v1.2 options as query parameters with full backward-compatible parsing (completed 2026-03-01)
-- [ ] **Phase 11: Code Preview and Responsive Design** - Add code preview modal with highlight.js syntax highlighting and make the UI fully responsive
+- [x] **Phase 11: Code Preview and Responsive Design** - Add code preview modal with highlight.js syntax highlighting and make the UI fully responsive (completed 2026-03-01)
 
 ## Phase Details
 
@@ -103,7 +103,7 @@ Plans:
   2. highlight.js is loaded as a local JS module via dynamic `import()` on first modal open — it is not loaded in `index.html` on page load; the component implements `IAsyncDisposable`
   3. The generator UI displays in a single-column stacked layout on viewports below 768px, and all form controls have a minimum 44px touch target
   4. The code preview modal is scrollable and correctly sized on mobile viewports; the responsive layout is verified against a production build on GitHub Pages (not localhost)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 11-01-PLAN.md — Code preview modal with highlight.js, file tree click handlers, folder toggle, Home.razor wiring
 - [x] 11-02-PLAN.md — Responsive layout CSS, 44px touch targets, Phase 11 automated tests
@@ -127,4 +127,4 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
 | 9. Background Jobs | 2/2 | Complete    | 2026-03-01 | - |
 | 10. URL Serialization | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
-| 11. Code Preview and Responsive Design | 1/2 | In Progress|  | - |
+| 11. Code Preview and Responsive Design | 2/2 | Complete   | 2026-03-01 | - |

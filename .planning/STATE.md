@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Infrastructure, UX & Polish
 status: unknown
-last_updated: "2026-03-01T18:01:26.337Z"
+last_updated: "2026-03-01T19:02:21Z"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can generate a fully configured .NET project with their chosen architecture, ORM, auth, observability, and testing setup in seconds — no manual scaffolding.
-**Current focus:** Phase 11 — Code Preview and Responsive Design (Plan 02 complete)
+**Current focus:** Phase 11 — Code Preview and Responsive Design (Plan 01 complete)
 
 ## Current Position
 
-Phase: 11 of 11 (Code Preview and Responsive Design) — COMPLETE
-Plan: 2 of 2 complete (11-02)
-Status: Phase 11 Plan 02 complete — responsive touch targets CSS + 15 Phase 11 tests (235 total tests)
-Last activity: 2026-03-01 — Phase 11 Plan 02 complete (responsive CSS RESP-01/02/04, 15 new tests, 235 total)
+Phase: 11 of 11 (Code Preview and Responsive Design) — IN PROGRESS
+Plan: 1 of 2 complete (11-01)
+Status: Phase 11 Plan 01 complete — CodePreviewModal with lazy highlight.js, FileTreePreview click handlers, Home.razor modal wiring (235 total tests)
+Last activity: 2026-03-01 — Phase 11 Plan 01 complete (code preview modal, file tree click handlers, PREV-01/02/03/04/RESP-03)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -53,7 +53,7 @@ Progress: [██████████] 100%
 | 8. OpenAPI Documentation | 2/2 | Complete |
 | 9. Background Jobs | 2/2 | Complete |
 | 10. URL Serialization | 1/1 | Complete |
-| 11. Code Preview and Responsive Design | 2/2 | Complete |
+| 11. Code Preview and Responsive Design | 1/2 | In Progress |
 
 ## Accumulated Context
 
@@ -81,6 +81,9 @@ Key decisions carried forward to v1.2:
 - [Phase 10-url-serialization]: docs and jobs URL params added to Home.razor; URL serialize convention: None enum values → null (omitted), non-None → .ToString().ToLower(); variable names docsUi/jobsOpt avoid shadowing dict key strings
 - [Phase 11-responsive]: RESP-04 satisfied by design — Tailwind Play CDN generates CSS at runtime, no purge; touch target CSS uses ::deep + @media (max-width: 768px) in scoped ConfigurationForm.razor style block
 - [Phase 11-responsive]: overflow-y: unset added to .panel-left mobile block for natural form scrolling on phones
+- [Phase 11-code-preview]: Collocated .razor.js served at /Components/ComponentName.razor.js in standalone Blazor WASM (not _content/AssemblyName/...)
+- [Phase 11-code-preview]: Modal always in DOM (opacity/pointer-events) not @if rendered — preserves IJSObjectReference across opens
+- [Phase 11-code-preview]: _generatedFiles cache set to null in OnConfigChanged before PushStateToUrl() to invalidate on config change
 
 ### Pending Todos
 
@@ -93,5 +96,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 11 Plan 02 complete — responsive touch targets CSS (RESP-01/02/04) + Phase11CodePreviewResponsiveTests.cs (15 tests, PREV-01/03); 235 total tests, 0 failures
+Stopped at: Phase 11 Plan 01 complete — CodePreviewModal.razor + CodePreviewModal.razor.js (lazy highlight.js ESM) + FileTreePreview click handlers + Home.razor modal wiring; 235 total tests, 0 failures
 Resume file: None

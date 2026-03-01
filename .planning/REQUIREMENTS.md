@@ -47,16 +47,16 @@ Requirements for v1.2 Infrastructure, UX & Polish. Each maps to roadmap phases.
 
 ### Code Preview
 
-- [ ] **PREV-01**: User can click any file in the file tree to see its generated content in a modal
-- [ ] **PREV-02**: Code preview modal displays syntax-highlighted code using highlight.js
-- [ ] **PREV-03**: Code preview modal supports C#, XML, JSON, YAML, Dockerfile, and Bash syntax highlighting
-- [ ] **PREV-04**: highlight.js is loaded lazily (only on modal open, not on page load) via JS module import
+- [x] **PREV-01**: User can click any file in the file tree to see its generated content in a modal
+- [x] **PREV-02**: Code preview modal displays syntax-highlighted code using highlight.js
+- [x] **PREV-03**: Code preview modal supports C#, XML, JSON, YAML, Dockerfile, and Bash syntax highlighting
+- [x] **PREV-04**: highlight.js is loaded lazily (only on modal open, not on page load) via JS module import
 
 ### Responsive Design
 
 - [x] **RESP-01**: Generator UI displays in a single-column stacked layout on phone-width viewports (below 768px)
 - [x] **RESP-02**: All form controls have a minimum 44px touch target for mobile usability
-- [ ] **RESP-03**: Code preview modal is scrollable and properly sized on mobile viewports
+- [x] **RESP-03**: Code preview modal is scrollable and properly sized on mobile viewports
 - [x] **RESP-04**: Responsive layout works correctly in production builds deployed to GitHub Pages (Tailwind purge safe)
 
 ## Future Requirements
@@ -112,13 +112,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | URL-01 | Phase 10 | Complete |
 | URL-02 | Phase 10 | Complete |
 | URL-03 | Phase 10 | Complete |
-| PREV-01 | Phase 11 | Pending |
-| PREV-02 | Phase 11 | Pending |
-| PREV-03 | Phase 11 | Pending |
-| PREV-04 | Phase 11 | Pending |
+| PREV-01 | Phase 11 | Complete |
+| PREV-02 | Phase 11 | Complete |
+| PREV-03 | Phase 11 | Complete |
+| PREV-04 | Phase 11 | Complete |
 | RESP-01 | Phase 11 | Complete |
 | RESP-02 | Phase 11 | Complete |
-| RESP-03 | Phase 11 | Pending |
+| RESP-03 | Phase 11 | Complete |
 | RESP-04 | Phase 11 | Complete |
 
 **Coverage:**
