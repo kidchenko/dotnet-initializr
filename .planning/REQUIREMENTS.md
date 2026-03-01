@@ -33,11 +33,11 @@ Requirements for v1.2 Infrastructure, UX & Polish. Each maps to roadmap phases.
 ### Background Jobs
 
 - [ ] **JOBS-01**: User can select a background job option (None, IHostedService, Hangfire, Quartz.NET) in the generator
-- [ ] **JOBS-02**: Generated project includes a `SampleBackgroundService : BackgroundService` class when IHostedService is selected
-- [ ] **JOBS-03**: Generated project includes Hangfire packages with storage auto-matched to database choice (PostgreSQL, SQL Server, or InMemory fallback)
-- [ ] **JOBS-04**: Generated project includes Hangfire dashboard middleware for WebApi/MinimalApi project types
-- [ ] **JOBS-05**: Generated project includes Quartz packages (`Quartz`, `Quartz.Extensions.Hosting`, `Quartz.Extensions.DependencyInjection`) with a sample `IJob` implementation
-- [ ] **JOBS-06**: Generated file tree includes `Jobs/` or `Workers/` folder for all three architecture patterns when background jobs are selected
+- [x] **JOBS-02**: Generated project includes a `SampleBackgroundService : BackgroundService` class when IHostedService is selected
+- [x] **JOBS-03**: Generated project includes Hangfire packages with storage auto-matched to database choice (PostgreSQL, SQL Server, or InMemory fallback)
+- [x] **JOBS-04**: Generated project includes Hangfire dashboard middleware for WebApi/MinimalApi project types
+- [x] **JOBS-05**: Generated project includes Quartz packages (`Quartz`, `Quartz.Extensions.Hosting`, `Quartz.Extensions.DependencyInjection`) with a sample `IJob` implementation
+- [x] **JOBS-06**: Generated file tree includes `Jobs/` or `Workers/` folder for all three architecture patterns when background jobs are selected
 
 ### URL Serialization
 
@@ -104,11 +104,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-05 | Phase 8 | Complete |
 | DOCS-06 | Phase 8 | Complete |
 | JOBS-01 | Phase 9 | Pending |
-| JOBS-02 | Phase 9 | Pending |
-| JOBS-03 | Phase 9 | Pending |
-| JOBS-04 | Phase 9 | Pending |
-| JOBS-05 | Phase 9 | Pending |
-| JOBS-06 | Phase 9 | Pending |
+| JOBS-02 | Phase 9 | Complete |
+| JOBS-03 | Phase 9 | Complete |
+| JOBS-04 | Phase 9 | Complete |
+| JOBS-05 | Phase 9 | Complete |
+| JOBS-06 | Phase 9 | Complete |
 | URL-01 | Phase 10 | Pending |
 | URL-02 | Phase 10 | Pending |
 | URL-03 | Phase 10 | Pending |
