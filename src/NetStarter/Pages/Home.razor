@@ -74,8 +74,12 @@
             <h2>Project Structure</h2>
             <button class="sheet-close" @onclick="CloseSheet">&times;</button>
         </div>
-        <FileTreePreview Config="@_config" />
+        <FileTreePreview Config="@_config" OnFileSelected="OnFileSelected" />
     </div>
+
+    <CodePreviewModal @bind-IsOpen="_showCodePreview"
+                      FilePath="@_selectedFilePath"
+                      FileContent="@_selectedFileContent" />
 
     <button class="sheet-toggle" @onclick="OpenSheet">
         <Icon Name="IconName.FolderOpen" />
@@ -90,6 +94,12 @@
     private string? _validationError;
     private bool _sheetOpen;
     private bool _isDarkMode = true;
+
+    // Code preview modal state
+    private Dictionary<string, string>? _generatedFiles;
+    private bool _showCodePreview;
+    private string _selectedFilePath = "";
+    private string _selectedFileContent = "";
 
     [SupplyParameterFromQuery(Name = "name")] public string? NameParam { get; set; }
     [SupplyParameterFromQuery(Name = "ns")] public string? NsParam { get; set; }
@@ -201,8 +211,26 @@
     private void OpenSheet() => _sheetOpen = true;
     private void CloseSheet() => _sheetOpen = false;
 
+    private Dictionary<string, string> GetGeneratedFiles()
+    {
+        return _generatedFiles ??= GenerationService.Generate(_config);
+    }
+
+    private void OnFileSelected(string treePath)
+    {
+        var files = GetGeneratedFiles();
+        var dictKey = treePath.TrimStart('/');
+        if (files.TryGetValue(dictKey, out var content))
+        {
+            _selectedFilePath = dictKey;
+            _selectedFileContent = content;
+            _showCodePreview = true;
+        }
+    }
+
     private void OnConfigChanged()
     {
+        _generatedFiles = null; // Invalidate cache when config changes
         PushStateToUrl();
         StateHasChanged(); // Re-render FileTreePreview with updated config
     }

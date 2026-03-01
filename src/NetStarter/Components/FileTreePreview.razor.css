@@ -19,6 +19,21 @@
     background-color: rgba(148, 163, 184, 0.1);
 }
 
+/* Clickable file nodes */
+.file-clickable {
+    cursor: pointer;
+}
+
+.file-clickable:hover {
+    background-color: rgba(148, 163, 184, 0.15);
+    cursor: pointer;
+}
+
+/* Clickable folder toggle nodes */
+.folder-toggle {
+    cursor: pointer;
+}
+
 .node-icon {
     display: flex;
     align-items: center;

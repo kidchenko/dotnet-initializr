@@ -7,19 +7,32 @@
         var isAdded = _addedPaths.Contains(fullPath);
         var cssClass = isAdded ? "file-tree-node file-tree-node-added" : "file-tree-node";
 
-        <div class="@cssClass" style="padding-left: @($"{depth * 1.25}rem")">
-            <span class="node-icon">
-                @if (node.IsFolder)
-                {
-                    <i class="fa-solid fa-folder-open"></i>
-                }
-                else
-                {
-                    <i class="fa-regular fa-file-code"></i>
-                }
-            </span>
-            <span class="node-name">@node.Name</span>
-        </div>
+        if (node.IsFolder)
+        {
+            <div class="@cssClass folder-toggle" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath" @onclick="() => { node.IsExpanded = !node.IsExpanded; StateHasChanged(); }">
+                <span class="node-icon">
+                    @if (node.IsExpanded)
+                    {
+                        <i class="fa-solid fa-folder-open"></i>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-folder"></i>
+                    }
+                </span>
+                <span class="node-name">@node.Name</span>
+            </div>
+        }
+        else
+        {
+            var (iconClass, iconStyle) = GetFileIcon(node.Name);
+            <div class="@cssClass file-clickable" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath" @onclick="async () => await OnFileSelected.InvokeAsync(fullPath)">
+                <span class="node-icon">
+                    <i class="@iconClass" style="@iconStyle"></i>
+                </span>
+                <span class="node-name">@node.Name</span>
+            </div>
+        }
 
         @if (node.IsFolder && node.IsExpanded)
         {
@@ -34,7 +47,7 @@
     {
         var fullPath = parentPath + "/" + node.Name;
 
-        <div class="file-tree-node file-tree-node-removed" style="padding-left: @($"{depth * 1.25}rem")">
+        <div class="file-tree-node file-tree-node-removed" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath">
             <span class="node-icon">
                 @if (node.IsFolder)
                 {
@@ -71,6 +84,7 @@
 
 @code {
     [Parameter] public ProjectConfiguration Config { get; set; } = new();
+    [Parameter] public EventCallback<string> OnFileSelected { get; set; }
 
     private List<FileTreeNode> _currentTree = new();
     private HashSet<string> _previousPaths = new();
@@ -151,5 +165,25 @@
             }
         }
         return result;
+    }
+
+    private static (string iconClass, string iconStyle) GetFileIcon(string fileName)
+    {
+        // Check filename first (no extension)
+        if (fileName == "Dockerfile")
+            return ("fa-brands fa-docker", "color: #2496ed;");
+
+        var ext = System.IO.Path.GetExtension(fileName).ToLower();
+        return ext switch
+        {
+            ".cs" => ("fa-solid fa-code", "color: #68d391;"),
+            ".json" => ("fa-solid fa-code", "color: #f6e05e;"),
+            ".xml" or ".csproj" or ".slnx" => ("fa-solid fa-code", "color: #ed8936;"),
+            ".yml" or ".yaml" => ("fa-solid fa-file-lines", "color: #a0aec0;"),
+            ".md" => ("fa-solid fa-file-lines", "color: #90cdf4;"),
+            ".sh" => ("fa-regular fa-file-code", "color: #a0aec0;"),
+            ".gitignore" or ".editorconfig" => ("fa-solid fa-gear", "color: #a0aec0;"),
+            _ => ("fa-regular fa-file-code", "")
+        };
     }
 }
