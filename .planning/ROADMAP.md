@@ -90,7 +90,7 @@ Plans:
   1. A URL containing `logging`, `docs`, `jobs`, and `resilience` query parameters fully restores those configuration values when visited; a round-trip test asserts serialize → deserialize → equality for all non-default config fields
   2. All existing v1.0 and v1.1 URLs (including `obs=serilog` and all v1.1 params) continue to work without producing a broken or default-reset configuration
   3. The pre-existing v1.1 gap where `IncludeResilience` was not serialized in `PushStateToUrl()` is closed and covered by the round-trip test
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [x] 10-01-PLAN.md — TDD: URL round-trip tests + Home.razor docs/jobs query param wiring
 
@@ -103,7 +103,10 @@ Plans:
   2. highlight.js is loaded as a local JS module via dynamic `import()` on first modal open — it is not loaded in `index.html` on page load; the component implements `IAsyncDisposable`
   3. The generator UI displays in a single-column stacked layout on viewports below 768px, and all form controls have a minimum 44px touch target
   4. The code preview modal is scrollable and correctly sized on mobile viewports; the responsive layout is verified against a production build on GitHub Pages (not localhost)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — Code preview modal with highlight.js, file tree click handlers, folder toggle, Home.razor wiring
+- [ ] 11-02-PLAN.md — Responsive layout CSS, 44px touch targets, Phase 11 automated tests
 
 ## Progress
 
@@ -123,5 +126,5 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
 | 9. Background Jobs | 2/2 | Complete    | 2026-03-01 | - |
-| 10. URL Serialization | v1.2 | 1/1 | Complete | 2026-03-01 |
-| 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
+| 10. URL Serialization | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
+| 11. Code Preview and Responsive Design | v1.2 | 0/2 | Not started | - |
