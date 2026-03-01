@@ -149,6 +149,42 @@ public static class CsprojGenerator
             packages.Add(("FluentValidation", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation")));
             packages.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
         }
+
+        // OpenAPI Documentation packages
+        if (config.ApiDocsUi != OpenApiUi.None && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            var isNet8SwaggerUi = config.ApiDocsUi == OpenApiUi.SwaggerUI
+                                  && config.SdkVersion == DotNetSdkVersion.Net8;
+
+            if (isNet8SwaggerUi)
+            {
+                // .NET 8 SwaggerUI: classic Swashbuckle — no Microsoft.AspNetCore.OpenApi
+                packages.Add(("Swashbuckle.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Swashbuckle.AspNetCore")));
+            }
+            else
+            {
+                // All other combos use Microsoft.AspNetCore.OpenApi
+                packages.Add(("Microsoft.AspNetCore.OpenApi", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.OpenApi")));
+
+                switch (config.ApiDocsUi)
+                {
+                    case OpenApiUi.Scalar:
+                        packages.Add(("Scalar.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Scalar.AspNetCore")));
+                        break;
+                    case OpenApiUi.SwaggerUI:
+                        // .NET 9/10: UI-only sub-package + Microsoft.OpenApi pin
+                        packages.Add(("Swashbuckle.AspNetCore.SwaggerUI", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Swashbuckle.AspNetCore.SwaggerUI")));
+                        packages.Add(("Microsoft.OpenApi", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.OpenApi")));
+                        break;
+                    case OpenApiUi.Redoc:
+                        packages.Add(("Swashbuckle.AspNetCore.ReDoc", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Swashbuckle.AspNetCore.ReDoc")));
+                        // Microsoft.OpenApi pin only on .NET 9/10
+                        if (config.SdkVersion != DotNetSdkVersion.Net8)
+                            packages.Add(("Microsoft.OpenApi", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.OpenApi")));
+                        break;
+                }
+            }
+        }
     }
 
     public static string GenerateClassLibrary(ProjectConfiguration config, string projectSuffix, List<string>? packages = null)

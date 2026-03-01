@@ -142,6 +142,7 @@ public static class ProgramCsGenerator
         AddFluentValidationFragment(config, sb);
         AddResilienceFragment(config, sb);
         AddControllersFragment(config, sb);
+        AddOpenApiServicesFragment(config, sb);
         sb.Append("\n");
         sb.Append("var app = builder.Build();\n");
         sb.Append("\n");
@@ -219,6 +220,12 @@ public static class ProgramCsGenerator
         if (config.IncludeFluentValidation)
         {
             sb.Append($"using FluentValidation;\n");
+            hasUsings = true;
+        }
+
+        if (config.ApiDocsUi == OpenApiUi.Scalar)
+        {
+            sb.Append("using Scalar.AspNetCore;\n");
             hasUsings = true;
         }
 
@@ -371,6 +378,62 @@ public static class ProgramCsGenerator
             sb.Append("builder.Services.AddEndpointsApiExplorer();\n");
     }
 
+    private static void AddOpenApiServicesFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.ApiDocsUi == OpenApiUi.None) return;
+        if (config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi)) return;
+
+        var isNet8SwaggerUi = config.ApiDocsUi == OpenApiUi.SwaggerUI
+                              && config.SdkVersion == DotNetSdkVersion.Net8;
+
+        if (isNet8SwaggerUi)
+            sb.Append("builder.Services.AddSwaggerGen();\n");
+        else
+            sb.Append("builder.Services.AddOpenApi();\n");
+    }
+
+    private static void AddOpenApiMiddlewareFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.ApiDocsUi == OpenApiUi.None) return;
+        if (config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi)) return;
+
+        var isNet8SwaggerUi = config.ApiDocsUi == OpenApiUi.SwaggerUI
+                              && config.SdkVersion == DotNetSdkVersion.Net8;
+
+        sb.Append("if (app.Environment.IsDevelopment())\n");
+        sb.Append("{\n");
+
+        if (isNet8SwaggerUi)
+        {
+            sb.Append("    app.UseSwagger();\n");
+            sb.Append("    app.UseSwaggerUI();\n");
+        }
+        else
+        {
+            sb.Append("    app.MapOpenApi();\n");
+            switch (config.ApiDocsUi)
+            {
+                case OpenApiUi.Scalar:
+                    sb.Append("    app.MapScalarApiReference();\n");
+                    break;
+                case OpenApiUi.SwaggerUI:
+                    sb.Append("    app.UseSwaggerUI(options =>\n");
+                    sb.Append("    {\n");
+                    sb.Append("        options.SwaggerEndpoint(\"/openapi/v1.json\", \"v1\");\n");
+                    sb.Append("    });\n");
+                    break;
+                case OpenApiUi.Redoc:
+                    sb.Append("    app.UseReDoc(options =>\n");
+                    sb.Append("    {\n");
+                    sb.Append("        options.SpecUrl(\"/openapi/v1.json\");\n");
+                    sb.Append("    });\n");
+                    break;
+            }
+        }
+
+        sb.Append("}\n");
+    }
+
     private static void AddMiddlewareFragment(ProjectConfiguration config, StringBuilder sb)
     {
         var middlewareStart = sb.Length;
@@ -380,6 +443,8 @@ public static class ProgramCsGenerator
             sb.Append("app.UseAuthentication();\n");
             sb.Append("app.UseAuthorization();\n");
         }
+
+        AddOpenApiMiddlewareFragment(config, sb);
 
         if (config.IncludeHealthChecks)
             sb.Append("app.MapHealthChecks(\"/health\");\n");

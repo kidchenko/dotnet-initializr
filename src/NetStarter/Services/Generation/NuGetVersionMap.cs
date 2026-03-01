@@ -220,6 +220,24 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "2.*",
             [DotNetSdkVersion.Net10] = "2.*",
         },
+        ["Swashbuckle.AspNetCore.SwaggerUI"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "10.*",
+            [DotNetSdkVersion.Net9] = "10.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Swashbuckle.AspNetCore.ReDoc"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "10.*",
+            [DotNetSdkVersion.Net9] = "10.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
+        ["Microsoft.OpenApi"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "2.*",
+            [DotNetSdkVersion.Net9] = "2.*",
+            [DotNetSdkVersion.Net10] = "2.*",
+        },
         ["Serilog.Sinks.File"] = new()
         {
             [DotNetSdkVersion.Net8] = "7.*",
