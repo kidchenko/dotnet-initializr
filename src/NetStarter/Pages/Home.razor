@@ -112,6 +112,8 @@
     [SupplyParameterFromQuery(Name = "mock")] public string? MockParam { get; set; }
     [SupplyParameterFromQuery(Name = "bogus")] public string? BogusParam { get; set; }
     [SupplyParameterFromQuery(Name = "resil")] public string? ResilParam { get; set; }
+    [SupplyParameterFromQuery(Name = "docs")] public string? DocsParam { get; set; }
+    [SupplyParameterFromQuery(Name = "jobs")] public string? JobsParam { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -181,6 +183,10 @@
             _config.IncludeBogus = true;
         if (!string.IsNullOrEmpty(ResilParam) && bool.TryParse(ResilParam, out var resil) && resil)
             _config.IncludeResilience = true;
+        if (!string.IsNullOrEmpty(DocsParam) && Enum.TryParse<OpenApiUi>(DocsParam, true, out var docsUi))
+            _config.ApiDocsUi = docsUi;
+        if (!string.IsNullOrEmpty(JobsParam) && Enum.TryParse<BackgroundJobsOption>(JobsParam, true, out var jobsOpt))
+            _config.BackgroundJobs = jobsOpt;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -284,6 +290,8 @@
             ["mock"] = _config.IncludeNSubstitute ? "true" : null,
             ["bogus"] = _config.IncludeBogus ? "true" : null,
             ["resil"] = _config.IncludeResilience ? "true" : null,
+            ["docs"] = _config.ApiDocsUi != OpenApiUi.None ? _config.ApiDocsUi.ToString().ToLower() : null,
+            ["jobs"] = _config.BackgroundJobs != BackgroundJobsOption.None ? _config.BackgroundJobs.ToString().ToLower() : null,
         };
 
         var uri = Nav.GetUriWithQueryParameters(parameters);
