@@ -416,3 +416,44 @@
         await NotifyChanged();
     }
 }
+
+<style>
+    /* RESP-02: 44px minimum touch targets for mobile */
+    @@media (max-width: 768px) {
+        ::deep .b-radio,
+        ::deep .b-check {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        ::deep .b-radio label,
+        ::deep .b-check label {
+            padding: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        /* Ensure Select dropdowns and text inputs have adequate touch target */
+        ::deep .b-select select,
+        ::deep .b-input input[type="text"] {
+            min-height: 44px;
+        }
+
+        /* Global fallback for form controls using standard class names */
+        ::deep .form-check,
+        ::deep .form-radio,
+        ::deep [class*="b-radio"],
+        ::deep [class*="b-check"] {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        ::deep .form-select,
+        ::deep .form-control,
+        ::deep input[type="text"],
+        ::deep select {
+            min-height: 44px;
+        }
+    }
+</style>
