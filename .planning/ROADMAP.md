@@ -32,7 +32,7 @@
 **Milestone Goal:** Add NLog, Polly, OpenAPI UI picker, and background jobs to the generator; expose all new options in shareable URLs with backward-compatible parsing; add code preview with syntax highlighting; make the UI fully responsive on phones and tablets.
 
 - [x] **Phase 7: NLog and Polly** - Wire NLog logging option and Polly resilience scaffold into the generator
-- [ ] **Phase 8: OpenAPI Documentation** - Add the OpenAPI document layer and Scalar/SwaggerUI/Redoc UI picker with SDK-version-aware generated code
+- [x] **Phase 8: OpenAPI Documentation** - Add the OpenAPI document layer and Scalar/SwaggerUI/Redoc UI picker with SDK-version-aware generated code
 - [ ] **Phase 9: Background Jobs** - Add IHostedService, Hangfire, and Quartz.NET scaffolding with file tree and Jobs/Workers folder support
 - [ ] **Phase 10: URL Serialization** - Serialize all new v1.2 options as query parameters with full backward-compatible parsing
 - [ ] **Phase 11: Code Preview and Responsive Design** - Add code preview modal with highlight.js syntax highlighting and make the UI fully responsive
@@ -62,10 +62,10 @@ Plans:
   2. All three UI choices include `Microsoft.AspNetCore.OpenApi` with `AddOpenApi()` and `MapOpenApi()`; API doc middleware is always inside an `IsDevelopment()` guard
   3. Scalar selection adds `Scalar.AspNetCore 2.*` and `MapScalarApiReference()`; Redoc selection uses `Swashbuckle.AspNetCore.ReDoc` with `app.UseReDoc()` middleware
   4. SwaggerUI on .NET 8 uses full `Swashbuckle.AspNetCore`; SwaggerUI on .NET 9/10 uses the UI-only sub-package and pins `Microsoft.OpenApi < 3.0.0`
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 08-01-PLAN.md — Backend generators: enum rename (OpenApiUi), NuGetVersionMap, CsprojGenerator packages, ProgramCsGenerator fragments, validation
-- [ ] 08-02-PLAN.md — UI wiring (ConfigurationForm.razor OpenAPI radio group) + comprehensive automated tests
+- [x] 08-01-PLAN.md — Backend generators: enum rename (OpenApiUi), NuGetVersionMap, CsprojGenerator packages, ProgramCsGenerator fragments, validation
+- [x] 08-02-PLAN.md — UI wiring (ConfigurationForm.razor OpenAPI radio group) + comprehensive automated tests
 
 ### Phase 9: Background Jobs
 **Goal**: Users can select a background job strategy (IHostedService, Hangfire, Quartz.NET, or None) and the generated project includes the correct scaffold and file tree
@@ -116,7 +116,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Auth, Validation, and Testing | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6.1 Validation and URL Persistence Fixes | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
-| 8. OpenAPI Documentation | 1/2 | In Progress|  | - |
+| 8. OpenAPI Documentation | v1.2 | 2/2 | Complete | 2026-03-01 |
 | 9. Background Jobs | v1.2 | 0/? | Not started | - |
 | 10. URL Serialization | v1.2 | 0/? | Not started | - |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
