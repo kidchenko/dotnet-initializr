@@ -130,6 +130,42 @@ public static class AppSettingsGenerator
             };
         }
 
+        // Conditional: NLog settings
+        if (config.Logging == LoggingOption.NLog)
+        {
+            settings["NLog"] = new Dictionary<string, object>
+            {
+                ["throwConfigExceptions"] = true,
+                ["targets"] = new Dictionary<string, object>
+                {
+                    ["logfile"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "File",
+                        ["fileName"] = "logs/log-${shortdate}.log",
+                    },
+                    ["logconsole"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "Console",
+                    },
+                },
+                ["rules"] = new List<object>
+                {
+                    new Dictionary<string, object>
+                    {
+                        ["logger"] = "*",
+                        ["minLevel"] = "Info",
+                        ["writeTo"] = "logconsole",
+                    },
+                    new Dictionary<string, object>
+                    {
+                        ["logger"] = "*",
+                        ["minLevel"] = "Debug",
+                        ["writeTo"] = "logfile",
+                    },
+                },
+            };
+        }
+
         return JsonSerializer.Serialize(settings, _jsonOptions);
     }
 

@@ -115,6 +115,13 @@ public static class CsprojGenerator
             packages.Add(("Serilog.Sinks.File", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Serilog.Sinks.File")));
         }
 
+        if (config.Logging == LoggingOption.NLog)
+        {
+            var isWebProject = config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi;
+            var nlogPackage = isWebProject ? "NLog.Web.AspNetCore" : "NLog.Extensions.Hosting";
+            packages.Add((nlogPackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, nlogPackage)));
+        }
+
         if (config.IncludeOpenTelemetry)
         {
             packages.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));

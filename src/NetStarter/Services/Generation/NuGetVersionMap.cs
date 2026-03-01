@@ -202,6 +202,12 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "6.*",
             [DotNetSdkVersion.Net10] = "6.*",
         },
+        ["NLog.Extensions.Hosting"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "6.*",
+            [DotNetSdkVersion.Net9] = "6.*",
+            [DotNetSdkVersion.Net10] = "6.*",
+        },
         ["Swashbuckle.AspNetCore"] = new()
         {
             [DotNetSdkVersion.Net8] = "10.*",

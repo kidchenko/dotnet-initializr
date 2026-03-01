@@ -71,6 +71,12 @@ public static class ProgramCsGenerator
                     $"                .CreateLogger()));\n";
         }
 
+        if (config.Logging == LoggingOption.NLog)
+        {
+            usings += $"using NLog.Extensions.Hosting;\n";
+            body += $"        // NLog configured via Host in Program.cs\n";
+        }
+
         if (config.Mapping == MappingOption.Mapster)
         {
             usings += $"using Mapster;\n";
@@ -94,14 +100,30 @@ public static class ProgramCsGenerator
             $"}}\n";
     }
 
-    private static string GenerateWorkerService(ProjectConfiguration config) =>
-        $"using {config.Namespace};\n" +
-        $"\n" +
-        $"var builder = Host.CreateApplicationBuilder(args);\n" +
-        $"builder.Services.AddHostedService<Worker>();\n" +
-        $"\n" +
-        $"var host = builder.Build();\n" +
-        $"host.Run();\n";
+    private static string GenerateWorkerService(ProjectConfiguration config)
+    {
+        var sb = new StringBuilder();
+
+        if (config.Logging == LoggingOption.NLog)
+            sb.Append("using NLog.Extensions.Hosting;\n");
+
+        sb.Append($"using {config.Namespace};\n");
+        sb.Append("\n");
+        sb.Append("var builder = Host.CreateApplicationBuilder(args);\n");
+
+        if (config.Logging == LoggingOption.NLog)
+        {
+            sb.Append("builder.Logging.ClearProviders();\n");
+            sb.Append("builder.UseNLog();\n");
+        }
+
+        sb.Append("builder.Services.AddHostedService<Worker>();\n");
+        sb.Append("\n");
+        sb.Append("var host = builder.Build();\n");
+        sb.Append("host.Run();\n");
+
+        return sb.ToString();
+    }
 
     private static string GenerateWebApplication(ProjectConfiguration config)
     {
@@ -110,6 +132,7 @@ public static class ProgramCsGenerator
         sb.Append("var builder = WebApplication.CreateBuilder(args);\n");
         sb.Append("\n");
         AddSerilogFragment(config, sb);
+        AddNLogFragment(config, sb);
         AddDatabaseFragment(config, sb);
         AddAuthFragment(config, sb);
         AddHealthChecksFragment(config, sb);
@@ -171,6 +194,13 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
+        if (config.Logging == LoggingOption.NLog)
+        {
+            var isWebProject = config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi;
+            sb.Append(isWebProject ? "using NLog.Web;\n" : "using NLog.Extensions.Hosting;\n");
+            hasUsings = true;
+        }
+
         if (config.IncludeOpenTelemetry)
         {
             var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(config.Architecture);
@@ -200,6 +230,14 @@ public static class ProgramCsGenerator
         if (config.Logging != LoggingOption.Serilog) return;
         sb.Append("builder.Host.UseSerilog((context, cfg) =>\n");
         sb.Append("    cfg.ReadFrom.Configuration(context.Configuration));\n");
+        sb.Append("\n");
+    }
+
+    private static void AddNLogFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Logging != LoggingOption.NLog) return;
+        sb.Append("builder.Logging.ClearProviders();\n");
+        sb.Append("builder.Host.UseNLog();\n");
         sb.Append("\n");
     }
 
