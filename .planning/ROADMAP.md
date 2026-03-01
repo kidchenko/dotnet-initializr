@@ -33,7 +33,7 @@
 
 - [x] **Phase 7: NLog and Polly** - Wire NLog logging option and Polly resilience scaffold into the generator
 - [x] **Phase 8: OpenAPI Documentation** - Add the OpenAPI document layer and Scalar/SwaggerUI/Redoc UI picker with SDK-version-aware generated code
-- [ ] **Phase 9: Background Jobs** - Add IHostedService, Hangfire, and Quartz.NET scaffolding with file tree and Jobs/Workers folder support
+- [x] **Phase 9: Background Jobs** - Add IHostedService, Hangfire, and Quartz.NET scaffolding with file tree and Jobs/Workers folder support (completed 2026-03-01)
 - [ ] **Phase 10: URL Serialization** - Serialize all new v1.2 options as query parameters with full backward-compatible parsing
 - [ ] **Phase 11: Code Preview and Responsive Design** - Add code preview modal with highlight.js syntax highlighting and make the UI fully responsive
 
@@ -77,7 +77,7 @@ Plans:
   3. Hangfire selection auto-matches the storage NuGet package to the selected database (PostgreSQL, SQL Server, or InMemory fallback); Hangfire dashboard middleware is generated only for WebApi/MinimalApi projects
   4. Quartz.NET selection generates all three required packages (`Quartz`, `Quartz.Extensions.Hosting`, `Quartz.Extensions.DependencyInjection`) and a sample `IJob` implementation
   5. File tree includes a `Jobs/` or `Workers/` folder for all three architecture patterns when any background job option is selected
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 09-01-PLAN.md — Backend generators: BackgroundJobsGenerator.cs, CsprojGenerator packages, ProgramCsGenerator fragments, FileTreeService Jobs/ folder, ProjectGenerationService wiring
 - [ ] 09-02-PLAN.md — UI wiring (ConfigurationForm.razor Background Jobs radio group, reset logic) + comprehensive automated tests
@@ -120,6 +120,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6.1 Validation and URL Persistence Fixes | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
-| 9. Background Jobs | 1/2 | In Progress|  | - |
+| 9. Background Jobs | 2/2 | Complete   | 2026-03-01 | - |
 | 10. URL Serialization | v1.2 | 0/? | Not started | - |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |

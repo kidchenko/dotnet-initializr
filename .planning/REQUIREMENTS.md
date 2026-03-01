@@ -32,7 +32,7 @@ Requirements for v1.2 Infrastructure, UX & Polish. Each maps to roadmap phases.
 
 ### Background Jobs
 
-- [ ] **JOBS-01**: User can select a background job option (None, IHostedService, Hangfire, Quartz.NET) in the generator
+- [x] **JOBS-01**: User can select a background job option (None, IHostedService, Hangfire, Quartz.NET) in the generator
 - [x] **JOBS-02**: Generated project includes a `SampleBackgroundService : BackgroundService` class when IHostedService is selected
 - [x] **JOBS-03**: Generated project includes Hangfire packages with storage auto-matched to database choice (PostgreSQL, SQL Server, or InMemory fallback)
 - [x] **JOBS-04**: Generated project includes Hangfire dashboard middleware for WebApi/MinimalApi project types
@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-04 | Phase 8 | Complete |
 | DOCS-05 | Phase 8 | Complete |
 | DOCS-06 | Phase 8 | Complete |
-| JOBS-01 | Phase 9 | Pending |
+| JOBS-01 | Phase 9 | Complete |
 | JOBS-02 | Phase 9 | Complete |
 | JOBS-03 | Phase 9 | Complete |
 | JOBS-04 | Phase 9 | Complete |
