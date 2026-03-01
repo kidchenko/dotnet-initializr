@@ -314,6 +314,7 @@ public static class CsprojGenerator
             ("Microsoft.Extensions.Hosting", "*"),
         };
 
+        AppendFeaturePackages(config, packages);
         sb.Append(BuildPackageReferences(packages));
         sb.AppendLine();
         sb.Append("</Project>");
