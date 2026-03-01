@@ -1,0 +1,229 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="code-modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick"></div>
+<div class="code-modal @(IsOpen ? "open" : "")" role="dialog" aria-modal="true" tabindex="-1" @onkeydown="HandleKeyDown">
+    <div class="code-modal-header">
+        <span class="code-modal-path">@FilePath</span>
+        <button class="code-modal-close" @onclick="CloseModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="code-modal-body">
+        <pre><code id="code-preview-element"></code></pre>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public string FilePath { get; set; } = "";
+    [Parameter] public string FileContent { get; set; } = "";
+
+    private IJSObjectReference? _module;
+    private bool _wasOpen;
+    private string _previousFilePath = "";
+
+    private const string ThemeCssUrl = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/vs2015.min.css";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsOpen && (!_wasOpen || FilePath != _previousFilePath))
+        {
+            await EnsureHighlightJsLoaded();
+            await HighlightCode();
+            _previousFilePath = FilePath;
+        }
+        _wasOpen = IsOpen;
+    }
+
+    private async Task EnsureHighlightJsLoaded()
+    {
+        if (_module is null)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./Components/CodePreviewModal.razor.js");
+        }
+    }
+
+    private async Task HighlightCode()
+    {
+        if (_module is null) return;
+        var language = GetLanguage(FilePath);
+        await _module.InvokeVoidAsync("highlightCode", "code-preview-element", FileContent, language, ThemeCssUrl);
+    }
+
+    private async Task CloseModal()
+    {
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        await CloseModal();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseModal();
+        }
+    }
+
+    private static string GetLanguage(string filePath)
+    {
+        var fileName = System.IO.Path.GetFileName(filePath);
+        if (fileName == "Dockerfile") return "dockerfile";
+
+        var ext = System.IO.Path.GetExtension(filePath).ToLower();
+        return ext switch
+        {
+            ".cs" => "csharp",
+            ".xml" or ".csproj" or ".slnx" => "xml",
+            ".json" => "json",
+            ".yml" or ".yaml" => "yaml",
+            ".sh" => "bash",
+            ".md" => "markdown",
+            ".editorconfig" => "ini",
+            ".gitignore" => "plaintext",
+            _ => "plaintext"
+        };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            await _module.DisposeAsync();
+            _module = null;
+        }
+    }
+}
+
+<style>
+    .code-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .code-modal-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .code-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        z-index: 2001;
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .code-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .code-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .code-modal-path {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .code-modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+        border-radius: 0.25rem;
+        transition: color 0.15s, background-color 0.15s;
+    }
+
+    .code-modal-close:hover {
+        color: var(--text-primary);
+        background-color: var(--bg-secondary);
+    }
+
+    .code-modal-body {
+        flex: 1;
+        overflow: auto;
+        padding: 0;
+    }
+
+    .code-modal-body pre {
+        margin: 0;
+        padding: 1rem;
+        min-height: 100%;
+    }
+
+    .code-modal-body code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        counter-reset: line;
+    }
+
+    /* Line number styles */
+    .code-modal-body .line {
+        display: block;
+        width: 100%;
+    }
+
+    .code-modal-body .line-number {
+        display: inline-block;
+        width: 3rem;
+        text-align: right;
+        padding-right: 1rem;
+        color: var(--text-tertiary);
+        user-select: none;
+        opacity: 0.5;
+    }
+
+    /* Mobile: full-screen (RESP-03) */
+    @@media (max-width: 768px) {
+        .code-modal {
+            top: 0;
+            left: 0;
+            transform: none;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .code-modal-body code {
+            font-size: 0.875rem;
+            white-space: pre;
+            overflow-x: auto;
+        }
+    }
+</style>
