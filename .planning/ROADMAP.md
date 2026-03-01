@@ -103,10 +103,10 @@ Plans:
   2. highlight.js is loaded as a local JS module via dynamic `import()` on first modal open — it is not loaded in `index.html` on page load; the component implements `IAsyncDisposable`
   3. The generator UI displays in a single-column stacked layout on viewports below 768px, and all form controls have a minimum 44px touch target
   4. The code preview modal is scrollable and correctly sized on mobile viewports; the responsive layout is verified against a production build on GitHub Pages (not localhost)
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 11-01-PLAN.md — Code preview modal with highlight.js, file tree click handlers, folder toggle, Home.razor wiring
-- [ ] 11-02-PLAN.md — Responsive layout CSS, 44px touch targets, Phase 11 automated tests
+- [x] 11-02-PLAN.md — Responsive layout CSS, 44px touch targets, Phase 11 automated tests
 
 ## Progress
 
@@ -127,4 +127,4 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
 | 9. Background Jobs | 2/2 | Complete    | 2026-03-01 | - |
 | 10. URL Serialization | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
-| 11. Code Preview and Responsive Design | v1.2 | 0/2 | Not started | - |
+| 11. Code Preview and Responsive Design | 1/2 | In Progress|  | - |

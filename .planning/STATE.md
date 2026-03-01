@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Infrastructure, UX & Polish
 status: unknown
-last_updated: "2026-03-01T06:21:22.941Z"
+last_updated: "2026-03-01T18:01:26.337Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can generate a fully configured .NET project with their chosen architecture, ORM, auth, observability, and testing setup in seconds — no manual scaffolding.
-**Current focus:** Phase 10 — URL Serialization (Plan 01 complete)
+**Current focus:** Phase 11 — Code Preview and Responsive Design (Plan 02 complete)
 
 ## Current Position
 
-Phase: 10 of 11 (URL Serialization) — IN PROGRESS
-Plan: 1 of 1 complete (10-01)
-Status: Phase 10 Plan 01 complete — docs and jobs query params wired in Home.razor + 14 round-trip/backward-compat tests (220 total tests)
-Last activity: 2026-03-01 — Phase 10 Plan 01 complete (URL serialization for docs/jobs params, 14 new tests, 220 total)
+Phase: 11 of 11 (Code Preview and Responsive Design) — COMPLETE
+Plan: 2 of 2 complete (11-02)
+Status: Phase 11 Plan 02 complete — responsive touch targets CSS + 15 Phase 11 tests (235 total tests)
+Last activity: 2026-03-01 — Phase 11 Plan 02 complete (responsive CSS RESP-01/02/04, 15 new tests, 235 total)
 
-Progress: [█████░░░░░] 60%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [█████░░░░░] 60%
 | 8. OpenAPI Documentation | 2/2 | Complete |
 | 9. Background Jobs | 2/2 | Complete |
 | 10. URL Serialization | 1/1 | Complete |
+| 11. Code Preview and Responsive Design | 2/2 | Complete |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Key decisions carried forward to v1.2:
 - [Phase 09-background-jobs]: Background Jobs section visible for WebApi, MinimalApi, WorkerService (not Console only like OpenAPI); Hangfire conditional on Config.Database.HasValue
 - [Phase 09-background-jobs]: Reset guard in OnOrmChanged checks Hangfire AND Database is null after ORM change nulls DB — two-step sequence
 - [Phase 10-url-serialization]: docs and jobs URL params added to Home.razor; URL serialize convention: None enum values → null (omitted), non-None → .ToString().ToLower(); variable names docsUi/jobsOpt avoid shadowing dict key strings
+- [Phase 11-responsive]: RESP-04 satisfied by design — Tailwind Play CDN generates CSS at runtime, no purge; touch target CSS uses ::deep + @media (max-width: 768px) in scoped ConfigurationForm.razor style block
+- [Phase 11-responsive]: overflow-y: unset added to .panel-left mobile block for natural form scrolling on phones
 
 ### Pending Todos
 
@@ -85,10 +88,10 @@ None.
 
 ### Blockers/Concerns
 
-- Phase 11 (Responsive): Confirm Tailwind v4 `safelist.txt` syntax for Blazorise 2.0 before implementing responsive CSS
+None.
 
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 10 Plan 01 complete — docs and jobs query params in Home.razor + Phase10UrlSerializationTests.cs (14 tests, URL-01/02/03); 220 total tests, 0 failures
+Stopped at: Phase 11 Plan 02 complete — responsive touch targets CSS (RESP-01/02/04) + Phase11CodePreviewResponsiveTests.cs (15 tests, PREV-01/03); 235 total tests, 0 failures
 Resume file: None

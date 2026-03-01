@@ -54,10 +54,10 @@ Requirements for v1.2 Infrastructure, UX & Polish. Each maps to roadmap phases.
 
 ### Responsive Design
 
-- [ ] **RESP-01**: Generator UI displays in a single-column stacked layout on phone-width viewports (below 768px)
-- [ ] **RESP-02**: All form controls have a minimum 44px touch target for mobile usability
+- [x] **RESP-01**: Generator UI displays in a single-column stacked layout on phone-width viewports (below 768px)
+- [x] **RESP-02**: All form controls have a minimum 44px touch target for mobile usability
 - [ ] **RESP-03**: Code preview modal is scrollable and properly sized on mobile viewports
-- [ ] **RESP-04**: Responsive layout works correctly in production builds deployed to GitHub Pages (Tailwind purge safe)
+- [x] **RESP-04**: Responsive layout works correctly in production builds deployed to GitHub Pages (Tailwind purge safe)
 
 ## Future Requirements
 
@@ -116,10 +116,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PREV-02 | Phase 11 | Pending |
 | PREV-03 | Phase 11 | Pending |
 | PREV-04 | Phase 11 | Pending |
-| RESP-01 | Phase 11 | Pending |
-| RESP-02 | Phase 11 | Pending |
+| RESP-01 | Phase 11 | Complete |
+| RESP-02 | Phase 11 | Complete |
 | RESP-03 | Phase 11 | Pending |
-| RESP-04 | Phase 11 | Pending |
+| RESP-04 | Phase 11 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 31 total
