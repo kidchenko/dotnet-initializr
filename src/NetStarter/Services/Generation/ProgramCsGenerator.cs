@@ -140,6 +140,7 @@ public static class ProgramCsGenerator
         AddMappingFragment(config, sb);
         AddRedisCacheFragment(config, sb);
         AddFluentValidationFragment(config, sb);
+        AddResilienceFragment(config, sb);
         AddControllersFragment(config, sb);
         sb.Append("\n");
         sb.Append("var app = builder.Build();\n");
@@ -352,6 +353,14 @@ public static class ProgramCsGenerator
     {
         if (!config.IncludeFluentValidation) return;
         sb.Append("builder.Services.AddValidatorsFromAssemblyContaining<Program>();\n");
+    }
+
+    private static void AddResilienceFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (!config.IncludeResilience) return;
+        if (config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi)) return;
+        sb.Append($"builder.Services.AddHttpClient(\"{config.ProjectName}Client\")\n");
+        sb.Append("    .AddStandardResilienceHandler();\n");
     }
 
     private static void AddControllersFragment(ProjectConfiguration config, StringBuilder sb)

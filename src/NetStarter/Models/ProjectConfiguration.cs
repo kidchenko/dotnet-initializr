@@ -72,6 +72,13 @@ public class ProjectConfiguration
                 "Authentication requires a web project (Web API or Minimal API).",
                 [nameof(Auth), nameof(ProjectType)]));
 
+        // HTTP Resilience requires a web project type (RESIL-03)
+        if (IncludeResilience && ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+            errors.Add(new ValidationError(
+                "RESILIENCE_REQUIRES_WEB",
+                "HTTP Resilience requires a web project (Web API or Minimal API).",
+                [nameof(IncludeResilience), nameof(ProjectType)]));
+
         // Hangfire requires a database (JOBS-03)
         if (BackgroundJobs == BackgroundJobsOption.Hangfire && Database is null)
             errors.Add(new ValidationError(

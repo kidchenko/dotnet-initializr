@@ -122,6 +122,12 @@ public static class CsprojGenerator
             packages.Add((nlogPackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, nlogPackage)));
         }
 
+        if (config.IncludeResilience && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            packages.Add(("Microsoft.Extensions.Http.Resilience",
+                NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Http.Resilience")));
+        }
+
         if (config.IncludeOpenTelemetry)
         {
             packages.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));
