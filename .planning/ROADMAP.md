@@ -90,7 +90,9 @@ Plans:
   1. A URL containing `logging`, `docs`, `jobs`, and `resilience` query parameters fully restores those configuration values when visited; a round-trip test asserts serialize → deserialize → equality for all non-default config fields
   2. All existing v1.0 and v1.1 URLs (including `obs=serilog` and all v1.1 params) continue to work without producing a broken or default-reset configuration
   3. The pre-existing v1.1 gap where `IncludeResilience` was not serialized in `PushStateToUrl()` is closed and covered by the round-trip test
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 10-01-PLAN.md — TDD: URL round-trip tests + Home.razor docs/jobs query param wiring
 
 ### Phase 11: Code Preview and Responsive Design
 **Goal**: Users can preview the content of any generated file with syntax highlighting directly in the browser, and the generator UI works correctly on phones and tablets
@@ -120,6 +122,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6.1 Validation and URL Persistence Fixes | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
 | 8. OpenAPI Documentation | v1.2 | Complete    | 2026-03-01 | 2026-03-01 |
-| 9. Background Jobs | 2/2 | Complete   | 2026-03-01 | - |
-| 10. URL Serialization | v1.2 | 0/? | Not started | - |
+| 9. Background Jobs | 2/2 | Complete    | 2026-03-01 | - |
+| 10. URL Serialization | v1.2 | 0/1 | Not started | - |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
