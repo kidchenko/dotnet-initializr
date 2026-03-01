@@ -274,7 +274,7 @@
             <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Test Framework</FieldLabel>
             <RadioGroup TValue="TestFrameworkOption"
                         @bind-Value="Config.TestFramework"
-                        @bind-Value:after="NotifyChanged"
+                        @bind-Value:after="OnTestFrameworkChanged"
                         Name="testFramework">
                 <Radio Value="TestFrameworkOption.None">None</Radio>
                 <Radio Value="TestFrameworkOption.XUnit">xUnit</Radio>
@@ -282,26 +282,26 @@
             </RadioGroup>
         </Field>
 
-        <Field>
-            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Assert Library</FieldLabel>
-            <RadioGroup TValue="AssertLibraryOption"
-                        @bind-Value="Config.AssertLibrary"
-                        @bind-Value:after="NotifyChanged"
-                        Name="assertLibrary">
-                <Radio Value="AssertLibraryOption.None">None</Radio>
-                <Radio Value="AssertLibraryOption.Shouldly">Shouldly</Radio>
-            </RadioGroup>
-        </Field>
-
-        <Field>
-            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Integration Testing</FieldLabel>
-            <Check TValue="bool"
-                   @bind-Value="Config.IncludeTestcontainers"
-                   @bind-Value:after="NotifyChanged">Testcontainers</Check>
-        </Field>
-
         @if (Config.HasTestFramework)
         {
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Assert Library</FieldLabel>
+                <RadioGroup TValue="AssertLibraryOption"
+                            @bind-Value="Config.AssertLibrary"
+                            @bind-Value:after="NotifyChanged"
+                            Name="assertLibrary">
+                    <Radio Value="AssertLibraryOption.None">None</Radio>
+                    <Radio Value="AssertLibraryOption.Shouldly">Shouldly</Radio>
+                </RadioGroup>
+            </Field>
+
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Integration Testing</FieldLabel>
+                <Check TValue="bool"
+                       @bind-Value="Config.IncludeTestcontainers"
+                       @bind-Value:after="NotifyChanged">Testcontainers</Check>
+            </Field>
+
             <Field>
                 <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Mock Library</FieldLabel>
                 <Check TValue="bool"
@@ -385,6 +385,19 @@
             && Config.Database is null)
         {
             Config.BackgroundJobs = BackgroundJobsOption.None;
+        }
+
+        await NotifyChanged();
+    }
+
+    private async Task OnTestFrameworkChanged()
+    {
+        if (!Config.HasTestFramework)
+        {
+            Config.AssertLibrary = AssertLibraryOption.None;
+            Config.IncludeTestcontainers = false;
+            Config.IncludeNSubstitute = false;
+            Config.IncludeBogus = false;
         }
 
         await NotifyChanged();

@@ -187,31 +187,45 @@ public static class CsprojGenerator
         }
 
         // Background Jobs packages
+        // For Clean Architecture, packages go on Infrastructure (except Hangfire.AspNetCore for dashboard middleware)
         if (config.BackgroundJobs != BackgroundJobsOption.None
             && config.ProjectType != ProjectType.Console)
         {
-            if (config.BackgroundJobs == BackgroundJobsOption.Hangfire && config.Database.HasValue)
+            if (config.Architecture == ArchitecturePattern.CleanArchitecture)
             {
-                packages.Add(("Hangfire", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire")));
-                packages.Add(("Hangfire.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire.AspNetCore")));
-
-                var storagePackage = config.Database switch
+                // Only Hangfire.AspNetCore stays in entry point (dashboard middleware)
+                if (config.BackgroundJobs == BackgroundJobsOption.Hangfire && config.Database.HasValue)
                 {
-                    DatabaseOption.PostgreSql => "Hangfire.PostgreSql",
-                    DatabaseOption.SqlServer  => "Hangfire.SqlServer",
-                    DatabaseOption.MySql      => "Hangfire.MySqlStorage",
-                    _                         => null  // SQLite: no official Hangfire storage
-                };
-                if (storagePackage is not null)
-                    packages.Add((storagePackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, storagePackage)));
+                    packages.Add(("Hangfire.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire.AspNetCore")));
+                }
+                // Quartz and IHostedService: no entry point packages needed (transitive from Infrastructure)
             }
-            else if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+            else
             {
-                packages.Add(("Quartz", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz")));
-                packages.Add(("Quartz.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.Hosting")));
-                packages.Add(("Quartz.Extensions.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.DependencyInjection")));
+                // Non-Clean Architecture: all packages in the single project
+                if (config.BackgroundJobs == BackgroundJobsOption.Hangfire && config.Database.HasValue)
+                {
+                    packages.Add(("Hangfire", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire")));
+                    packages.Add(("Hangfire.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire.AspNetCore")));
+
+                    var storagePackage = config.Database switch
+                    {
+                        DatabaseOption.PostgreSql => "Hangfire.PostgreSql",
+                        DatabaseOption.SqlServer  => "Hangfire.SqlServer",
+                        DatabaseOption.MySql      => "Hangfire.MySqlStorage",
+                        _                         => null  // SQLite: no official Hangfire storage
+                    };
+                    if (storagePackage is not null)
+                        packages.Add((storagePackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, storagePackage)));
+                }
+                else if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+                {
+                    packages.Add(("Quartz", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz")));
+                    packages.Add(("Quartz.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.Hosting")));
+                    packages.Add(("Quartz.Extensions.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.DependencyInjection")));
+                }
+                // IHostedService: no NuGet packages needed
             }
-            // IHostedService: no NuGet packages needed
         }
     }
 
@@ -243,6 +257,37 @@ public static class CsprojGenerator
 
             if (config.Auth == AuthOption.AspNetIdentity)
                 pkgList.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
+        }
+
+        // For Infrastructure layer: add Background Jobs packages
+        if (projectSuffix is "Infrastructure"
+            && config.BackgroundJobs != BackgroundJobsOption.None
+            && config.ProjectType != ProjectType.Console)
+        {
+            if (config.BackgroundJobs == BackgroundJobsOption.IHostedService)
+            {
+                pkgList.Add(("Microsoft.Extensions.Hosting.Abstractions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Hosting.Abstractions")));
+            }
+            else if (config.BackgroundJobs == BackgroundJobsOption.Hangfire && config.Database.HasValue)
+            {
+                pkgList.Add(("Hangfire", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Hangfire")));
+
+                var storagePackage = config.Database switch
+                {
+                    DatabaseOption.PostgreSql => "Hangfire.PostgreSql",
+                    DatabaseOption.SqlServer  => "Hangfire.SqlServer",
+                    DatabaseOption.MySql      => "Hangfire.MySqlStorage",
+                    _                         => null
+                };
+                if (storagePackage is not null)
+                    pkgList.Add((storagePackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, storagePackage)));
+            }
+            else if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+            {
+                pkgList.Add(("Quartz", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz")));
+                pkgList.Add(("Quartz.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.Hosting")));
+                pkgList.Add(("Quartz.Extensions.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Quartz.Extensions.DependencyInjection")));
+            }
         }
 
         if (packages is not null)

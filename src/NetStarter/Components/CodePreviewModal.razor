@@ -3,7 +3,7 @@
 @implements IAsyncDisposable
 
 <div class="code-modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick"></div>
-<div class="code-modal @(IsOpen ? "open" : "")" role="dialog" aria-modal="true" tabindex="-1" @onkeydown="HandleKeyDown">
+<div @ref="_modalRef" class="code-modal @(IsOpen ? "open" : "")" role="dialog" aria-modal="true" tabindex="-1" @onkeydown="HandleKeyDown">
     <div class="code-modal-header">
         <span class="code-modal-path">@FilePath</span>
         <button class="code-modal-close" @onclick="CloseModal" aria-label="Close">&times;</button>
@@ -19,6 +19,7 @@
     [Parameter] public string FilePath { get; set; } = "";
     [Parameter] public string FileContent { get; set; } = "";
 
+    private ElementReference _modalRef;
     private IJSObjectReference? _module;
     private bool _wasOpen;
     private string _previousFilePath = "";
@@ -27,11 +28,21 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (IsOpen && !_wasOpen)
+        {
+            await JS.InvokeVoidAsync("document.body.style.setProperty", "overflow", "hidden");
+        }
+        else if (!IsOpen && _wasOpen)
+        {
+            await JS.InvokeVoidAsync("document.body.style.removeProperty", "overflow");
+        }
+
         if (IsOpen && (!_wasOpen || FilePath != _previousFilePath))
         {
             await EnsureHighlightJsLoaded();
             await HighlightCode();
             _previousFilePath = FilePath;
+            await _modalRef.FocusAsync();
         }
         _wasOpen = IsOpen;
     }
@@ -184,6 +195,7 @@
         margin: 0;
         padding: 1rem;
         min-height: 100%;
+        background: #1e1e1e;
     }
 
     .code-modal-body code {

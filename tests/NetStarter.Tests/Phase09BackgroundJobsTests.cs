@@ -143,7 +143,7 @@ public class Phase09BackgroundJobsTests
     [Theory] // JOBS-03: Hangfire emits correct storage method in Program.cs services
     [InlineData(DatabaseOption.PostgreSql, "UsePostgreSqlStorage")]
     [InlineData(DatabaseOption.SqlServer, "UseSqlServerStorage")]
-    [InlineData(DatabaseOption.MySql, "UseMySqlStorage")]
+    [InlineData(DatabaseOption.MySql, "MySqlStorage")]
     public void JOBS_03_Hangfire_ProgramCs_Services(DatabaseOption database, string storageMethod)
     {
         var config = CreateConfig(BackgroundJobsOption.Hangfire, ProjectType.WebApi, database: database);
@@ -442,9 +442,9 @@ public class Phase09BackgroundJobsTests
         Assert.Contains("Jobs", path);
     }
 
-    // ---- CleanArchitecture path uses EntryPointProjectName ----
+    // ---- CleanArchitecture path uses Infrastructure project ----
 
-    [Fact] // JOBS-06: CleanArchitecture IHostedService uses EntryPointProjectName in Jobs path
+    [Fact] // JOBS-06: CleanArchitecture IHostedService uses Infrastructure in Jobs path
     public void JOBS_06_CleanArchitecture_IHostedService_FilePath()
     {
         var config = CreateConfig(
@@ -452,7 +452,7 @@ public class Phase09BackgroundJobsTests
             ProjectType.WebApi,
             architecture: ArchitecturePattern.CleanArchitecture);
         var path = BackgroundJobsGenerator.GetFilePath(config);
-        Assert.Contains("TestApp.Api", path);
+        Assert.Contains("TestApp.Infrastructure", path);
         Assert.Contains("Jobs/SampleBackgroundService.cs", path);
     }
 }

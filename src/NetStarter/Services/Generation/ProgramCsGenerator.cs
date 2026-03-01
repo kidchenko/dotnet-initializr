@@ -108,7 +108,17 @@ public static class ProgramCsGenerator
             sb.Append("using NLog.Extensions.Hosting;\n");
 
         if (config.BackgroundJobs == BackgroundJobsOption.Hangfire)
+        {
             sb.Append("using Hangfire;\n");
+            var storageUsing = config.Database switch
+            {
+                DatabaseOption.PostgreSql => "using Hangfire.PostgreSql;\n",
+                DatabaseOption.MySql      => "using Hangfire.MySql;\n",
+                _                         => null,
+            };
+            if (storageUsing is not null)
+                sb.Append(storageUsing);
+        }
 
         sb.Append($"using {config.Namespace};\n");
         sb.Append("\n");
@@ -237,6 +247,22 @@ public static class ProgramCsGenerator
         if (config.BackgroundJobs == BackgroundJobsOption.Hangfire)
         {
             sb.Append("using Hangfire;\n");
+            var storageUsing = config.Database switch
+            {
+                DatabaseOption.PostgreSql => "using Hangfire.PostgreSql;\n",
+                DatabaseOption.MySql      => "using Hangfire.MySql;\n",
+                _                         => null,
+            };
+            if (storageUsing is not null)
+                sb.Append(storageUsing);
+            hasUsings = true;
+        }
+
+        if (config.BackgroundJobs == BackgroundJobsOption.IHostedService
+            && config.ProjectType != ProjectType.Console)
+        {
+            var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
+            sb.Append($"using {jobsNs};\n");
             hasUsings = true;
         }
 
@@ -323,6 +349,7 @@ public static class ProgramCsGenerator
                 sb.Append("                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n");
                 sb.Append("        };\n");
                 sb.Append("    });\n");
+                sb.Append("builder.Services.AddAuthorization();\n");
                 break;
             case AuthOption.Keycloak:
                 sb.Append("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n");
@@ -413,18 +440,22 @@ public static class ProgramCsGenerator
                 sb.Append("builder.Services.AddHostedService<SampleBackgroundService>();\n");
                 break;
             case BackgroundJobsOption.Hangfire when config.Database.HasValue:
-                var storageMethod = config.Database switch
-                {
-                    DatabaseOption.PostgreSql => "UsePostgreSqlStorage",
-                    DatabaseOption.SqlServer  => "UseSqlServerStorage",
-                    DatabaseOption.MySql      => "UseMySqlStorage",
-                    _                         => "UseMemoryStorage",
-                };
                 sb.Append("builder.Services.AddHangfire(config => config\n");
                 sb.Append("    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)\n");
                 sb.Append("    .UseSimpleAssemblyNameTypeSerializer()\n");
                 sb.Append("    .UseRecommendedSerializerSettings()\n");
-                sb.Append($"    .{storageMethod}(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n");
+                var storageLine = config.Database switch
+                {
+                    DatabaseOption.PostgreSql =>
+                        "    .UsePostgreSqlStorage(opts => opts.UseNpgsqlConnection(builder.Configuration.GetConnectionString(\"DefaultConnection\")))",
+                    DatabaseOption.SqlServer =>
+                        "    .UseSqlServerStorage(builder.Configuration.GetConnectionString(\"DefaultConnection\"))",
+                    DatabaseOption.MySql =>
+                        "    .UseStorage(new MySqlStorage(builder.Configuration.GetConnectionString(\"DefaultConnection\"), new MySqlStorageOptions()))",
+                    _ =>
+                        "    .UseMemoryStorage()",
+                };
+                sb.Append(storageLine + ");\n");
                 sb.Append("builder.Services.AddHangfireServer();\n");
                 break;
             case BackgroundJobsOption.Quartz:

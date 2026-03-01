@@ -67,6 +67,12 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "9.*",
             [DotNetSdkVersion.Net10] = "10.*",
         },
+        ["Microsoft.Extensions.Hosting.Abstractions"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "8.*",
+            [DotNetSdkVersion.Net9] = "9.*",
+            [DotNetSdkVersion.Net10] = "10.*",
+        },
         ["Microsoft.Extensions.Http.Resilience"] = new()
         {
             [DotNetSdkVersion.Net8] = "8.*",

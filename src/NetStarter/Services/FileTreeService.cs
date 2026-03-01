@@ -175,7 +175,7 @@ public class FileTreeService
             srcFolder.Children.Add(serviceDefaultsProject);
         }
 
-        // Background Jobs folder
+        // Background Jobs folder (in Infrastructure for Clean Architecture)
         if (config.BackgroundJobs != BackgroundJobsOption.None
             && config.ProjectType != ProjectType.Console)
         {
@@ -189,7 +189,7 @@ public class FileTreeService
             };
             if (sampleFileName is not null)
                 jobsFolder.Children.Add(new FileTreeNode { Name = sampleFileName, IsFolder = false });
-            apiProject.Children.Add(jobsFolder);
+            infraProject.Children.Add(jobsFolder);
         }
 
         srcFolder.Children.Add(apiProject);

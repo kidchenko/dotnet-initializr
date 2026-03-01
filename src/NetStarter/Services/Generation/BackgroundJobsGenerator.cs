@@ -8,6 +8,9 @@ public static class BackgroundJobsGenerator
     {
         var ns = GetJobsNamespace(config);
         return
+            $"using Microsoft.Extensions.Hosting;\n" +
+            $"using Microsoft.Extensions.Logging;\n" +
+            $"\n" +
             $"namespace {ns};\n" +
             $"\n" +
             $"public class SampleBackgroundService(ILogger<SampleBackgroundService> logger) : BackgroundService\n" +
@@ -24,6 +27,8 @@ public static class BackgroundJobsGenerator
     {
         var ns = GetJobsNamespace(config);
         return
+            $"using Microsoft.Extensions.Logging;\n" +
+            $"\n" +
             $"namespace {ns};\n" +
             $"\n" +
             $"public class SampleHangfireJob(ILogger<SampleHangfireJob> logger)\n" +
@@ -39,6 +44,7 @@ public static class BackgroundJobsGenerator
     {
         var ns = GetJobsNamespace(config);
         return
+            $"using Microsoft.Extensions.Logging;\n" +
             $"using Quartz;\n" +
             $"\n" +
             $"namespace {ns};\n" +
@@ -64,14 +70,14 @@ public static class BackgroundJobsGenerator
         };
 
         return config.Architecture == ArchitecturePattern.CleanArchitecture
-            ? $"src/{config.EntryPointProjectName}/Jobs/{sampleClassName}.cs"
+            ? $"src/{config.ProjectName}.Infrastructure/Jobs/{sampleClassName}.cs"
             : $"src/{config.ProjectName}/Jobs/{sampleClassName}.cs";
     }
 
-    private static string GetJobsNamespace(ProjectConfiguration config)
+    public static string GetJobsNamespace(ProjectConfiguration config)
     {
         return config.Architecture == ArchitecturePattern.CleanArchitecture
-            ? $"{config.Namespace}.{config.EntryPointSuffix}.Jobs"
+            ? $"{config.Namespace}.Infrastructure.Jobs"
             : $"{config.Namespace}.Jobs";
     }
 }

@@ -157,6 +157,7 @@ public class ProgramCsGeneratorBaselineTests
             "                Encoding.UTF8.GetBytes(builder.Configuration[\"Jwt:Key\"]!))\n" +
             "        };\n" +
             "    });\n" +
+            "builder.Services.AddAuthorization();\n" +
             "builder.Services.AddHealthChecks();\n" +
             "builder.Services.AddAppOpenTelemetry(builder.Configuration);\n" +
             "builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n" +

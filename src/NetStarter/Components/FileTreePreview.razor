@@ -47,7 +47,7 @@
     {
         var fullPath = parentPath + "/" + node.Name;
 
-        <div class="file-tree-node file-tree-node-removed" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath">
+        <div class="file-tree-node file-tree-node-removed" style="padding-left: @($"{depth * 1.25}rem")" @key="@("removed:" + fullPath)">
             <span class="node-icon">
                 @if (node.IsFolder)
                 {
