@@ -176,6 +176,23 @@
         </Field>
     </div>
 
+    <!-- Section 4c: Resilience -->
+    @if (Config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+    {
+        <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
+            <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                Resilience
+            </h3>
+
+            <Field>
+                <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">HTTP Resilience</FieldLabel>
+                <Check TValue="bool"
+                       @bind-Value="Config.IncludeResilience"
+                       @bind-Value:after="NotifyChanged">Polly / HTTP Resilience</Check>
+            </Field>
+        </div>
+    }
+
     <!-- Section 5: Quality -->
     <div style="margin-bottom: 1.5rem; padding: 0 1.5rem;">
         <h3 style="color: var(--text-primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
@@ -183,10 +200,19 @@
         </h3>
 
         <Field>
+            <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Logging</FieldLabel>
+            <RadioGroup TValue="LoggingOption"
+                        @bind-Value="Config.Logging"
+                        @bind-Value:after="NotifyChanged"
+                        Name="logging">
+                <Radio Value="LoggingOption.None">None</Radio>
+                <Radio Value="LoggingOption.Serilog">Serilog</Radio>
+                <Radio Value="LoggingOption.NLog">NLog</Radio>
+            </RadioGroup>
+        </Field>
+
+        <Field>
             <FieldLabel style="color: var(--text-secondary); font-size: 0.875rem;">Observability</FieldLabel>
-            <Check TValue="bool"
-                   @bind-Value="LoggingSerilog"
-                   @bind-Value:after="NotifyChanged">Serilog</Check>
             <Check TValue="bool"
                    @bind-Value="Config.IncludeHealthChecks"
                    @bind-Value:after="NotifyChanged">Health Checks</Check>
@@ -285,14 +311,6 @@
         set => Config.Database = value;
     }
 
-    // Temporary bridge: maps Serilog checkbox to LoggingOption enum
-    // Phase 7 will replace this with a full logging picker (None/Serilog/NLog)
-    private bool LoggingSerilog
-    {
-        get => Config.Logging == LoggingOption.Serilog;
-        set => Config.Logging = value ? LoggingOption.Serilog : LoggingOption.None;
-    }
-
     private async Task NotifyChanged()
     {
         await OnConfigChanged.InvokeAsync();
@@ -322,6 +340,11 @@
         if (Config.Auth != AuthOption.None && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
         {
             Config.Auth = AuthOption.None;
+        }
+
+        if (Config.IncludeResilience && Config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi))
+        {
+            Config.IncludeResilience = false;
         }
 
         await NotifyChanged();
