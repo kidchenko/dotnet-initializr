@@ -62,7 +62,7 @@ Plans:
   2. All three UI choices include `Microsoft.AspNetCore.OpenApi` with `AddOpenApi()` and `MapOpenApi()`; API doc middleware is always inside an `IsDevelopment()` guard
   3. Scalar selection adds `Scalar.AspNetCore 2.*` and `MapScalarApiReference()`; Redoc selection uses `Swashbuckle.AspNetCore.ReDoc` with `app.UseReDoc()` middleware
   4. SwaggerUI on .NET 8 uses full `Swashbuckle.AspNetCore`; SwaggerUI on .NET 9/10 uses the UI-only sub-package and pins `Microsoft.OpenApi < 3.0.0`
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 08-01-PLAN.md — Backend generators: enum rename (OpenApiUi), NuGetVersionMap, CsprojGenerator packages, ProgramCsGenerator fragments, validation
 - [ ] 08-02-PLAN.md — UI wiring (ConfigurationForm.razor OpenAPI radio group) + comprehensive automated tests
@@ -116,7 +116,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Auth, Validation, and Testing | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6.1 Validation and URL Persistence Fixes | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 7. NLog and Polly | 3/3 | Complete    | 2026-03-01 | 2026-02-28 |
-| 8. OpenAPI Documentation | v1.2 | 0/2 | Not started | - |
+| 8. OpenAPI Documentation | 1/2 | In Progress|  | - |
 | 9. Background Jobs | v1.2 | 0/? | Not started | - |
 | 10. URL Serialization | v1.2 | 0/? | Not started | - |
 | 11. Code Preview and Responsive Design | v1.2 | 0/? | Not started | - |
