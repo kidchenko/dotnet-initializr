@@ -82,6 +82,21 @@ public class CliCommandService
             commands.Add($"dotnet add {srcPath} package Serilog.Sinks.File --version {serilogFileVersion}");
         }
 
+        // NLog
+        if (config.Logging == LoggingOption.NLog)
+        {
+            if (config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+            {
+                var nlogWebVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NLog.Web.AspNetCore");
+                commands.Add($"dotnet add {srcPath} package NLog.Web.AspNetCore --version {nlogWebVersion}");
+            }
+            else
+            {
+                var nlogHostingVersion = NuGetVersionMap.GetPackageVersion(config.SdkVersion, "NLog.Extensions.Hosting");
+                commands.Add($"dotnet add {srcPath} package NLog.Extensions.Hosting --version {nlogHostingVersion}");
+            }
+        }
+
         // Mapster
         if (config.Mapping == MappingOption.Mapster)
         {

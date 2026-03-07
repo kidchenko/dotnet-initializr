@@ -203,6 +203,29 @@ public static class AppSettingsGenerator
             };
         }
 
+        // Conditional: NLog development override
+        if (config.Logging == LoggingOption.NLog)
+        {
+            settings["NLog"] = new Dictionary<string, object>
+            {
+                ["rules"] = new List<object>
+                {
+                    new Dictionary<string, object>
+                    {
+                        ["logger"] = "Microsoft.*",
+                        ["maxLevel"] = "Info",
+                        ["final"] = true,
+                    },
+                    new Dictionary<string, object>
+                    {
+                        ["logger"] = "*",
+                        ["minLevel"] = "Debug",
+                        ["writeTo"] = "console",
+                    },
+                },
+            };
+        }
+
         return JsonSerializer.Serialize(settings, _jsonOptions);
     }
 }
