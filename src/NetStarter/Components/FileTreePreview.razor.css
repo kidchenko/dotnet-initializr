@@ -70,3 +70,12 @@
     0% { opacity: 1; }
     100% { opacity: 0; }
 }
+
+/* RESP-02: 44px minimum touch targets for file tree nodes on mobile */
+@media (max-width: 768px) {
+    .file-clickable,
+    .folder-toggle {
+        min-height: 44px;
+        align-items: center;
+    }
+}

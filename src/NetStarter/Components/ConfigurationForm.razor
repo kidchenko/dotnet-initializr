@@ -238,6 +238,16 @@
                     }
                     <Radio Value="BackgroundJobsOption.Quartz">Quartz.NET</Radio>
                 </RadioGroup>
+                @if (Config.BackgroundJobs == BackgroundJobsOption.Hangfire
+                     && Config.Database == DatabaseOption.Sqlite)
+                {
+                    <div style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 0.25rem;
+                                background-color: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.4);
+                                color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.4;">
+                        SQLite has no official Hangfire storage package. Jobs will use in-memory storage
+                        and <strong>won't persist across restarts</strong>.
+                    </div>
+                }
             </Field>
         </div>
     }
