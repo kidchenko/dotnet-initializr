@@ -51,7 +51,12 @@ public class ProjectConfiguration
 
     public bool HasTestFramework => TestFramework != TestFrameworkOption.None;
 
-    public string EntryPointSuffix => ProjectType == ProjectType.Console ? "Cli" : "Api";
+    public string EntryPointSuffix => ProjectType switch
+    {
+        ProjectType.Console => "Cli",
+        ProjectType.WorkerService => "Worker",
+        _ => "Api",
+    };
     public string EntryPointProjectName => $"{ProjectName}.{EntryPointSuffix}";
 
     public List<ValidationError> Validate()

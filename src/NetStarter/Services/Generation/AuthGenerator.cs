@@ -57,9 +57,12 @@ public static class AuthGenerator
             $"}}\n";
     }
 
-    public static string GetNamespaceSuffix(ArchitecturePattern architecture) => architecture switch
+    public static string GetNamespaceSuffix(ArchitecturePattern architecture) =>
+        GetNamespaceSuffix(architecture, "Api");
+
+    public static string GetNamespaceSuffix(ArchitecturePattern architecture, string entryPointSuffix) => architecture switch
     {
-        ArchitecturePattern.CleanArchitecture => "Api.Auth",
+        ArchitecturePattern.CleanArchitecture => $"{entryPointSuffix}.Auth",
         _ => "Auth",
     };
 }

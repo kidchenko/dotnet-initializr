@@ -32,9 +32,12 @@ public static class ArchitectureGenerator
                 MappingGenerator.GenerateMappingConfig(config, mappingNs);
         }
 
-        // Infrastructure project — references Application, owns EF Core
+        // Infrastructure project — references Application and Domain, owns EF Core / Dapper
         var infraCsproj = CsprojGenerator.GenerateClassLibrary(config, "Infrastructure");
-        infraCsproj = InjectProjectReferences(infraCsproj, [$"../{name}.Application/{name}.Application.csproj"]);
+        infraCsproj = InjectProjectReferences(infraCsproj, [
+            $"../{name}.Application/{name}.Application.csproj",
+            $"../{name}.Domain/{name}.Domain.csproj",
+        ]);
         files[$"{src}/{name}.Infrastructure/{name}.Infrastructure.csproj"] = infraCsproj;
 
         if (config.Orm == OrmOption.EfCore)
@@ -61,29 +64,26 @@ public static class ArchitectureGenerator
         files[$"{src}/{name}.{config.EntryPointSuffix}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
         files[$"{src}/{name}.{config.EntryPointSuffix}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
 
-        if (config.ProjectType == ProjectType.WorkerService)
-            files[$"{src}/{name}.{config.EntryPointSuffix}/Worker.cs"] = GenerateWorkerClass(config);
-
         if (config.ProjectType == ProjectType.Console)
             files[$"{src}/{name}.{config.EntryPointSuffix}/ServiceCollectionExtensions.cs"] =
                 ProgramCsGenerator.GenerateServiceCollectionExtensions(config);
 
         if (config.Auth == AuthOption.Jwt)
         {
-            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
+            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture, config.EntryPointSuffix);
             files[$"{src}/{name}.{config.EntryPointSuffix}/Auth/JwtSettings.cs"] =
                 AuthGenerator.GenerateJwtSettings(config, authNs);
         }
         else if (config.Auth == AuthOption.ApiKey)
         {
-            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
+            var authNs = AuthGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture, config.EntryPointSuffix);
             files[$"{src}/{name}.{config.EntryPointSuffix}/Auth/ApiKeyAuthenticationHandler.cs"] =
                 AuthGenerator.GenerateApiKeyAuthHandler(config, authNs);
         }
 
         if (config.IncludeOpenTelemetry)
         {
-            var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
+            var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture, config.EntryPointSuffix);
             files[$"{src}/{name}.{config.EntryPointSuffix}/Telemetry/OpenTelemetryExtensions.cs"] =
                 ObservabilityGenerator.GenerateOpenTelemetryExtensions(config, telemetryNs);
         }
@@ -108,9 +108,6 @@ public static class ArchitectureGenerator
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
         files[$"{proj}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
         files[$"{proj}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
-
-        if (config.ProjectType == ProjectType.WorkerService)
-            files[$"{proj}/Worker.cs"] = GenerateWorkerClass(config);
 
         if (config.ProjectType == ProjectType.Console)
             files[$"{proj}/ServiceCollectionExtensions.cs"] =
@@ -174,9 +171,6 @@ public static class ArchitectureGenerator
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
         files[$"{proj}/appsettings.json"] = AppSettingsGenerator.GenerateAppSettings(config);
         files[$"{proj}/appsettings.Development.json"] = AppSettingsGenerator.GenerateAppSettingsDevelopment(config);
-
-        if (config.ProjectType == ProjectType.WorkerService)
-            files[$"{proj}/Worker.cs"] = GenerateWorkerClass(config);
 
         if (config.ProjectType == ProjectType.Console)
             files[$"{proj}/ServiceCollectionExtensions.cs"] =
@@ -245,7 +239,6 @@ public static class ArchitectureGenerator
         else
         {
             files[$"{proj}/{name}.csproj"] = CsprojGenerator.GenerateWorkerProject(config);
-            files[$"{proj}/Worker.cs"] = GenerateWorkerClass(config);
         }
 
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
@@ -272,21 +265,6 @@ public static class ArchitectureGenerator
         $"    public static void Map(WebApplication app)\n" +
         $"    {{\n" +
         $"        app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n" +
-        $"    }}\n" +
-        $"}}\n";
-
-    private static string GenerateWorkerClass(ProjectConfiguration config) =>
-        $"namespace {config.Namespace};\n" +
-        $"\n" +
-        $"public class Worker(ILogger<Worker> logger) : BackgroundService\n" +
-        $"{{\n" +
-        $"    protected override async Task ExecuteAsync(CancellationToken stoppingToken)\n" +
-        $"    {{\n" +
-        $"        while (!stoppingToken.IsCancellationRequested)\n" +
-        $"        {{\n" +
-        $"            logger.LogInformation(\"Worker running at: {{time}}\", DateTimeOffset.UtcNow);\n" +
-        $"            await Task.Delay(1000, stoppingToken);\n" +
-        $"        }}\n" +
         $"    }}\n" +
         $"}}\n";
 

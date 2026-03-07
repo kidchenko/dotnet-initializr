@@ -246,7 +246,7 @@ public class Phase09BackgroundJobsTests
         var config = CreateConfig(BackgroundJobsOption.Quartz, projectType, database: null);
         var result = ProgramCsGenerator.Generate(config);
         Assert.Contains("AddQuartz", result);
-        Assert.Contains("UseMicrosoftDependencyInjectionJobFactory", result);
+        Assert.Contains("ScheduleJob<SampleQuartzJob>", result);
         Assert.Contains("AddQuartzHostedService", result);
     }
 

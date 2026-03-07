@@ -60,7 +60,7 @@ public static class DapperGenerator
             $"}}\n";
     }
 
-    private static string GetNamespace(ProjectConfiguration config)
+    public static string GetNamespace(ProjectConfiguration config)
     {
         var suffix = config.Architecture switch
         {

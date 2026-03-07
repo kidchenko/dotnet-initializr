@@ -258,10 +258,8 @@ public class ProgramCsGeneratorBaselineTests
         var result = ProgramCsGenerator.Generate(config);
 
         const string expected =
-            "using MyProject;\n" +
             "\n" +
             "var builder = Host.CreateApplicationBuilder(args);\n" +
-            "builder.Services.AddHostedService<Worker>();\n" +
             "\n" +
             "var host = builder.Build();\n" +
             "host.Run();\n";

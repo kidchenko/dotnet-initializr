@@ -186,7 +186,7 @@ public class Phase07NLogPollyTests
     {
         var config = CreateWebConfig(c => c.Logging = LoggingOption.NLog);
         var result = AppSettingsGenerator.GenerateAppSettings(config);
-        Assert.Contains("logconsole", result);
+        Assert.Contains("console", result);
     }
 
     [Fact] // LOG-05: NLog config -> appsettings.json contains logfile target

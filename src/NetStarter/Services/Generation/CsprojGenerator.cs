@@ -259,6 +259,22 @@ public static class CsprojGenerator
                 pkgList.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
         }
 
+        // For Infrastructure layer: add Dapper packages
+        if (projectSuffix is "Infrastructure" && config.Orm == OrmOption.Dapper)
+        {
+            pkgList.Add(("Dapper", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Dapper")));
+            pkgList.Add(("Microsoft.Extensions.DependencyInjection", "*"));
+            pkgList.Add(("Microsoft.Extensions.Configuration", "*"));
+            var driver = config.Database switch
+            {
+                DatabaseOption.MySql => "MySqlConnector",
+                DatabaseOption.Sqlite => "Microsoft.Data.Sqlite",
+                DatabaseOption.SqlServer => "Microsoft.Data.SqlClient",
+                _ => "Npgsql",  // PostgreSQL default
+            };
+            pkgList.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
+        }
+
         // For Infrastructure layer: add Background Jobs packages
         if (projectSuffix is "Infrastructure"
             && config.BackgroundJobs != BackgroundJobsOption.None

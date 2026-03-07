@@ -133,6 +133,12 @@ public class FileTreeService
             dataFolder.Children.Add(migrationsFolder);
             infraProject.Children.Add(dataFolder);
         }
+        else if (config.Orm == OrmOption.Dapper)
+        {
+            var dataFolder = new FileTreeNode { Name = "Data", IsFolder = true };
+            dataFolder.Children.Add(new FileTreeNode { Name = "DapperExtensions.cs", IsFolder = false });
+            infraProject.Children.Add(dataFolder);
+        }
 
         srcFolder.Children.Add(infraProject);
 
@@ -216,6 +222,12 @@ public class FileTreeService
             dataFolder.Children.Add(new FileTreeNode { Name = "AppDbContext.cs", IsFolder = false });
             var migrationsFolder = new FileTreeNode { Name = "Migrations", IsFolder = true };
             dataFolder.Children.Add(migrationsFolder);
+            mainProject.Children.Add(dataFolder);
+        }
+        else if (config.Orm == OrmOption.Dapper)
+        {
+            var dataFolder = new FileTreeNode { Name = "Data", IsFolder = true };
+            dataFolder.Children.Add(new FileTreeNode { Name = "DapperExtensions.cs", IsFolder = false });
             mainProject.Children.Add(dataFolder);
         }
 
@@ -306,6 +318,12 @@ public class FileTreeService
             dataFolder.Children.Add(new FileTreeNode { Name = "AppDbContext.cs", IsFolder = false });
             var migrationsFolder = new FileTreeNode { Name = "Migrations", IsFolder = true };
             dataFolder.Children.Add(migrationsFolder);
+            mainProject.Children.Add(dataFolder);
+        }
+        else if (config.Orm == OrmOption.Dapper)
+        {
+            var dataFolder = new FileTreeNode { Name = "Data", IsFolder = true };
+            dataFolder.Children.Add(new FileTreeNode { Name = "DapperExtensions.cs", IsFolder = false });
             mainProject.Children.Add(dataFolder);
         }
         else

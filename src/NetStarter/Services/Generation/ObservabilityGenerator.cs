@@ -47,9 +47,12 @@ public static class ObservabilityGenerator
             $"}}\n";
     }
 
-    public static string GetNamespaceSuffix(ArchitecturePattern architecture) => architecture switch
+    public static string GetNamespaceSuffix(ArchitecturePattern architecture) =>
+        GetNamespaceSuffix(architecture, "Api");
+
+    public static string GetNamespaceSuffix(ArchitecturePattern architecture, string entryPointSuffix) => architecture switch
     {
-        ArchitecturePattern.CleanArchitecture => "Api.Telemetry",
+        ArchitecturePattern.CleanArchitecture => $"{entryPointSuffix}.Telemetry",
         _ => "Telemetry",
     };
 }

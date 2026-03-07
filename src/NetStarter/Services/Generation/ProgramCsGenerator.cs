@@ -62,6 +62,13 @@ public static class ProgramCsGenerator
                     $"            options.{dbMethod}(configuration.GetConnectionString(\"DefaultConnection\")));\n";
         }
 
+        if (config.Orm == OrmOption.Dapper)
+        {
+            var dapperNs = DapperGenerator.GetNamespace(config);
+            usings += $"using {dapperNs};\n";
+            body += $"        services.AddDapperConnection(configuration);\n";
+        }
+
         if (config.Logging == LoggingOption.Serilog)
         {
             usings += $"using Serilog;\n";
@@ -104,6 +111,9 @@ public static class ProgramCsGenerator
     {
         var sb = new StringBuilder();
 
+        if (config.Logging == LoggingOption.Serilog)
+            sb.Append("using Serilog;\n");
+
         if (config.Logging == LoggingOption.NLog)
             sb.Append("using NLog.Extensions.Hosting;\n");
 
@@ -120,17 +130,36 @@ public static class ProgramCsGenerator
                 sb.Append(storageUsing);
         }
 
-        sb.Append($"using {config.Namespace};\n");
+        if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+        {
+            sb.Append("using Quartz;\n");
+            var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
+            sb.Append($"using {jobsNs};\n");
+        }
+
+        if (config.BackgroundJobs == BackgroundJobsOption.IHostedService)
+        {
+            var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
+            sb.Append($"using {jobsNs};\n");
+        }
+
         sb.Append("\n");
         sb.Append("var builder = Host.CreateApplicationBuilder(args);\n");
 
+        if (config.Logging == LoggingOption.Serilog)
+        {
+            sb.Append("\n");
+            sb.Append("builder.Services.AddSerilog((_, cfg) =>\n");
+            sb.Append("    cfg.ReadFrom.Configuration(builder.Configuration));\n");
+        }
+
         if (config.Logging == LoggingOption.NLog)
         {
+            sb.Append("\n");
             sb.Append("builder.Logging.ClearProviders();\n");
             sb.Append("builder.UseNLog();\n");
         }
 
-        sb.Append("builder.Services.AddHostedService<Worker>();\n");
         AddBackgroundJobsServicesFragment(config, sb);
         sb.Append("\n");
         sb.Append("var host = builder.Build();\n");
@@ -178,6 +207,13 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
+        if (config.Orm == OrmOption.Dapper)
+        {
+            var dapperNs = DapperGenerator.GetNamespace(config);
+            sb.Append($"using {dapperNs};\n");
+            hasUsings = true;
+        }
+
         if (config.Auth == AuthOption.Jwt)
         {
             sb.Append($"using Microsoft.AspNetCore.Authentication.JwtBearer;\n");
@@ -194,7 +230,7 @@ public static class ProgramCsGenerator
 
         if (config.Auth == AuthOption.ApiKey)
         {
-            sb.Append($"using {config.Namespace}.{AuthGenerator.GetNamespaceSuffix(config.Architecture)};\n");
+            sb.Append($"using {config.Namespace}.{AuthGenerator.GetNamespaceSuffix(config.Architecture, config.EntryPointSuffix)};\n");
             sb.Append($"using Microsoft.AspNetCore.Authentication;\n");
             hasUsings = true;
         }
@@ -220,7 +256,7 @@ public static class ProgramCsGenerator
 
         if (config.IncludeOpenTelemetry)
         {
-            var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(config.Architecture);
+            var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(config.Architecture, config.EntryPointSuffix);
             sb.Append($"using {config.Namespace}.{telemetryNs};\n");
             hasUsings = true;
         }
@@ -255,6 +291,14 @@ public static class ProgramCsGenerator
             };
             if (storageUsing is not null)
                 sb.Append(storageUsing);
+            hasUsings = true;
+        }
+
+        if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+        {
+            sb.Append("using Quartz;\n");
+            var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
+            sb.Append($"using {jobsNs};\n");
             hasUsings = true;
         }
 
@@ -459,7 +503,11 @@ public static class ProgramCsGenerator
                 sb.Append("builder.Services.AddHangfireServer();\n");
                 break;
             case BackgroundJobsOption.Quartz:
-                sb.Append("builder.Services.AddQuartz(q => { q.UseMicrosoftDependencyInjectionJobFactory(); });\n");
+                sb.Append("builder.Services.AddQuartz(q =>\n");
+                sb.Append("{\n");
+                sb.Append("    q.ScheduleJob<SampleQuartzJob>(trigger => trigger\n");
+                sb.Append("        .WithSimpleSchedule(x => x.WithIntervalInSeconds(5).RepeatForever()));\n");
+                sb.Append("});\n");
                 sb.Append("builder.Services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);\n");
                 break;
         }

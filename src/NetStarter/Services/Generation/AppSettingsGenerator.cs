@@ -14,16 +14,20 @@ public static class AppSettingsGenerator
     {
         var settings = new Dictionary<string, object>
         {
-            ["Logging"] = new Dictionary<string, object>
+            ["AllowedHosts"] = "*",
+        };
+
+        if (config.Logging is not (LoggingOption.Serilog or LoggingOption.NLog))
+        {
+            settings["Logging"] = new Dictionary<string, object>
             {
                 ["LogLevel"] = new Dictionary<string, object>
                 {
                     ["Default"] = "Information",
                     ["Microsoft.AspNetCore"] = "Warning",
                 },
-            },
-            ["AllowedHosts"] = "*",
-        };
+            };
+        }
 
         // Conditional: EF Core / Dapper connection strings
         if (config.Orm is OrmOption.EfCore or OrmOption.Dapper && config.Database.HasValue)
@@ -138,14 +142,16 @@ public static class AppSettingsGenerator
                 ["throwConfigExceptions"] = true,
                 ["targets"] = new Dictionary<string, object>
                 {
+                    ["console"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "Console",
+                        ["layout"] = "${longdate}|${level:uppercase=true}|${logger}|${message:withexception=true}",
+                    },
                     ["logfile"] = new Dictionary<string, object>
                     {
                         ["type"] = "File",
                         ["fileName"] = "logs/log-${shortdate}.log",
-                    },
-                    ["logconsole"] = new Dictionary<string, object>
-                    {
-                        ["type"] = "Console",
+                        ["layout"] = "${longdate}|${level:uppercase=true}|${logger}|${message:withexception=true}",
                     },
                 },
                 ["rules"] = new List<object>
@@ -154,7 +160,7 @@ public static class AppSettingsGenerator
                     {
                         ["logger"] = "*",
                         ["minLevel"] = "Info",
-                        ["writeTo"] = "logconsole",
+                        ["writeTo"] = "console",
                     },
                     new Dictionary<string, object>
                     {
@@ -171,17 +177,19 @@ public static class AppSettingsGenerator
 
     public static string GenerateAppSettingsDevelopment(ProjectConfiguration config)
     {
-        var settings = new Dictionary<string, object>
+        var settings = new Dictionary<string, object>();
+
+        if (config.Logging is not (LoggingOption.Serilog or LoggingOption.NLog))
         {
-            ["Logging"] = new Dictionary<string, object>
+            settings["Logging"] = new Dictionary<string, object>
             {
                 ["LogLevel"] = new Dictionary<string, object>
                 {
                     ["Default"] = "Debug",
                     ["Microsoft.AspNetCore"] = "Information",
                 },
-            },
-        };
+            };
+        }
 
         // Conditional: Serilog development override
         if (config.Logging == LoggingOption.Serilog)
