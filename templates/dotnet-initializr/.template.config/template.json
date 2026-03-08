@@ -3,13 +3,277 @@
   "author": "kidchenko",
   "classifications": ["Web", "API"],
   "identity": "Initializr.Templates.WebApi.CSharp.1.0",
-  "name": ".NET Initializr Web API",
+  "name": ".NET Initializr",
   "shortName": "dotnet-initializr",
-  "description": "Generates a minimal compilable .NET WebApi project.",
+  "description": "Generates a configurable .NET project with your chosen architecture, ORM, auth, and tooling.",
   "sourceName": "Company.ProjectName",
   "preferNameDirectory": true,
   "tags": {
     "language": "C#",
     "type": "project"
+  },
+  "symbols": {
+
+    "type": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Project type [default: MinimalApi]",
+      "choices": [
+        { "choice": "WebApi",        "description": "Controller-based Web API",     "displayName": "Web API" },
+        { "choice": "MinimalApi",    "description": "Minimal API",                  "displayName": "Minimal API" },
+        { "choice": "Console",       "description": "Console application",           "displayName": "Console" },
+        { "choice": "WorkerService", "description": "Background Worker Service",     "displayName": "Worker Service" }
+      ],
+      "defaultValue": "MinimalApi"
+    },
+
+    "IncludeWebProject":  { "type": "computed", "value": "(type == \"WebApi\" || type == \"MinimalApi\")" },
+    "IncludeWebApi":      { "type": "computed", "value": "(type == \"WebApi\")" },
+    "IncludeMinimalApi":  { "type": "computed", "value": "(type == \"MinimalApi\")" },
+    "IncludeConsole":     { "type": "computed", "value": "(type == \"Console\")" },
+    "IncludeWorker":      { "type": "computed", "value": "(type == \"WorkerService\")" },
+
+    "arch": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Architecture pattern [default: CleanArchitecture]",
+      "choices": [
+        { "choice": "CleanArchitecture", "description": "Clean Architecture (multi-project)", "displayName": "Clean Architecture" },
+        { "choice": "VerticalSlice",     "description": "Vertical Slice Architecture",        "displayName": "Vertical Slice" },
+        { "choice": "SimpleLayered",     "description": "Simple layered (single project)",    "displayName": "Simple Layered" }
+      ],
+      "defaultValue": "CleanArchitecture"
+    },
+
+    "IncludeCleanArchitecture": { "type": "computed", "value": "(arch == \"CleanArchitecture\")" },
+    "IncludeVerticalSlice":     { "type": "computed", "value": "(arch == \"VerticalSlice\")" },
+    "IncludeSimpleLayered":     { "type": "computed", "value": "(arch == \"SimpleLayered\")" },
+
+    "orm": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "ORM / data access [default: EfCore]",
+      "choices": [
+        { "choice": "None",   "description": "No ORM" },
+        { "choice": "EfCore", "description": "Entity Framework Core", "displayName": "EF Core" },
+        { "choice": "Dapper", "description": "Dapper micro-ORM" }
+      ],
+      "defaultValue": "EfCore"
+    },
+
+    "IncludeEfCore":  { "type": "computed", "value": "(orm == \"EfCore\")" },
+    "IncludeDapper":  { "type": "computed", "value": "(orm == \"Dapper\")" },
+    "IncludeAnyOrm":  { "type": "computed", "value": "(orm != \"None\")" },
+
+    "db": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Database provider (requires --orm efcore|dapper) [default: PostgreSql]",
+      "isEnabled": "(orm != \"None\")",
+      "choices": [
+        { "choice": "PostgreSql", "description": "PostgreSQL" },
+        { "choice": "SqlServer",  "description": "SQL Server" },
+        { "choice": "MySql",      "description": "MySQL" },
+        { "choice": "Sqlite",     "description": "SQLite" }
+      ],
+      "defaultValue": "PostgreSql"
+    },
+
+    "IncludePostgreSql":  { "type": "computed", "value": "(orm != \"None\" && db == \"PostgreSql\")" },
+    "IncludeSqlServer":   { "type": "computed", "value": "(orm != \"None\" && db == \"SqlServer\")" },
+    "IncludeMySql":       { "type": "computed", "value": "(orm != \"None\" && db == \"MySql\")" },
+    "IncludeSqlite":      { "type": "computed", "value": "(orm != \"None\" && db == \"Sqlite\")" },
+    "IncludeAnyDatabase": { "type": "computed", "value": "(orm != \"None\")" },
+
+    "auth": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Authentication strategy (requires --type webapi|minimalapi) [default: None]",
+      "isEnabled": "(type == \"WebApi\" || type == \"MinimalApi\")",
+      "choices": [
+        { "choice": "None",           "description": "No authentication" },
+        { "choice": "Jwt",            "description": "JWT Bearer" },
+        { "choice": "AspNetIdentity", "description": "ASP.NET Core Identity (requires --orm efcore)", "displayName": "ASP.NET Identity" },
+        { "choice": "Keycloak",       "description": "Keycloak OIDC" },
+        { "choice": "ApiKey",         "description": "API Key" }
+      ],
+      "defaultValue": "None"
+    },
+
+    "IncludeJwt":            { "type": "computed", "value": "(auth == \"Jwt\")" },
+    "IncludeAspNetIdentity": { "type": "computed", "value": "(auth == \"AspNetIdentity\")" },
+    "IncludeKeycloak":       { "type": "computed", "value": "(auth == \"Keycloak\")" },
+    "IncludeApiKey":         { "type": "computed", "value": "(auth == \"ApiKey\")" },
+    "IncludeAnyAuth":        { "type": "computed", "value": "(auth != \"None\")" },
+
+    "logging": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Logging framework [default: Serilog]",
+      "choices": [
+        { "choice": "None",    "description": "Built-in Microsoft.Extensions.Logging only" },
+        { "choice": "Serilog", "description": "Serilog structured logging" },
+        { "choice": "NLog",    "description": "NLog" }
+      ],
+      "defaultValue": "Serilog"
+    },
+
+    "IncludeSerilog": { "type": "computed", "value": "(logging == \"Serilog\")" },
+    "IncludeNLog":    { "type": "computed", "value": "(logging == \"NLog\")" },
+
+    "framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Target framework [default: net10.0]",
+      "choices": [
+        { "choice": "net8.0",  "description": ".NET 8 (LTS)" },
+        { "choice": "net9.0",  "description": ".NET 9" },
+        { "choice": "net10.0", "description": ".NET 10 (LTS)" }
+      ],
+      "defaultValue": "net10.0",
+      "replaces": "net10.0"
+    },
+
+    "IncludeNet8":  { "type": "computed", "value": "(framework == \"net8.0\")" },
+    "IncludeNet9":  { "type": "computed", "value": "(framework == \"net9.0\")" },
+    "IncludeNet10": { "type": "computed", "value": "(framework == \"net10.0\")" },
+
+    "testing": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Testing libraries (comma-separated, e.g. xunit,fluentassertions) [default: xunit]",
+      "allowMultipleValues": true,
+      "enableQuotelessLiterals": true,
+      "choices": [
+        { "choice": "xunit",            "description": "xUnit test framework" },
+        { "choice": "fluentassertions", "description": "FluentAssertions" },
+        { "choice": "nsubstitute",      "description": "NSubstitute mocking" },
+        { "choice": "bogus",            "description": "Bogus fake data generator" },
+        { "choice": "testcontainers",   "description": "Testcontainers integration testing" }
+      ],
+      "defaultValue": "xunit"
+    },
+
+    "IncludeXunit":            { "type": "computed", "value": "(testing == \"xunit\")" },
+    "IncludeFluentAssertions": { "type": "computed", "value": "(testing == \"fluentassertions\")" },
+    "IncludeNSubstitute":      { "type": "computed", "value": "(testing == \"nsubstitute\")" },
+    "IncludeBogus":            { "type": "computed", "value": "(testing == \"bogus\")" },
+    "IncludeTestcontainers":   { "type": "computed", "value": "(testing == \"testcontainers\")" },
+
+    "containers": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Container support [default: None]",
+      "choices": [
+        { "choice": "None",          "description": "No container files" },
+        { "choice": "Dockerfile",    "description": "Dockerfile" },
+        { "choice": "DockerCompose", "description": "Docker Compose",           "displayName": "Docker Compose" },
+        { "choice": "Aspire",        "description": ".NET Aspire orchestration" }
+      ],
+      "defaultValue": "None"
+    },
+
+    "IncludeDockerfile":    { "type": "computed", "value": "(containers == \"Dockerfile\")" },
+    "IncludeDockerCompose": { "type": "computed", "value": "(containers == \"DockerCompose\")" },
+    "IncludeAspire":        { "type": "computed", "value": "(containers == \"Aspire\")" },
+
+    "cicd": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "CI/CD pipeline [default: None]",
+      "choices": [
+        { "choice": "None",          "description": "No CI/CD files" },
+        { "choice": "GitHubActions", "description": "GitHub Actions", "displayName": "GitHub Actions" },
+        { "choice": "AzureDevOps",   "description": "Azure DevOps",   "displayName": "Azure DevOps" }
+      ],
+      "defaultValue": "None"
+    },
+
+    "IncludeGitHubActions": { "type": "computed", "value": "(cicd == \"GitHubActions\")" },
+    "IncludeAzureDevOps":   { "type": "computed", "value": "(cicd == \"AzureDevOps\")" },
+
+    "backgroundJobs": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Background job strategy (Hangfire requires --orm efcore|dapper + --db) [default: None]",
+      "choices": [
+        { "choice": "None",           "description": "No background jobs" },
+        { "choice": "IHostedService", "description": "IHostedService / BackgroundService", "displayName": "IHostedService" },
+        { "choice": "Hangfire",       "description": "Hangfire (requires --orm + --db)" },
+        { "choice": "Quartz",         "description": "Quartz.NET" }
+      ],
+      "defaultValue": "None"
+    },
+
+    "IncludeIHostedService": { "type": "computed", "value": "(backgroundJobs == \"IHostedService\")" },
+    "IncludeHangfire":       { "type": "computed", "value": "(backgroundJobs == \"Hangfire\")" },
+    "IncludeQuartz":         { "type": "computed", "value": "(backgroundJobs == \"Quartz\")" },
+
+    "apiDocs": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "API documentation UI (requires --type webapi|minimalapi) [default: None]",
+      "isEnabled": "(type == \"WebApi\" || type == \"MinimalApi\")",
+      "choices": [
+        { "choice": "None",      "description": "No API documentation UI" },
+        { "choice": "Scalar",    "description": "Scalar" },
+        { "choice": "SwaggerUI", "description": "Swagger UI",  "displayName": "Swagger UI" },
+        { "choice": "Redoc",     "description": "Redoc" }
+      ],
+      "defaultValue": "None"
+    },
+
+    "IncludeScalar":    { "type": "computed", "value": "(IncludeWebProject && apiDocs == \"Scalar\")" },
+    "IncludeSwaggerUI": { "type": "computed", "value": "(IncludeWebProject && apiDocs == \"SwaggerUI\")" },
+    "IncludeRedoc":     { "type": "computed", "value": "(IncludeWebProject && apiDocs == \"Redoc\")" },
+
+    "healthChecks": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include health check endpoint [default: true]",
+      "defaultValue": "true"
+    },
+    "IncludeHealthChecks": { "type": "computed", "value": "(healthChecks)" },
+
+    "openTelemetry": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include OpenTelemetry observability [default: false]",
+      "defaultValue": "false"
+    },
+    "IncludeOpenTelemetry": { "type": "computed", "value": "(openTelemetry)" },
+
+    "caching": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include distributed caching (IDistributedCache) [default: false]",
+      "defaultValue": "false"
+    },
+    "IncludeCaching": { "type": "computed", "value": "(caching)" },
+
+    "validation": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include FluentValidation [default: true]",
+      "defaultValue": "true"
+    },
+    "IncludeValidation": { "type": "computed", "value": "(validation)" },
+
+    "resilience": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include Microsoft.Extensions.Http.Resilience [default: false]",
+      "defaultValue": "false"
+    },
+    "IncludeResilience": { "type": "computed", "value": "(resilience)" },
+
+    "mapping": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include object mapping library (Mapperly) [default: false]",
+      "defaultValue": "false"
+    },
+    "IncludeMapping": { "type": "computed", "value": "(mapping)" }
+
   }
 }
