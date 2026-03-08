@@ -158,6 +158,19 @@ public class FileTreeService
         apiProject.Children.Add(new FileTreeNode { Name = "appsettings.json", IsFolder = false });
         apiProject.Children.Add(new FileTreeNode { Name = "appsettings.Development.json", IsFolder = false });
 
+        if (config.ProjectType == ProjectType.WebApi)
+        {
+            var controllersFolder = new FileTreeNode { Name = "Controllers", IsFolder = true };
+            controllersFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+            apiProject.Children.Add(controllersFolder);
+        }
+        else if (config.ProjectType == ProjectType.MinimalApi)
+        {
+            var endpointsFolder = new FileTreeNode { Name = "Endpoints", IsFolder = true };
+            endpointsFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+            apiProject.Children.Add(endpointsFolder);
+        }
+
         // Auth in entry point
         if (config.Auth == AuthOption.Jwt)
         {
@@ -318,11 +331,15 @@ public class FileTreeService
         // Controllers or Endpoints folder depending on project type
         if (config.ProjectType == ProjectType.MinimalApi)
         {
-            mainProject.Children.Add(new FileTreeNode { Name = "Endpoints", IsFolder = true });
+            var endpointsFolder = new FileTreeNode { Name = "Endpoints", IsFolder = true };
+            endpointsFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+            mainProject.Children.Add(endpointsFolder);
         }
-        else
+        else if (config.ProjectType == ProjectType.WebApi)
         {
-            mainProject.Children.Add(new FileTreeNode { Name = "Controllers", IsFolder = true });
+            var controllersFolder = new FileTreeNode { Name = "Controllers", IsFolder = true };
+            controllersFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+            mainProject.Children.Add(controllersFolder);
         }
 
         mainProject.Children.Add(new FileTreeNode { Name = "Services", IsFolder = true });

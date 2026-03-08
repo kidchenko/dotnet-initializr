@@ -310,6 +310,18 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
+        if (config.ProjectType == ProjectType.MinimalApi)
+        {
+            var endpointNs = config.Architecture switch
+            {
+                ArchitecturePattern.VerticalSlice => $"{config.Namespace}.Features.Hello",
+                ArchitecturePattern.CleanArchitecture => $"{config.Namespace}.Api.Endpoints",
+                _ => $"{config.Namespace}.Endpoints",
+            };
+            sb.Append($"using {endpointNs};\n");
+            hasUsings = true;
+        }
+
         if (hasUsings)
             sb.Append("\n");
     }
@@ -585,7 +597,7 @@ public static class ProgramCsGenerator
         if (config.ProjectType == ProjectType.WebApi)
             sb.Append("app.MapControllers();\n");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            sb.Append($"app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n");
+            sb.Append("HelloEndpoint.Map(app);\n");
 
         if (sb.Length > middlewareStart)
             sb.Append("\n");

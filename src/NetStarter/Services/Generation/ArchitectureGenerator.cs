@@ -97,6 +97,9 @@ public static class ArchitectureGenerator
         if (config.ProjectType == ProjectType.WebApi)
             files[$"{src}/{name}.{config.EntryPointSuffix}/Controllers/HelloController.cs"] =
                 GenerateHelloController(config, $"{config.Namespace}.Api.Controllers");
+        else if (config.ProjectType == ProjectType.MinimalApi)
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Endpoints/HelloEndpoint.cs"] =
+                GenerateHelloEndpoint(config, $"{config.Namespace}.Api.Endpoints");
     }
 
     public static void GenerateVerticalSlice(ProjectConfiguration config, Dictionary<string, string> files, string root)

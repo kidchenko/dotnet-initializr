@@ -183,13 +183,15 @@ public class ProgramCsGeneratorBaselineTests
         var result = ProgramCsGenerator.Generate(config);
 
         const string expected =
+            "using MyProject.Endpoints;\n" +
+            "\n" +
             "var builder = WebApplication.CreateBuilder(args);\n" +
             "\n" +
             "builder.Services.AddEndpointsApiExplorer();\n" +
             "\n" +
             "var app = builder.Build();\n" +
             "\n" +
-            "app.MapGet(\"/api/hello\", () => new { Message = \"Hello from MyProject!\" });\n" +
+            "HelloEndpoint.Map(app);\n" +
             "\n" +
             "app.Run();\n";
 

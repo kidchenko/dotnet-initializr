@@ -14,7 +14,7 @@
   },
   "symbols": {
 
-    "type": {
+    "projectType": {
       "type": "parameter",
       "datatype": "choice",
       "description": "Project type [default: MinimalApi]",
@@ -27,11 +27,11 @@
       "defaultValue": "MinimalApi"
     },
 
-    "IncludeWebProject":  { "type": "computed", "value": "(type == \"WebApi\" || type == \"MinimalApi\")" },
-    "IncludeWebApi":      { "type": "computed", "value": "(type == \"WebApi\")" },
-    "IncludeMinimalApi":  { "type": "computed", "value": "(type == \"MinimalApi\")" },
-    "IncludeConsole":     { "type": "computed", "value": "(type == \"Console\")" },
-    "IncludeWorker":      { "type": "computed", "value": "(type == \"WorkerService\")" },
+    "IncludeWebProject":  { "type": "computed", "value": "(projectType == \"WebApi\" || projectType == \"MinimalApi\")" },
+    "IncludeWebApi":      { "type": "computed", "value": "(projectType == \"WebApi\")" },
+    "IncludeMinimalApi":  { "type": "computed", "value": "(projectType == \"MinimalApi\")" },
+    "IncludeConsole":     { "type": "computed", "value": "(projectType == \"Console\")" },
+    "IncludeWorker":      { "type": "computed", "value": "(projectType == \"WorkerService\")" },
 
     "arch": {
       "type": "parameter",
@@ -88,8 +88,8 @@
     "auth": {
       "type": "parameter",
       "datatype": "choice",
-      "description": "Authentication strategy (requires --type webapi|minimalapi) [default: None]",
-      "isEnabled": "(type == \"WebApi\" || type == \"MinimalApi\")",
+      "description": "Authentication strategy (requires --project-type webapi|minimalapi) [default: None]",
+      "isEnabled": "(projectType == \"WebApi\" || projectType == \"MinimalApi\")",
       "choices": [
         { "choice": "None",           "description": "No authentication" },
         { "choice": "Jwt",            "description": "JWT Bearer" },
@@ -195,7 +195,7 @@
     "backgroundJobs": {
       "type": "parameter",
       "datatype": "choice",
-      "description": "Background job strategy (Hangfire requires --orm efcore|dapper + --db) [default: None]",
+      "description": "Background job strategy (Hangfire requires --orm + --db) [default: None]",
       "choices": [
         { "choice": "None",           "description": "No background jobs" },
         { "choice": "IHostedService", "description": "IHostedService / BackgroundService", "displayName": "IHostedService" },
@@ -212,8 +212,8 @@
     "apiDocs": {
       "type": "parameter",
       "datatype": "choice",
-      "description": "API documentation UI (requires --type webapi|minimalapi) [default: None]",
-      "isEnabled": "(type == \"WebApi\" || type == \"MinimalApi\")",
+      "description": "API documentation UI (requires --project-type webapi|minimalapi) [default: None]",
+      "isEnabled": "(projectType == \"WebApi\" || projectType == \"MinimalApi\")",
       "choices": [
         { "choice": "None",      "description": "No API documentation UI" },
         { "choice": "Scalar",    "description": "Scalar" },

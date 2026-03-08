@@ -123,7 +123,7 @@ echo "13. Verifying --help shows all user-facing parameters..."
 HELP_OUTPUT=$(dotnet new dotnet-initializr --help 2>&1)
 
 # Core choice parameters
-echo "$HELP_OUTPUT" | grep -q "\-\-param:type" || { echo "FAIL: --param:type not in help"; exit 1; }
+echo "$HELP_OUTPUT" | grep -q "\-\-project-type" || { echo "FAIL: --project-type not in help"; exit 1; }
 echo "$HELP_OUTPUT" | grep -q "\-\-arch" || { echo "FAIL: --arch not in help"; exit 1; }
 echo "$HELP_OUTPUT" | grep -q "\-\-orm" || { echo "FAIL: --orm not in help"; exit 1; }
 echo "$HELP_OUTPUT" | grep -q "\-\-db" || { echo "FAIL: --db not in help"; exit 1; }
@@ -172,23 +172,23 @@ if ! echo "$HELP_OUTPUT" | grep -A5 "^  -db " | grep -q "Enabled if"; then
     echo "FAIL: --db does not show 'Enabled if' annotation in help"
     exit 1
 fi
-echo "   OK: --db shows 'Enabled if: (orm != \"None\")' gating annotation"
+echo "   OK: --db shows 'Enabled if' gating annotation"
 
 # Step 15: Verify gating rule 2 — --auth shows 'Enabled if' annotation (requires web type)
-echo "15. Verifying gating rule 2: --auth shows 'Enabled if' annotation (requires web type)..."
-if ! echo "$HELP_OUTPUT" | grep -A5 "^  -au, --auth" | grep -q "Enabled if"; then
+echo "15. Verifying gating rule 2: --auth shows 'Enabled if' annotation (requires web project-type)..."
+if ! echo "$HELP_OUTPUT" | grep -A5 "\-\-auth" | grep -q "Enabled if"; then
     echo "FAIL: --auth does not show 'Enabled if' annotation in help"
     exit 1
 fi
-echo "   OK: --auth shows 'Enabled if: (type == \"WebApi\" || type == \"MinimalApi\")' gating annotation"
+echo "   OK: --auth shows 'Enabled if: (projectType == \"WebApi\" || projectType == \"MinimalApi\")' gating annotation"
 
 # Step 16: Verify gating rule 3 — --api-docs shows 'Enabled if' annotation (requires web type)
-echo "16. Verifying gating rule 3: --api-docs shows 'Enabled if' annotation (requires web type)..."
-if ! echo "$HELP_OUTPUT" | grep -A5 "^  -ad, --api-docs" | grep -q "Enabled if"; then
+echo "16. Verifying gating rule 3: --api-docs shows 'Enabled if' annotation (requires web project-type)..."
+if ! echo "$HELP_OUTPUT" | grep -A5 "\-\-api-docs" | grep -q "Enabled if"; then
     echo "FAIL: --api-docs does not show 'Enabled if' annotation in help"
     exit 1
 fi
-echo "   OK: --api-docs shows 'Enabled if: (type == \"WebApi\" || type == \"MinimalApi\")' gating annotation"
+echo "   OK: --api-docs shows 'Enabled if: (projectType == \"WebApi\" || projectType == \"MinimalApi\")' gating annotation"
 
 # Step 17: Verify multi-value --testing parameter (repeated flags)
 # NOTE: .NET 10 requires repeated option flags, NOT comma-separated syntax.
@@ -210,8 +210,8 @@ fi
 echo "   OK: --testing shows 'Multiple values are allowed: True' in help"
 
 # Step 18: Verify valid gated combination works (web type + auth + orm + db)
-echo "18. Verifying valid gated combination: --param:type WebApi --auth Jwt --orm EfCore --db PostgreSql..."
-dotnet new dotnet-initializr -n GatedValid --param:type WebApi --auth Jwt --orm EfCore --db PostgreSql -o "$TEST_DIR/gated-valid"
+echo "18. Verifying valid gated combination: --project-type WebApi --auth Jwt --orm EfCore --db PostgreSql..."
+dotnet new dotnet-initializr -n GatedValid --project-type WebApi --auth Jwt --orm EfCore --db PostgreSql -o "$TEST_DIR/gated-valid"
 if [ ! -d "$TEST_DIR/gated-valid" ]; then
     echo "FAIL: valid gated combination should succeed"
     exit 1
@@ -221,7 +221,7 @@ echo "   OK: valid gated combination accepted"
 
 # Step 19: Verify Console project type generates and builds
 echo "19. Verifying Console project type generates and builds..."
-dotnet new dotnet-initializr -n ConsoleTest --param:type Console -o "$TEST_DIR/console-test"
+dotnet new dotnet-initializr -n ConsoleTest --project-type Console -o "$TEST_DIR/console-test"
 if [ ! -d "$TEST_DIR/console-test" ]; then
     echo "FAIL: Console project generation should succeed"
     exit 1
