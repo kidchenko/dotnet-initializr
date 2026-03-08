@@ -212,9 +212,9 @@ Plans:
 **Plans:** 4/4 plans complete
 Plans:
 - [x] 17-01-PLAN.md — Packages (.csproj), template.json (IncludeAnyTesting, sources), .slnx test project entries (completed 2026-03-08)
-- [ ] 17-02-PLAN.md — Program.cs logging/quality registrations, InfrastructureExtensions, ApplicationExtensions, appsettings.json, sample files
-- [ ] 17-03-PLAN.md — Test project directories (tests-single, tests-split), .csproj, SampleTests.cs, SampleIntegrationTests.cs
-- [ ] 17-04-PLAN.md — Phase 17 verification steps 40-53 in test-template.sh
+- [x] 17-02-PLAN.md — Program.cs logging/quality registrations, InfrastructureExtensions, ApplicationExtensions, appsettings.json, sample files (completed 2026-03-08)
+- [x] 17-03-PLAN.md — Test project directories (tests-single, tests-split), .csproj, SampleTests.cs, SampleIntegrationTests.cs (completed 2026-03-08)
+- [x] 17-04-PLAN.md — Phase 17 verification steps 40-53 in test-template.sh (completed 2026-03-08)
 
 ### Phase 18: DevOps, Containers, and Background Jobs
 **Goal**: CI/CD workflow files, container files, and background job scaffolding are included or excluded via `sources.modifiers` for the correct parameter combinations
