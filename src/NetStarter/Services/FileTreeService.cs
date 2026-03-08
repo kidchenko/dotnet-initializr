@@ -118,6 +118,13 @@ public class FileTreeService
             appProject.Children.Add(mappingFolder);
         }
 
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            var validationFolder = new FileTreeNode { Name = "Validation", IsFolder = true };
+            validationFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
+            appProject.Children.Add(validationFolder);
+        }
+
         srcFolder.Children.Add(appProject);
 
         // Infrastructure project
@@ -225,6 +232,9 @@ public class FileTreeService
 
         if (config.Mapping == MappingOption.Mapster)
             helloFolder.Children.Add(new FileTreeNode { Name = "HelloMappingConfig.cs", IsFolder = false });
+
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+            helloFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
 
         featuresFolder.Children.Add(helloFolder);
         mainProject.Children.Add(featuresFolder);
@@ -351,6 +361,13 @@ public class FileTreeService
             var mappingFolder = new FileTreeNode { Name = "Mapping", IsFolder = true };
             mappingFolder.Children.Add(new FileTreeNode { Name = "MappingConfig.cs", IsFolder = false });
             mainProject.Children.Add(mappingFolder);
+        }
+
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            var validationFolder = new FileTreeNode { Name = "Validation", IsFolder = true };
+            validationFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
+            mainProject.Children.Add(validationFolder);
         }
 
         // OpenTelemetry

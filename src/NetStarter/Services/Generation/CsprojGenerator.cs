@@ -78,32 +78,42 @@ public static class CsprojGenerator
 
     private static void AppendFeaturePackages(ProjectConfiguration config, List<(string Name, string Version)> packages)
     {
-        if (config.Orm == OrmOption.EfCore)
+        // EF Core and Dapper packages: skip for Clean Architecture (owned by Infrastructure layer)
+        if (config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
-            packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
-            packages.Add(("Microsoft.EntityFrameworkCore.Design", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Design")));
-
-            if (config.Database == DatabaseOption.PostgreSql)
-                packages.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
-            else if (config.Database == DatabaseOption.SqlServer)
-                packages.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
-            else if (config.Database == DatabaseOption.MySql)
-                packages.Add(("Pomelo.EntityFrameworkCore.MySql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Pomelo.EntityFrameworkCore.MySql")));
-            else if (config.Database == DatabaseOption.Sqlite)
-                packages.Add(("Microsoft.EntityFrameworkCore.Sqlite", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Sqlite")));
-        }
-
-        if (config.Orm == OrmOption.Dapper)
-        {
-            packages.Add(("Dapper", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Dapper")));
-            var driver = config.Database switch
+            if (config.Orm == OrmOption.EfCore)
             {
-                DatabaseOption.MySql => "MySqlConnector",
-                DatabaseOption.Sqlite => "Microsoft.Data.Sqlite",
-                DatabaseOption.SqlServer => "Microsoft.Data.SqlClient",
-                _ => "Npgsql",  // PostgreSQL default
-            };
-            packages.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
+                packages.Add(("Microsoft.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore")));
+                packages.Add(("Microsoft.EntityFrameworkCore.Design", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Design")));
+
+                if (config.Database == DatabaseOption.PostgreSql)
+                    packages.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
+                else if (config.Database == DatabaseOption.SqlServer)
+                    packages.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
+                else if (config.Database == DatabaseOption.MySql)
+                    packages.Add(("Pomelo.EntityFrameworkCore.MySql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Pomelo.EntityFrameworkCore.MySql")));
+                else if (config.Database == DatabaseOption.Sqlite)
+                    packages.Add(("Microsoft.EntityFrameworkCore.Sqlite", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Sqlite")));
+            }
+
+            if (config.Orm == OrmOption.Dapper)
+            {
+                packages.Add(("Dapper", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Dapper")));
+                var driver = config.Database switch
+                {
+                    DatabaseOption.MySql => "MySqlConnector",
+                    DatabaseOption.Sqlite => "Microsoft.Data.Sqlite",
+                    DatabaseOption.SqlServer => "Microsoft.Data.SqlClient",
+                    _ => "Npgsql",  // PostgreSQL default
+                };
+                packages.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
+            }
+
+            if (config.Auth == AuthOption.AspNetIdentity && config.Orm == OrmOption.EfCore)
+            {
+                packages.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+                    NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
+            }
         }
 
         if (config.Auth is AuthOption.Jwt or AuthOption.Keycloak)
@@ -150,7 +160,8 @@ public static class CsprojGenerator
             packages.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
         }
 
-        if (config.Mapping == MappingOption.Mapster)
+        // Mapster packages: skip for Clean Architecture (owned by Application layer)
+        if (config.Mapping == MappingOption.Mapster && config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
             packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
             packages.Add(("Mapster.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster.DependencyInjection")));

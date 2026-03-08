@@ -49,6 +49,7 @@ public class Phase05DataLayerTests
             Orm = OrmOption.Dapper,
             Database = db,
             SdkVersion = DotNetSdkVersion.Net10,
+            Architecture = ArchitecturePattern.SimpleLayered,
         };
         var csproj = CsprojGenerator.GenerateWebProject(config);
         Assert.Contains("Include=\"Dapper\"", csproj);
@@ -65,6 +66,7 @@ public class Phase05DataLayerTests
             Orm = OrmOption.EfCore,
             Database = DatabaseOption.MySql,
             SdkVersion = DotNetSdkVersion.Net10,
+            Architecture = ArchitecturePattern.SimpleLayered,
         };
         var csproj = CsprojGenerator.GenerateWebProject(config);
         Assert.Contains("Pomelo.EntityFrameworkCore.MySql", csproj);

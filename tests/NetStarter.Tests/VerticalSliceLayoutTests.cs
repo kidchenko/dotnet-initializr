@@ -123,6 +123,87 @@ public class VerticalSliceLayoutTests
     }
 
     [Fact]
+    public void VerticalSlice_FluentValidation_GeneratesHelloRequestValidator()
+    {
+        var config = CreateVerticalSliceConfig();
+        config.IncludeFluentValidation = true;
+        var files = _generationService.Generate(config);
+
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        Assert.NotNull(validatorKey);
+        Assert.Contains("Features/Hello/HelloRequestValidator.cs", validatorKey);
+
+        var content = files[validatorKey];
+        Assert.Contains("AbstractValidator<HelloRequest>", content);
+        Assert.Contains("RuleFor(x => x.Name)", content);
+    }
+
+    [Fact]
+    public void VerticalSlice_FluentValidation_FileTreeHasValidatorNode()
+    {
+        var config = CreateVerticalSliceConfig();
+        config.IncludeFluentValidation = true;
+
+        var treeService = new FileTreeService();
+        var tree = treeService.GenerateTree(config);
+
+        var src = tree[0].Children.First(n => n.Name == "src");
+        var proj = src.Children.First(n => n.Name == config.ProjectName);
+        var features = proj.Children.First(n => n.Name == "Features");
+        var hello = features.Children.First(n => n.Name == "Hello");
+
+        Assert.Contains(hello.Children, n => n.Name == "HelloRequestValidator.cs");
+    }
+
+    [Fact]
+    public void VerticalSlice_NoFluentValidation_NoValidatorGenerated()
+    {
+        var config = CreateVerticalSliceConfig();
+        config.IncludeFluentValidation = false;
+        var files = _generationService.Generate(config);
+
+        Assert.DoesNotContain(files.Keys, k => k.Contains("HelloRequestValidator.cs"));
+    }
+
+    [Fact]
+    public void CleanArchitecture_FluentValidation_GeneratesValidatorInApplication()
+    {
+        var config = new ProjectConfiguration
+        {
+            Architecture = ArchitecturePattern.CleanArchitecture,
+            ProjectType = ProjectType.WebApi,
+            IncludeFluentValidation = true,
+        };
+        var files = _generationService.Generate(config);
+
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        Assert.NotNull(validatorKey);
+        Assert.Contains("Application/Validation/HelloRequestValidator.cs", validatorKey);
+
+        var content = files[validatorKey];
+        Assert.Contains("AbstractValidator<HelloRequest>", content);
+    }
+
+    [Fact]
+    public void SimpleLayered_FluentValidation_GeneratesValidatorInValidationFolder()
+    {
+        var config = new ProjectConfiguration
+        {
+            Architecture = ArchitecturePattern.SimpleLayered,
+            ProjectType = ProjectType.MinimalApi,
+            IncludeFluentValidation = true,
+        };
+        var files = _generationService.Generate(config);
+
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        Assert.NotNull(validatorKey);
+        Assert.Contains("Validation/HelloRequestValidator.cs", validatorKey);
+
+        var content = files[validatorKey];
+        Assert.Contains("AbstractValidator<HelloRequest>", content);
+    }
+
+    [Fact]
     public void VerticalSlice_FileTree_HasHelloFolderInFeatures()
     {
         var config = CreateVerticalSliceConfig(

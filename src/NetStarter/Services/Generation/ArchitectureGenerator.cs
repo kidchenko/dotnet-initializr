@@ -32,6 +32,12 @@ public static class ArchitectureGenerator
                 MappingGenerator.GenerateMappingConfig(config, mappingNs);
         }
 
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            files[$"{src}/{name}.Application/Validation/HelloRequestValidator.cs"] =
+                GenerateHelloRequestValidator(config, $"{config.Namespace}.Application.Validation");
+        }
+
         // Infrastructure project — references Application and Domain, owns EF Core / Dapper
         var infraCsproj = CsprojGenerator.GenerateClassLibrary(config, "Infrastructure");
         infraCsproj = InjectProjectReferences(infraCsproj, [
@@ -152,6 +158,12 @@ public static class ArchitectureGenerator
                 MappingGenerator.GenerateHelloMappingConfig(config, mappingNs);
         }
 
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            files[$"{proj}/Features/Hello/HelloRequestValidator.cs"] =
+                GenerateHelloRequestValidator(config, $"{config.Namespace}.Features.Hello");
+        }
+
         if (config.ProjectType == ProjectType.WebApi)
             files[$"{proj}/Features/Hello/HelloController.cs"] =
                 GenerateHelloController(config, $"{config.Namespace}.Features.Hello");
@@ -219,6 +231,12 @@ public static class ArchitectureGenerator
                 MappingGenerator.GenerateMappingConfig(config, mappingNs);
         }
 
+        if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            files[$"{proj}/Validation/HelloRequestValidator.cs"] =
+                GenerateHelloRequestValidator(config, $"{config.Namespace}.Validation");
+        }
+
         // Layer folders
         files[$"{proj}/Services/.gitkeep"] = string.Empty;
 
@@ -269,6 +287,21 @@ public static class ArchitectureGenerator
         $"    public static void Map(WebApplication app)\n" +
         $"    {{\n" +
         $"        app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n" +
+        $"    }}\n" +
+        $"}}\n";
+
+    private static string GenerateHelloRequestValidator(ProjectConfiguration config, string ns) =>
+        $"using FluentValidation;\n" +
+        $"\n" +
+        $"namespace {ns};\n" +
+        $"\n" +
+        $"public record HelloRequest(string Name);\n" +
+        $"\n" +
+        $"public class HelloRequestValidator : AbstractValidator<HelloRequest>\n" +
+        $"{{\n" +
+        $"    public HelloRequestValidator()\n" +
+        $"    {{\n" +
+        $"        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);\n" +
         $"    }}\n" +
         $"}}\n";
 
