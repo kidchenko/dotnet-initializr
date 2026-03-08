@@ -17,6 +17,36 @@
 <!--#endif -->
   </ItemGroup>
 
+<!--#if (IncludeEfCore) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="__EfCoreVersion__" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="__EfCoreVersion__" />
+<!--#if (IncludePostgreSql) -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="__NpgsqlEfVersion__" />
+<!--#elif (IncludeSqlServer) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="__EfCoreVersion__" />
+<!--#elif (IncludeMySql) -->
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="__PomeloVersion__" />
+<!--#elif (IncludeSqlite) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="__EfCoreVersion__" />
+<!--#endif -->
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeDapper) -->
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.*" />
+<!--#if (IncludePostgreSql) -->
+    <PackageReference Include="Npgsql" Version="9.*" />
+<!--#elif (IncludeSqlServer) -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.*" />
+<!--#elif (IncludeMySql) -->
+    <PackageReference Include="MySqlConnector" Version="2.*" />
+<!--#elif (IncludeSqlite) -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="__EfCoreVersion__" />
+<!--#endif -->
+  </ItemGroup>
+<!--#endif -->
+
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Application/Company.ProjectName.Application.csproj" />
     <ProjectReference Include="../Company.ProjectName.Domain/Company.ProjectName.Domain.csproj" />

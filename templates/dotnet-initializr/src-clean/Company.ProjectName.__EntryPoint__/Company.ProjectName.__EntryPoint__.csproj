@@ -29,6 +29,27 @@
   </ItemGroup>
 <!--#endif -->
 
+<!--#if (IncludeJwt || IncludeKeycloak) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="__EfCoreVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeAspNetIdentity) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="__EfCoreVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeSwaggerUI && IncludeNet8) -->
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="__SwashbuckleVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeSwaggerUI && !IncludeNet8) -->
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="__SwashbuckleVersion__" />
+  </ItemGroup>
+<!--#endif -->
+
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Infrastructure/Company.ProjectName.Infrastructure.csproj" />
     <ProjectReference Include="../Company.ProjectName.Application/Company.ProjectName.Application.csproj" />
