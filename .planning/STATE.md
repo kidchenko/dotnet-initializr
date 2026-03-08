@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: dotnet new Templates
 status: unknown
-last_updated: "2026-03-08T23:27:45.869Z"
+last_updated: "2026-03-08T23:35:40.446Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 13
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 17 of 20 (Logging, Testing, and Quality)
-Plan: 3 complete (17-03 done — Test project directory structure: tests-single/ and tests-split/)
-Status: Phase 17 in progress
-Last activity: 2026-03-08 — Phase 17 Plan 03 complete: tests-single/ (Company.ProjectName.Tests) and tests-split/ (Company.ProjectName.UnitTests + Company.ProjectName.IntegrationTests) with xunit/FluentAssertions/NSubstitute/Bogus/Testcontainers conditional packages
+Plan: 4 complete (17-04 done — Phase 17 verification steps 40-53 added to test-template.sh)
+Status: Phase 17 complete (all 4 plans done)
+Last activity: 2026-03-08 — Phase 17 Plan 04 complete: 14 verification steps (40-53) added to test-template.sh covering Serilog, NLog (web/non-web), testing projects (single/split/none), validation, caching, resilience, mapping, OpenTelemetry, health-checks, kitchen sink, regression
 
-Progress: [█████░░░░░] 32% (v1.3: 12/? plans complete — Phase 17 plan 03 complete)
+Progress: [██████░░░░] 36% (v1.3: 13/? plans complete — Phase 17 plan 04 complete)
 
 ## Performance Metrics
 
@@ -43,7 +43,7 @@ Progress: [█████░░░░░] 32% (v1.3: 12/? plans complete — Ph
 | 14. Core Parameter Model | 2/2 | Complete |
 | 15. Architecture and Project Types | 2/2 | Complete |
 | 16. Data Access and Auth | 3/3 | Complete |
-| 17. Logging, Testing, and Quality | 3/? | In progress |
+| 17. Logging, Testing, and Quality | 4/4 | Complete |
 | 18. DevOps, Containers, and Background Jobs | 0/? | Not started |
 | 19. Blazor CLI Panel | 0/? | Not started |
 | 20. NuGet Packaging and Distribution | 0/? | Not started |
@@ -109,6 +109,8 @@ Key decisions carried into v1.3:
 - [Phase 17]: FluentAssertions pinned to 7.* in test projects (v8 is commercial); xunit.runner.visualstudio pinned to 2.* (.NET 10 issues with v3.x)
 - [Phase 17]: IntegrationTests references Infrastructure (not Application) for CleanArchitecture — data access testing requires Infrastructure layer
 - [Phase 17]: SampleIntegrationTests.cs uses IAsyncLifetime for async container start/stop lifecycle (xUnit idiomatic pattern)
+- [Phase 17]: --openTelemetry (camelCase) used as CLI flag — no longName override in dotnetcli.host.json
+- [Phase 17]: Kitchen sink step 52 uses xunit+fluentassertions+nsubstitute (no testcontainers) — produces single Tests/ project
 
 ### Pending Todos
 
@@ -121,5 +123,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 17-02-PLAN.md — Logging, health-check, and quality feature registrations in Program.cs (both arch), InfrastructureExtensions, ApplicationExtensions, appsettings.json; sample SampleEntityValidator and SampleMappingConfig files created
+Stopped at: Completed 17-04-PLAN.md — Phase 17 verification steps 40-53 added to test-template.sh (14 steps covering Serilog, NLog, testing, validation, caching, resilience, mapping, OpenTelemetry, health-checks, kitchen sink, regression)
 Resume file: None

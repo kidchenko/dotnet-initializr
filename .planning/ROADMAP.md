@@ -48,7 +48,7 @@
 - [x] **Phase 14: Core Parameter Model** - Complete template.json with all parameters, computed symbols, and dependency chains (completed 2026-03-08)
 - [x] **Phase 15: Architecture and Project Types** - Correct folder structures and .slnx for all arch + type combinations (completed 2026-03-08)
 - [x] **Phase 16: Data Access and Auth** - ORM, database, auth, and SDK-version-aware NuGet references (completed 2026-03-08)
-- [ ] **Phase 17: Logging, Testing, and Quality** - Logging choice, testing flags, and all boolean feature flags (Plan 01 complete 2026-03-08)
+- [x] **Phase 17: Logging, Testing, and Quality** - Logging choice, testing flags, and all boolean feature flags (Plan 01 complete 2026-03-08) (completed 2026-03-08)
 - [ ] **Phase 18: DevOps, Containers, and Background Jobs** - CI/CD, container files, background jobs, and API docs via sources.modifiers
 - [ ] **Phase 19: Blazor CLI Panel** - Blazor app displays `dotnet new dotnet-initializr --flags` command
 - [ ] **Phase 20: NuGet Packaging and Distribution** - Build verification, NuGet.org publish, GitHub release artifact
@@ -209,7 +209,7 @@ Plans:
   3. `--validation` adds FluentValidation v12 packages; `--resilience` adds `Microsoft.Extensions.Http.Resilience`; `--caching` adds StackExchange.Redis; `--mapping` adds Mapster — each flag independently controls exactly its own packages
   4. `Program.cs` in the generated project contains only the `#if` blocks relevant to the selected features — no dead conditional blocks for unselected features appear in the output
   5. `appsettings.json` contains configuration sections only for selected features (e.g., no `ConnectionStrings` section when `--orm none`)
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 - [x] 17-01-PLAN.md — Packages (.csproj), template.json (IncludeAnyTesting, sources), .slnx test project entries (completed 2026-03-08)
 - [ ] 17-02-PLAN.md — Program.cs logging/quality registrations, InfrastructureExtensions, ApplicationExtensions, appsettings.json, sample files
@@ -274,7 +274,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 14. Core Parameter Model | 2/2 | Complete    | 2026-03-08 | - |
 | 15. Architecture and Project Types | 2/2 | Complete    | 2026-03-08 | - |
 | 16. Data Access and Auth | 3/3 | Complete    | 2026-03-08 | - |
-| 17. Logging, Testing, and Quality | 3/4 | In Progress|  | - |
+| 17. Logging, Testing, and Quality | 4/4 | Complete   | 2026-03-08 | - |
 | 18. DevOps, Containers, and Background Jobs | v1.3 | 0/? | Not started | - |
 | 19. Blazor CLI Panel | v1.3 | 0/? | Not started | - |
 | 20. NuGet Packaging and Distribution | v1.3 | 0/? | Not started | - |
