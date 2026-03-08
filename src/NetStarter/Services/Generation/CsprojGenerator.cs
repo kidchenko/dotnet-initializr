@@ -150,6 +150,12 @@ public static class CsprojGenerator
             packages.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
         }
 
+        if (config.Mapping == MappingOption.Mapster)
+        {
+            packages.Add(("Mapster", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster")));
+            packages.Add(("Mapster.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster.DependencyInjection")));
+        }
+
         // OpenAPI Documentation packages
         if (config.ApiDocsUi != OpenApiUi.None && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {

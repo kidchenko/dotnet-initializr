@@ -113,9 +113,6 @@ public static class ArchitectureGenerator
             files[$"{proj}/ServiceCollectionExtensions.cs"] =
                 ProgramCsGenerator.GenerateServiceCollectionExtensions(config);
 
-        // Features folder placeholder — teams add feature slices here
-        files[$"{proj}/Features/.gitkeep"] = string.Empty;
-
         if (config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(ArchitecturePattern.VerticalSlice);
@@ -124,8 +121,8 @@ public static class ArchitectureGenerator
                 : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
 
             var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.VerticalSlice);
-            files[$"{proj}/Data/Entities/SampleEntity.cs"] =
-                EfCoreGenerator.GenerateSampleEntity(config, entityNs);
+            files[$"{proj}/Features/Hello/HelloEntity.cs"] =
+                EfCoreGenerator.GenerateHelloEntity(config, entityNs);
         }
 
         if (config.Auth == AuthOption.Jwt)
@@ -151,9 +148,16 @@ public static class ArchitectureGenerator
         if (config.Mapping == MappingOption.Mapster)
         {
             var mappingNs = MappingGenerator.GetNamespaceSuffix(ArchitecturePattern.VerticalSlice);
-            files[$"{proj}/Mapping/MappingConfig.cs"] =
-                MappingGenerator.GenerateMappingConfig(config, mappingNs);
+            files[$"{proj}/Features/Hello/HelloMappingConfig.cs"] =
+                MappingGenerator.GenerateHelloMappingConfig(config, mappingNs);
         }
+
+        if (config.ProjectType == ProjectType.WebApi)
+            files[$"{proj}/Features/Hello/HelloController.cs"] =
+                GenerateHelloController(config, $"{config.Namespace}.Features.Hello");
+        else if (config.ProjectType == ProjectType.MinimalApi)
+            files[$"{proj}/Features/Hello/HelloEndpoint.cs"] =
+                GenerateHelloEndpoint(config, $"{config.Namespace}.Features.Hello");
     }
 
     public static void GenerateSimpleLayered(ProjectConfiguration config, Dictionary<string, string> files, string root)

@@ -211,11 +211,25 @@ public class FileTreeService
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.json", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "appsettings.Development.json", IsFolder = false });
 
-        // Features folder
+        // Features folder with Hello slice
         var featuresFolder = new FileTreeNode { Name = "Features", IsFolder = true };
+        var helloFolder = new FileTreeNode { Name = "Hello", IsFolder = true };
+
+        if (config.Orm == OrmOption.EfCore)
+            helloFolder.Children.Add(new FileTreeNode { Name = "HelloEntity.cs", IsFolder = false });
+
+        if (config.ProjectType == ProjectType.WebApi)
+            helloFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+        else if (config.ProjectType == ProjectType.MinimalApi)
+            helloFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+
+        if (config.Mapping == MappingOption.Mapster)
+            helloFolder.Children.Add(new FileTreeNode { Name = "HelloMappingConfig.cs", IsFolder = false });
+
+        featuresFolder.Children.Add(helloFolder);
         mainProject.Children.Add(featuresFolder);
 
-        // EF Core
+        // EF Core — shared infrastructure (DbContext + Migrations)
         if (config.Orm == OrmOption.EfCore)
         {
             var dataFolder = new FileTreeNode { Name = "Data", IsFolder = true };
@@ -237,14 +251,6 @@ public class FileTreeService
             var authFolder = new FileTreeNode { Name = "Auth", IsFolder = true };
             authFolder.Children.Add(new FileTreeNode { Name = "JwtSettings.cs", IsFolder = false });
             mainProject.Children.Add(authFolder);
-        }
-
-        // Mapster
-        if (config.Mapping == MappingOption.Mapster)
-        {
-            var mappingFolder = new FileTreeNode { Name = "Mapping", IsFolder = true };
-            mappingFolder.Children.Add(new FileTreeNode { Name = "MappingConfig.cs", IsFolder = false });
-            mainProject.Children.Add(mappingFolder);
         }
 
         // OpenTelemetry
