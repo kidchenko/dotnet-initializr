@@ -19,6 +19,21 @@ using Microsoft.Data.Sqlite;
 #if (IncludeAnyOrm)
 using Company.ProjectName.Domain.Repositories;
 #endif
+#if (IncludeJwt || IncludeKeycloak)
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+#endif
+#if (IncludeAspNetIdentity)
+using Microsoft.AspNetCore.Identity;
+#endif
+#if (IncludeApiKey)
+using Microsoft.AspNetCore.Authentication;
+using Company.ProjectName.Infrastructure.Auth;
+#endif
+#if (IncludeOpenTelemetry)
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+#endif
 
 namespace Company.ProjectName.Infrastructure;
 
@@ -61,6 +76,63 @@ public static class InfrastructureExtensions
         });
 
         services.AddScoped<ISampleRepository, SampleRepository>();
+#endif
+
+#if (IncludeJwt)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = configuration["Authentication:Jwt:Issuer"];
+                options.Audience = configuration["Authentication:Jwt:Audience"];
+            });
+        services.AddAuthorization();
+#elif (IncludeKeycloak)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                // Keycloak realm URL, e.g. http://localhost:8080/realms/myrealm
+                options.Authority = configuration["Authentication:Keycloak:Authority"];
+                options.Audience = configuration["Authentication:Keycloak:Audience"];
+            });
+        services.AddAuthorization();
+#elif (IncludeAspNetIdentity)
+        services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+        services.AddAuthorization();
+        // Note: No UI pages or MapIdentityApi endpoints generated — add your own as needed
+#elif (IncludeApiKey)
+        services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
+            .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+                ApiKeyAuthenticationHandler.SchemeName, null);
+        services.AddAuthorization();
+#endif
+
+#if (IncludeCaching)
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+        });
+#endif
+#if (IncludeResilience)
+        services.ConfigureHttpClientDefaults(http =>
+            http.AddStandardResilienceHandler());
+#endif
+#if (IncludeOpenTelemetry)
+        services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("Company.ProjectName"))
+            .WithTracing(t => t
+#if (IncludeWebProject)
+                .AddAspNetCoreInstrumentation()
+#endif
+                .AddHttpClientInstrumentation()
+                .AddConsoleExporter())
+            .WithMetrics(m => m
+#if (IncludeWebProject)
+                .AddAspNetCoreInstrumentation()
+#endif
+                .AddHttpClientInstrumentation()
+                .AddConsoleExporter());
 #endif
 
         return services;
