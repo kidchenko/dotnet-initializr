@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: dotnet new Templates
 status: unknown
-last_updated: "2026-03-08T21:41:00Z"
+last_updated: "2026-03-08T21:47:42.295Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Users can generate a fully configured .NET project with their chosen architecture, ORM, auth, observability, and testing setup in seconds — no manual scaffolding.
-**Current focus:** v1.3 — Phase 16: Data Access and Auth
+**Current focus:** v1.3 — Phase 17: Logging, Testing, and Quality
 
 ## Current Position
 
-Phase: 16 of 20 (Data Access and Auth)
-Plan: 3 complete (16-03 done — Phase 16 complete)
-Status: Phase 16 complete
-Last activity: 2026-03-08 — Phase 16 Plan 03 complete: 13 Phase 16 verification steps (27-39) added to test-template.sh covering EF Core/Dapper x DB providers x Auth types x Framework versions
+Phase: 17 of 20 (Logging, Testing, and Quality)
+Plan: 1 complete (17-01 done — NuGet package refs and test project sources config)
+Status: Phase 17 in progress
+Last activity: 2026-03-08 — Phase 17 Plan 01 complete: Conditional PackageReferences for Serilog/NLog/FluentValidation/Mapster/Redis/Resilience/OTel in 4 .csproj files; IncludeAnyTesting symbol and test sources in template.json; .slnx test project entries
 
-Progress: [█████░░░░░] 30% (v1.3: 9/? plans complete — Phase 16 complete)
+Progress: [█████░░░░░] 30% (v1.3: 10/? plans complete — Phase 17 plan 01 complete)
 
 ## Performance Metrics
 
@@ -43,7 +43,7 @@ Progress: [█████░░░░░] 30% (v1.3: 9/? plans complete — Pha
 | 14. Core Parameter Model | 2/2 | Complete |
 | 15. Architecture and Project Types | 2/2 | Complete |
 | 16. Data Access and Auth | 3/3 | Complete |
-| 17. Logging, Testing, and Quality | 0/? | Not started |
+| 17. Logging, Testing, and Quality | 1/? | In progress |
 | 18. DevOps, Containers, and Background Jobs | 0/? | Not started |
 | 19. Blazor CLI Panel | 0/? | Not started |
 | 20. NuGet Packaging and Distribution | 0/? | Not started |
@@ -97,6 +97,11 @@ Key decisions carried into v1.3:
 - [Phase 16-02]: ORM registration added to Console/Worker project type branches — background workers need data access
 - [Phase 16-02]: SampleRepository #else branch preserves ISampleService stub fallback when no ORM selected
 - [Phase 16-03]: Verification steps follow generate-assert-build-cleanup pattern; version token substitution verified via grep for __TokenName__ patterns in generated output
+- [Phase 17-01]: testing parameter defaultValue changed from xunit to none — test project only generated when user explicitly passes --testing flag
+- [Phase 17-01]: NLog web/non-web split critical constraint: NLog.Web.AspNetCore for web, NLog.Extensions.Hosting for Worker/Console — gated on IncludeNLog && IncludeWebProject
+- [Phase 17-01]: IncludeAnyTesting computed value omits none — testing==none evaluates to IncludeAnyTesting=false, no test project sources included
+- [Phase 17-01]: FluentValidation 12.* in .csproj (not FluentAssertions which is for test projects in Plan 03)
+- [Phase 17-01]: OpenTelemetry.Instrumentation.AspNetCore gated on IncludeWebProject — Worker/Console do not need ASP.NET Core instrumentation
 
 ### Pending Todos
 
@@ -109,5 +114,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 16-03-PLAN.md — 13 Phase 16 verification steps (27-39) added to test-template.sh covering ORM x DB x Auth x Framework combinations
+Stopped at: Completed 17-01-PLAN.md — Conditional PackageReferences for logging/quality/testing in 4 .csproj files; IncludeAnyTesting symbol and test sources in template.json; .slnx test project entries
 Resume file: None
