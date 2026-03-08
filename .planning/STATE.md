@@ -102,6 +102,10 @@ Key decisions carried into v1.3:
 - [Phase 17-01]: IncludeAnyTesting computed value omits none — testing==none evaluates to IncludeAnyTesting=false, no test project sources included
 - [Phase 17-01]: FluentValidation 12.* in .csproj (not FluentAssertions which is for test projects in Plan 03)
 - [Phase 17-01]: OpenTelemetry.Instrumentation.AspNetCore gated on IncludeWebProject — Worker/Console do not need ASP.NET Core instrumentation
+- [Phase 17-02]: NLog namespace split in Program.cs: NLog.Web for WebApi/MinimalApi, NLog.Extensions.Hosting for Console/Worker
+- [Phase 17-02]: Redis connection string dual-block in appsettings.json: comma inside IncludeAnyOrm block + standalone block for caching-only scenario
+- [Phase 17-02]: Single-project SampleEntityValidator uses self-contained SampleRequest type (no domain layer in single-project templates)
+- [Phase 17-02]: ApplicationExtensions uses Mapster.TypeAdapterConfig fully qualified to prevent CS8019 with TreatWarningsAsErrors
 - [Phase 17]: FluentAssertions pinned to 7.* in test projects (v8 is commercial); xunit.runner.visualstudio pinned to 2.* (.NET 10 issues with v3.x)
 - [Phase 17]: IntegrationTests references Infrastructure (not Application) for CleanArchitecture — data access testing requires Infrastructure layer
 - [Phase 17]: SampleIntegrationTests.cs uses IAsyncLifetime for async container start/stop lifecycle (xUnit idiomatic pattern)
@@ -117,5 +121,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 17-03-PLAN.md — Test project directory structure: tests-single/Company.ProjectName.Tests and tests-split/Company.ProjectName.UnitTests + Company.ProjectName.IntegrationTests with xunit/FluentAssertions/NSubstitute/Bogus/Testcontainers conditional packages
+Stopped at: Completed 17-02-PLAN.md — Logging, health-check, and quality feature registrations in Program.cs (both arch), InfrastructureExtensions, ApplicationExtensions, appsettings.json; sample SampleEntityValidator and SampleMappingConfig files created
 Resume file: None
