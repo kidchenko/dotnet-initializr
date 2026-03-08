@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json.schemastore.org/dotnetcli.host",
+  "symbolInfo": {
+    "backgroundJobs": { "longName": "background-jobs" },
+    "apiDocs":        { "longName": "api-docs" },
+    "healthChecks":   { "longName": "health-checks" },
+
+    "IncludeWebProject":        { "isHidden": "true" },
+    "IncludeWebApi":            { "isHidden": "true" },
+    "IncludeMinimalApi":        { "isHidden": "true" },
+    "IncludeConsole":           { "isHidden": "true" },
+    "IncludeWorker":            { "isHidden": "true" },
+
+    "IncludeCleanArchitecture": { "isHidden": "true" },
+    "IncludeVerticalSlice":     { "isHidden": "true" },
+    "IncludeSimpleLayered":     { "isHidden": "true" },
+
+    "IncludeEfCore":            { "isHidden": "true" },
+    "IncludeDapper":            { "isHidden": "true" },
+    "IncludeAnyOrm":            { "isHidden": "true" },
+
+    "IncludePostgreSql":        { "isHidden": "true" },
+    "IncludeSqlServer":         { "isHidden": "true" },
+    "IncludeMySql":             { "isHidden": "true" },
+    "IncludeSqlite":            { "isHidden": "true" },
+    "IncludeAnyDatabase":       { "isHidden": "true" },
+
+    "IncludeJwt":               { "isHidden": "true" },
+    "IncludeAspNetIdentity":    { "isHidden": "true" },
+    "IncludeKeycloak":          { "isHidden": "true" },
+    "IncludeApiKey":            { "isHidden": "true" },
+    "IncludeAnyAuth":           { "isHidden": "true" },
+
+    "IncludeSerilog":           { "isHidden": "true" },
+    "IncludeNLog":              { "isHidden": "true" },
+
+    "IncludeNet8":              { "isHidden": "true" },
+    "IncludeNet9":              { "isHidden": "true" },
+    "IncludeNet10":             { "isHidden": "true" },
+
+    "IncludeXunit":             { "isHidden": "true" },
+    "IncludeFluentAssertions":  { "isHidden": "true" },
+    "IncludeNSubstitute":       { "isHidden": "true" },
+    "IncludeBogus":             { "isHidden": "true" },
+    "IncludeTestcontainers":    { "isHidden": "true" },
+
+    "IncludeDockerfile":        { "isHidden": "true" },
+    "IncludeDockerCompose":     { "isHidden": "true" },
+    "IncludeAspire":            { "isHidden": "true" },
+
+    "IncludeGitHubActions":     { "isHidden": "true" },
+    "IncludeAzureDevOps":       { "isHidden": "true" },
+
+    "IncludeIHostedService":    { "isHidden": "true" },
+    "IncludeHangfire":          { "isHidden": "true" },
+    "IncludeQuartz":            { "isHidden": "true" },
+
+    "IncludeScalar":            { "isHidden": "true" },
+    "IncludeSwaggerUI":         { "isHidden": "true" },
+    "IncludeRedoc":             { "isHidden": "true" },
+
+    "IncludeHealthChecks":      { "isHidden": "true" },
+    "IncludeOpenTelemetry":     { "isHidden": "true" },
+    "IncludeCaching":           { "isHidden": "true" },
+    "IncludeValidation":        { "isHidden": "true" },
+    "IncludeResilience":        { "isHidden": "true" },
+    "IncludeMapping":           { "isHidden": "true" }
+  }
+}
