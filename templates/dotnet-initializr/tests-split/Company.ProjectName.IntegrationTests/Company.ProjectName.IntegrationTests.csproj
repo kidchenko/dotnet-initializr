@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-minimum</AnalysisLevel>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="xunit" Version="2.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.*">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+<!--#if (IncludeFluentAssertions) -->
+    <PackageReference Include="FluentAssertions" Version="7.*" />
+<!--#endif -->
+    <PackageReference Include="Testcontainers" Version="4.*" />
+<!--#if (IncludePostgreSql) -->
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.*" />
+<!--#endif -->
+<!--#if (IncludeSqlServer) -->
+    <PackageReference Include="Testcontainers.MsSql" Version="4.*" />
+<!--#endif -->
+<!--#if (IncludeMySql) -->
+    <PackageReference Include="Testcontainers.MySql" Version="4.*" />
+<!--#endif -->
+  </ItemGroup>
+
+<!--#if (IncludeCleanArchitecture) -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/Company.ProjectName.Infrastructure/Company.ProjectName.Infrastructure.csproj" />
+  </ItemGroup>
+<!--#else -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/Company.ProjectName/Company.ProjectName.csproj" />
+  </ItemGroup>
+<!--#endif -->
+
+</Project>
