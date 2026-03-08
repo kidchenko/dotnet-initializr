@@ -47,7 +47,7 @@
 - [x] **Phase 13: Template Foundation** - Buildable NuGet template pack that generates a minimal compilable .NET project (Plan 01 complete)
 - [x] **Phase 14: Core Parameter Model** - Complete template.json with all parameters, computed symbols, and dependency chains (completed 2026-03-08)
 - [x] **Phase 15: Architecture and Project Types** - Correct folder structures and .slnx for all arch + type combinations (completed 2026-03-08)
-- [ ] **Phase 16: Data Access and Auth** - ORM, database, auth, and SDK-version-aware NuGet references
+- [x] **Phase 16: Data Access and Auth** - ORM, database, auth, and SDK-version-aware NuGet references (completed 2026-03-08)
 - [ ] **Phase 17: Logging, Testing, and Quality** - Logging choice, testing flags, and all boolean feature flags
 - [ ] **Phase 18: DevOps, Containers, and Background Jobs** - CI/CD, container files, background jobs, and API docs via sources.modifiers
 - [ ] **Phase 19: Blazor CLI Panel** - Blazor app displays `dotnet new dotnet-initializr --flags` command
@@ -193,7 +193,7 @@ Plans:
   3. `--auth jwt` generates JWT bearer middleware; `--auth aspnetidentity` generates Identity scaffolding with EF Core and fails gracefully when EF Core is not selected
   4. `--auth keycloak` generates JwtBearer with Authority configuration; `--auth apikey` generates the inline `ApiKeyAuthenticationHandler` class
   5. `--api-docs swaggerui --framework net8.0` uses full Swashbuckle; `--api-docs swaggerui --framework net9.0` uses the UI sub-package with `Microsoft.OpenApi` pin
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 16-01-PLAN.md — Template infrastructure: switch generators, computed symbols, conditional PackageReferences in .csproj
 - [ ] 16-02-PLAN.md — ORM, auth, and API docs C# source content for both architecture patterns
@@ -268,7 +268,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 13. Template Foundation | 2/2 | Complete    | 2026-03-08 | - |
 | 14. Core Parameter Model | 2/2 | Complete    | 2026-03-08 | - |
 | 15. Architecture and Project Types | 2/2 | Complete    | 2026-03-08 | - |
-| 16. Data Access and Auth | 2/3 | In Progress|  | - |
+| 16. Data Access and Auth | 3/3 | Complete   | 2026-03-08 | - |
 | 17. Logging, Testing, and Quality | v1.3 | 0/? | Not started | - |
 | 18. DevOps, Containers, and Background Jobs | v1.3 | 0/? | Not started | - |
 | 19. Blazor CLI Panel | v1.3 | 0/? | Not started | - |

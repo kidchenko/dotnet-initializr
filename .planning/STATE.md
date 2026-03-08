@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: dotnet new Templates
 status: unknown
-last_updated: "2026-03-08T17:51:49.210Z"
+last_updated: "2026-03-08T21:41:00Z"
 progress:
   total_phases: 3
   completed_phases: 3
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 16 of 20 (Data Access and Auth)
-Plan: 2 complete (16-02 done)
-Status: Phase 16 in progress
-Last activity: 2026-03-08 — Phase 16 Plan 02 complete: AppDbContext, ISampleRepository, SampleRepository (EF Core/Dapper), InfrastructureExtensions, ApiKeyAuthenticationHandler, Program.cs auth blocks (JWT/Keycloak/Identity/ApiKey), SwaggerUI net8 vs net9/10 branching, appsettings.json conditional sections for both Clean Architecture and single-project
+Plan: 3 complete (16-03 done — Phase 16 complete)
+Status: Phase 16 complete
+Last activity: 2026-03-08 — Phase 16 Plan 03 complete: 13 Phase 16 verification steps (27-39) added to test-template.sh covering EF Core/Dapper x DB providers x Auth types x Framework versions
 
-Progress: [█████░░░░░] 25% (v1.3: 8/? plans complete — Phase 15 complete, Phase 16 plan 2/3 done)
+Progress: [█████░░░░░] 30% (v1.3: 9/? plans complete — Phase 16 complete)
 
 ## Performance Metrics
 
@@ -42,7 +42,7 @@ Progress: [█████░░░░░] 25% (v1.3: 8/? plans complete — Pha
 | 13. Template Foundation | 2/2 | Complete |
 | 14. Core Parameter Model | 2/2 | Complete |
 | 15. Architecture and Project Types | 2/2 | Complete |
-| 16. Data Access and Auth | 2/3 | In progress |
+| 16. Data Access and Auth | 3/3 | Complete |
 | 17. Logging, Testing, and Quality | 0/? | Not started |
 | 18. DevOps, Containers, and Background Jobs | 0/? | Not started |
 | 19. Blazor CLI Panel | 0/? | Not started |
@@ -96,6 +96,7 @@ Key decisions carried into v1.3:
 - [Phase 16-02]: appsettings.json conditional sections use leading comma on first content line — template engine strips #if lines so comma must be on data line
 - [Phase 16-02]: ORM registration added to Console/Worker project type branches — background workers need data access
 - [Phase 16-02]: SampleRepository #else branch preserves ISampleService stub fallback when no ORM selected
+- [Phase 16-03]: Verification steps follow generate-assert-build-cleanup pattern; version token substitution verified via grep for __TokenName__ patterns in generated output
 
 ### Pending Todos
 
@@ -108,5 +109,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 16-02-PLAN.md — AppDbContext, ISampleRepository, SampleRepository (EF Core/Dapper), InfrastructureExtensions, ApiKeyAuthenticationHandler, Program.cs auth blocks (JWT/Keycloak/Identity/ApiKey), SwaggerUI net8 vs net9/10 branching, appsettings.json conditional sections for both architectures
+Stopped at: Completed 16-03-PLAN.md — 13 Phase 16 verification steps (27-39) added to test-template.sh covering ORM x DB x Auth x Framework combinations
 Resume file: None
