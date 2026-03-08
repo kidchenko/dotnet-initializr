@@ -29,16 +29,6 @@
   </ItemGroup>
 <!--#endif -->
 
-<!--#if (IncludeJwt || IncludeKeycloak) -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="__EfCoreVersion__" />
-  </ItemGroup>
-<!--#endif -->
-<!--#if (IncludeAspNetIdentity) -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="__EfCoreVersion__" />
-  </ItemGroup>
-<!--#endif -->
 <!--#if (IncludeSwaggerUI && IncludeNet8) -->
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="__SwashbuckleVersion__" />
@@ -47,6 +37,22 @@
 <!--#if (IncludeSwaggerUI && !IncludeNet8) -->
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="__SwashbuckleVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeSerilog) -->
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.*" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeNLog && IncludeWebProject) -->
+  <ItemGroup>
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.*" />
+  </ItemGroup>
+<!--#elif (IncludeNLog && !IncludeWebProject) -->
+  <ItemGroup>
+    <PackageReference Include="NLog.Extensions.Hosting" Version="6.*" />
   </ItemGroup>
 <!--#endif -->
 

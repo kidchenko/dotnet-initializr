@@ -11,6 +11,18 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.*" />
   </ItemGroup>
+<!--#if (IncludeValidation) -->
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.*" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeMapping) -->
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.*" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.*" />
+  </ItemGroup>
+<!--#endif -->
 
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Domain/Company.ProjectName.Domain.csproj" />

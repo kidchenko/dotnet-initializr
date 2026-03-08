@@ -78,5 +78,53 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="__SwashbuckleVersion__" />
   </ItemGroup>
 <!--#endif -->
+<!--#if (IncludeSerilog) -->
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.*" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeNLog && IncludeWebProject) -->
+  <ItemGroup>
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.*" />
+  </ItemGroup>
+<!--#elif (IncludeNLog && !IncludeWebProject) -->
+  <ItemGroup>
+    <PackageReference Include="NLog.Extensions.Hosting" Version="6.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeValidation) -->
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.*" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeMapping) -->
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.*" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeCaching) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeResilience) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeOpenTelemetry) -->
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.*" />
+<!--#if (IncludeWebProject) -->
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.*" />
+<!--#endif -->
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.*" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.*" />
+  </ItemGroup>
+<!--#endif -->
 
 </Project>
