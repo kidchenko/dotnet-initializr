@@ -5,7 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATES_DIR="$REPO_ROOT/templates"
 OUT_DIR="$REPO_ROOT/out"
-TEST_DIR="/tmp/dotnet-initializr-test"
+# Use /private/tmp on macOS to avoid /tmp symlink duplicate restore issue
+TEST_DIR="/private/tmp/dotnet-initializr-test"
 PACKAGE_ID="Initializr.Templates"
 
 echo "=== Template Test Script ==="
@@ -37,9 +38,9 @@ if ! dotnet new list | grep -q "dotnet-initializr"; then
 fi
 echo "   OK: dotnet-initializr registered"
 
-# Step 6: Generate test project
-echo "6. Generating test project..."
-dotnet new dotnet-initializr -n MyApp -o "$TEST_DIR"
+# Step 6: Generate test project (VerticalSlice + WebApi for single-project structure tests)
+echo "6. Generating test project (VerticalSlice + WebApi)..."
+dotnet new dotnet-initializr -n MyApp --arch VerticalSlice --project-type WebApi -o "$TEST_DIR"
 
 # Step 7: Verify dotfiles present (TMPL-05)
 echo "7. Verifying dotfiles..."
@@ -160,6 +161,10 @@ if echo "$HELP_OUTPUT" | grep -q "IncludeSerilog"; then
     echo "FAIL: computed symbol IncludeSerilog leaked to help (isHidden not working)"
     exit 1
 fi
+if echo "$HELP_OUTPUT" | grep -q "EntryPointSuffix"; then
+    echo "FAIL: computed symbol EntryPointSuffix leaked to help (isHidden not working)"
+    exit 1
+fi
 echo "   OK: All 18 user-facing parameters present, no computed symbols leaked"
 
 # Step 14: Verify gating rule 1 — --db shows 'Enabled if' annotation (requires --orm)
@@ -221,7 +226,7 @@ echo "   OK: valid gated combination accepted"
 
 # Step 19: Verify Console project type generates and builds
 echo "19. Verifying Console project type generates and builds..."
-dotnet new dotnet-initializr -n ConsoleTest --project-type Console -o "$TEST_DIR/console-test"
+dotnet new dotnet-initializr -n ConsoleTest --project-type Console --arch SimpleLayered -o "$TEST_DIR/console-test"
 if [ ! -d "$TEST_DIR/console-test" ]; then
     echo "FAIL: Console project generation should succeed"
     exit 1
@@ -229,6 +234,76 @@ fi
 dotnet build "$TEST_DIR/console-test" --nologo
 rm -rf "$TEST_DIR/console-test"
 echo "   OK: Console project type generates and builds"
+
+# ===== Phase 15: Architecture and Project Types Verification =====
+
+# Step 20: Verify CleanArchitecture + WebApi generates 4 projects with .Api suffix
+echo "20. Verifying CleanArchitecture + WebApi generates 4 projects with .Api suffix..."
+dotnet new dotnet-initializr -n CA1 --arch CleanArchitecture --project-type WebApi -o "$TEST_DIR/ca-webapi"
+[ -d "$TEST_DIR/ca-webapi/src/CA1.Domain" ] || { echo "FAIL: CA1.Domain missing"; exit 1; }
+[ -d "$TEST_DIR/ca-webapi/src/CA1.Application" ] || { echo "FAIL: CA1.Application missing"; exit 1; }
+[ -d "$TEST_DIR/ca-webapi/src/CA1.Infrastructure" ] || { echo "FAIL: CA1.Infrastructure missing"; exit 1; }
+[ -d "$TEST_DIR/ca-webapi/src/CA1.Api" ] || { echo "FAIL: CA1.Api missing (expected .Api suffix)"; exit 1; }
+dotnet build "$TEST_DIR/ca-webapi" --nologo || { echo "FAIL: CA WebApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/ca-webapi"
+echo "   OK: CleanArchitecture + WebApi: 4 projects, .Api suffix, builds"
+
+# Step 21: Verify CleanArchitecture + Console generates .Console suffix and Jobs/ in Infrastructure
+echo "21. Verifying CleanArchitecture + Console generates .Console suffix and Jobs/ in Infrastructure..."
+dotnet new dotnet-initializr -n CC1 --arch CleanArchitecture --project-type Console -o "$TEST_DIR/ca-console"
+[ -d "$TEST_DIR/ca-console/src/CC1.Console" ] || { echo "FAIL: CC1.Console missing (expected .Console suffix)"; exit 1; }
+[ -d "$TEST_DIR/ca-console/src/CC1.Infrastructure/Jobs" ] || { echo "FAIL: Infrastructure/Jobs/ missing for Console type"; exit 1; }
+dotnet build "$TEST_DIR/ca-console" --nologo || { echo "FAIL: CA Console build failed"; exit 1; }
+rm -rf "$TEST_DIR/ca-console"
+echo "   OK: CleanArchitecture + Console: .Console suffix, Jobs/ in Infrastructure, builds"
+
+# Step 22: Verify CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs
+echo "22. Verifying CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs..."
+dotnet new dotnet-initializr -n CW1 --arch CleanArchitecture --project-type WorkerService -o "$TEST_DIR/ca-worker"
+[ -d "$TEST_DIR/ca-worker/src/CW1.Worker" ] || { echo "FAIL: CW1.Worker missing (expected .Worker suffix)"; exit 1; }
+[ -f "$TEST_DIR/ca-worker/src/CW1.Worker/Worker.cs" ] || { echo "FAIL: Worker.cs missing for WorkerService type"; exit 1; }
+dotnet build "$TEST_DIR/ca-worker" --nologo || { echo "FAIL: CA Worker build failed"; exit 1; }
+rm -rf "$TEST_DIR/ca-worker"
+echo "   OK: CleanArchitecture + WorkerService: .Worker suffix, Worker.cs present, builds"
+
+# Step 23: Verify VerticalSlice + MinimalApi has Features/ and no Models/Services/Data/
+echo "23. Verifying VerticalSlice + MinimalApi has Features/ and no SimpleLayered folders..."
+dotnet new dotnet-initializr -n VS1 --arch VerticalSlice --project-type MinimalApi -o "$TEST_DIR/vs-minimal"
+[ -d "$TEST_DIR/vs-minimal/src/VS1/Features" ] || { echo "FAIL: Features/ missing for VerticalSlice"; exit 1; }
+[ ! -d "$TEST_DIR/vs-minimal/src/VS1/Models" ] || { echo "FAIL: Models/ should not be present for VerticalSlice"; exit 1; }
+dotnet build "$TEST_DIR/vs-minimal" --nologo || { echo "FAIL: VS MinimalApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/vs-minimal"
+echo "   OK: VerticalSlice + MinimalApi: Features/ present, no SimpleLayered folders, builds"
+
+# Step 24: Verify SimpleLayered + WorkerService has Models/Services/Data/ and Jobs/ and Worker.cs
+echo "24. Verifying SimpleLayered + WorkerService has correct folder structure..."
+dotnet new dotnet-initializr -n SLW --arch SimpleLayered --project-type WorkerService -o "$TEST_DIR/sl-worker"
+[ -d "$TEST_DIR/sl-worker/src/SLW/Models" ] || { echo "FAIL: Models/ missing for SimpleLayered"; exit 1; }
+[ -d "$TEST_DIR/sl-worker/src/SLW/Services" ] || { echo "FAIL: Services/ missing for SimpleLayered"; exit 1; }
+[ -d "$TEST_DIR/sl-worker/src/SLW/Data" ] || { echo "FAIL: Data/ missing for SimpleLayered"; exit 1; }
+[ -d "$TEST_DIR/sl-worker/src/SLW/Jobs" ] || { echo "FAIL: Jobs/ missing for WorkerService type"; exit 1; }
+[ -f "$TEST_DIR/sl-worker/src/SLW/Worker.cs" ] || { echo "FAIL: Worker.cs missing for WorkerService type"; exit 1; }
+dotnet build "$TEST_DIR/sl-worker" --nologo || { echo "FAIL: SL Worker build failed"; exit 1; }
+rm -rf "$TEST_DIR/sl-worker"
+echo "   OK: SimpleLayered + WorkerService: Models/Services/Data/Jobs/ present, Worker.cs, builds"
+
+# Step 25: Verify CleanArchitecture .slnx has 4 project entries
+echo "25. Verifying CleanArchitecture .slnx lists 4 projects..."
+dotnet new dotnet-initializr -n SLX --arch CleanArchitecture --project-type WebApi -o "$TEST_DIR/ca-slnx"
+PROJECT_COUNT=$(grep -c "Project Path" "$TEST_DIR/ca-slnx/SLX.slnx")
+[ "$PROJECT_COUNT" -eq 4 ] || { echo "FAIL: CA .slnx should have 4 Project entries, got $PROJECT_COUNT"; exit 1; }
+rm -rf "$TEST_DIR/ca-slnx"
+echo "   OK: CleanArchitecture .slnx has exactly 4 Project entries"
+
+# Step 26: Verify single-project .slnx has 1 project entry and Folder wrappers
+echo "26. Verifying single-project .slnx has 1 project entry and Folder wrappers..."
+dotnet new dotnet-initializr -n SLX2 --arch VerticalSlice --project-type WebApi -o "$TEST_DIR/sp-slnx"
+PROJECT_COUNT=$(grep -c "Project Path" "$TEST_DIR/sp-slnx/SLX2.slnx")
+[ "$PROJECT_COUNT" -eq 1 ] || { echo "FAIL: SP .slnx should have 1 Project entry, got $PROJECT_COUNT"; exit 1; }
+FOLDER_COUNT=$(grep -c "Folder Name" "$TEST_DIR/sp-slnx/SLX2.slnx")
+[ "$FOLDER_COUNT" -eq 2 ] || { echo "FAIL: SP .slnx should have 2 Folder entries (src/ and tests/), got $FOLDER_COUNT"; exit 1; }
+rm -rf "$TEST_DIR/sp-slnx"
+echo "   OK: Single-project .slnx has 1 Project entry and 2 Folder wrappers"
 
 # Cleanup
 echo ""
@@ -241,3 +316,4 @@ echo ""
 echo "=== ALL CHECKS PASSED ==="
 echo "Template generates a compilable project with correct name substitution, dotfiles, and preserved #if DEBUG guards."
 echo "Phase 14 verification: All 18 parameters in --help, gating annotations present, multi-value testing works, Console project builds."
+echo "Phase 15 verification: All arch x type combinations generate correct folder structures and compile successfully."

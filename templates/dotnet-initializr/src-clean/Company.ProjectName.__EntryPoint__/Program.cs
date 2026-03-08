@@ -47,6 +47,7 @@ Console.WriteLine("Hello from Company.ProjectName!");
 
 await host.RunAsync();
 #elif (IncludeWorker)
+using Company.ProjectName.__EntryPoint__;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

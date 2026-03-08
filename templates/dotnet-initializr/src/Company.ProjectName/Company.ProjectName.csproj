@@ -23,7 +23,7 @@
   </ItemGroup>
 <!--#endif -->
 
-<!--#if (IncludeConsole) -->
+<!--#if (IncludeConsole || IncludeWorker) -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
   </ItemGroup>

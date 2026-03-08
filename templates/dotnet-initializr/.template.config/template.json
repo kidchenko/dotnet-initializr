@@ -49,6 +49,21 @@
     "IncludeVerticalSlice":     { "type": "computed", "value": "(arch == \"VerticalSlice\")" },
     "IncludeSimpleLayered":     { "type": "computed", "value": "(arch == \"SimpleLayered\")" },
 
+    "EntryPointSuffix": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__EntryPoint__",
+      "fileRename": "__EntryPoint__",
+      "parameters": {
+        "evaluator": "C++",
+        "cases": [
+          { "condition": "(projectType == \"Console\")",       "value": "Console" },
+          { "condition": "(projectType == \"WorkerService\")", "value": "Worker" },
+          { "condition": "",                                   "value": "Api" }
+        ]
+      }
+    },
+
     "orm": {
       "type": "parameter",
       "datatype": "choice",
@@ -275,5 +290,77 @@
     },
     "IncludeMapping": { "type": "computed", "value": "(mapping)" }
 
-  }
+  },
+
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "include": [
+        ".gitignore",
+        ".editorconfig",
+        "global.json",
+        "README.md"
+      ]
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(!IncludeCleanArchitecture)",
+      "include": [
+        "src/**",
+        "Company.ProjectName.slnx"
+      ],
+      "modifiers": [
+        {
+          "condition": "(!IncludeVerticalSlice)",
+          "exclude": ["src/**/Features/**"]
+        },
+        {
+          "condition": "(!IncludeSimpleLayered)",
+          "exclude": ["src/**/Models/**", "src/**/Services/**", "src/**/Data/**"]
+        },
+        {
+          "condition": "(!IncludeConsole && !IncludeWorker)",
+          "exclude": ["src/**/Jobs/**"]
+        },
+        {
+          "condition": "(!IncludeWebApi)",
+          "exclude": ["src/**/Controllers/**"]
+        },
+        {
+          "condition": "(!IncludeWorker)",
+          "exclude": ["src/**/Worker.cs"]
+        }
+      ]
+    },
+    {
+      "source": "./src-clean",
+      "target": "./src",
+      "condition": "(IncludeCleanArchitecture)",
+      "modifiers": [
+        {
+          "condition": "(!IncludeConsole && !IncludeWorker)",
+          "exclude": ["**/Company.ProjectName.Infrastructure/Jobs/**", "**/Company.ProjectName.__EntryPoint__/Jobs/**"]
+        },
+        {
+          "condition": "(!IncludeWebApi)",
+          "exclude": ["**/Company.ProjectName.__EntryPoint__/Controllers/**"]
+        },
+        {
+          "condition": "(!IncludeWorker)",
+          "exclude": ["**/Company.ProjectName.__EntryPoint__/Worker.cs"]
+        }
+      ]
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(IncludeCleanArchitecture)",
+      "include": ["Company.ProjectName.clean.slnx"],
+      "rename": {
+        "Company.ProjectName.clean.slnx": "Company.ProjectName.slnx"
+      }
+    }
+  ]
 }
