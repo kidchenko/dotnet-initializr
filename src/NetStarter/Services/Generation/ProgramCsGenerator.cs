@@ -560,14 +560,12 @@ public static class ProgramCsGenerator
     private static void AddApplicationFragment(ProjectConfiguration config, StringBuilder sb)
     {
         if (config.Architecture != ArchitecturePattern.CleanArchitecture) return;
-        if (!InfrastructureExtensionsGenerator.HasApplicationServices(config)) return;
         sb.Append("builder.Services.AddApplication();\n");
     }
 
     private static void AddInfrastructureFragment(ProjectConfiguration config, StringBuilder sb)
     {
         if (config.Architecture != ArchitecturePattern.CleanArchitecture) return;
-        if (!InfrastructureExtensionsGenerator.HasInfrastructureServices(config)) return;
         sb.Append("builder.Services.AddInfrastructure(builder.Configuration);\n");
     }
 

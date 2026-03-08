@@ -105,6 +105,9 @@ public class FileTreeService
         // Domain project
         var domainProject = new FileTreeNode { Name = $"{config.ProjectName}.Domain", IsFolder = true, IsProject = true };
         domainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Domain.csproj", IsFolder = false });
+        var entitiesFolder = new FileTreeNode { Name = "Entities", IsFolder = true };
+        entitiesFolder.Children.Add(new FileTreeNode { Name = "SampleEntity.cs", IsFolder = false });
+        domainProject.Children.Add(entitiesFolder);
         srcFolder.Children.Add(domainProject);
 
         // Application project
@@ -126,15 +129,14 @@ public class FileTreeService
             appProject.Children.Add(validationFolder);
         }
 
-        if (config.Mapping == MappingOption.Mapster || config.IncludeFluentValidation)
-            appProject.Children.Add(new FileTreeNode { Name = "ApplicationServiceCollectionExtensions.cs", IsFolder = false });
+        appProject.Children.Add(new FileTreeNode { Name = "ApplicationExtensions.cs", IsFolder = false });
 
         srcFolder.Children.Add(appProject);
 
         // Infrastructure project
         var infraProject = new FileTreeNode { Name = $"{config.ProjectName}.Infrastructure", IsFolder = true, IsProject = true };
         infraProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Infrastructure.csproj", IsFolder = false });
-        infraProject.Children.Add(new FileTreeNode { Name = "InfrastructureServiceCollectionExtensions.cs", IsFolder = false });
+        infraProject.Children.Add(new FileTreeNode { Name = "InfrastructureExtensions.cs", IsFolder = false });
 
         // EF Core in Infrastructure
         if (config.Orm == OrmOption.EfCore)

@@ -13,12 +13,9 @@ public static class ArchitectureGenerator
         files[$"{src}/{name}.Domain/{name}.Domain.csproj"] =
             CsprojGenerator.GenerateClassLibrary(config, "Domain");
 
-        if (config.Orm == OrmOption.EfCore)
-        {
-            var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
-            files[$"{src}/{name}.Domain/Entities/SampleEntity.cs"] =
-                EfCoreGenerator.GenerateSampleEntity(config, entityNs);
-        }
+        var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.CleanArchitecture);
+        files[$"{src}/{name}.Domain/Entities/SampleEntity.cs"] =
+            EfCoreGenerator.GenerateSampleEntity(config, entityNs);
 
         // Application project — references Domain
         var appCsproj = CsprojGenerator.GenerateClassLibrary(config, "Application");
@@ -54,15 +51,13 @@ public static class ArchitectureGenerator
                 : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
         }
 
-        // Infrastructure extension methods
-        if (InfrastructureExtensionsGenerator.HasInfrastructureServices(config))
-            files[$"{src}/{name}.Infrastructure/InfrastructureServiceCollectionExtensions.cs"] =
-                InfrastructureExtensionsGenerator.GenerateInfrastructureExtensions(config);
+        // Infrastructure extension methods (always present in Clean Architecture)
+        files[$"{src}/{name}.Infrastructure/InfrastructureExtensions.cs"] =
+            InfrastructureExtensionsGenerator.GenerateInfrastructureExtensions(config);
 
-        // Application extension methods
-        if (InfrastructureExtensionsGenerator.HasApplicationServices(config))
-            files[$"{src}/{name}.Application/ApplicationServiceCollectionExtensions.cs"] =
-                InfrastructureExtensionsGenerator.GenerateApplicationExtensions(config);
+        // Application extension methods (always present in Clean Architecture)
+        files[$"{src}/{name}.Application/ApplicationExtensions.cs"] =
+            InfrastructureExtensionsGenerator.GenerateApplicationExtensions(config);
 
         // Entry point project — references Infrastructure and Application
         var entryPointCsproj = config.ProjectType switch

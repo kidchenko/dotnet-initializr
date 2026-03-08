@@ -67,7 +67,7 @@ public static class InfrastructureExtensionsGenerator
         sb.Append($"\n");
         sb.Append($"namespace {ns};\n");
         sb.Append($"\n");
-        sb.Append($"public static class InfrastructureServiceCollectionExtensions\n");
+        sb.Append($"public static class InfrastructureExtensions\n");
         sb.Append($"{{\n");
         sb.Append($"    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)\n");
         sb.Append($"    {{\n");
@@ -200,7 +200,7 @@ public static class InfrastructureExtensionsGenerator
         sb.Append($"\n");
         sb.Append($"namespace {ns};\n");
         sb.Append($"\n");
-        sb.Append($"public static class ApplicationServiceCollectionExtensions\n");
+        sb.Append($"public static class ApplicationExtensions\n");
         sb.Append($"{{\n");
         sb.Append($"    public static IServiceCollection AddApplication(this IServiceCollection services)\n");
         sb.Append($"    {{\n");
@@ -213,7 +213,7 @@ public static class InfrastructureExtensionsGenerator
 
         if (config.IncludeFluentValidation)
         {
-            sb.Append("        services.AddValidatorsFromAssembly(typeof(ApplicationServiceCollectionExtensions).Assembly);\n");
+            sb.Append("        services.AddValidatorsFromAssembly(typeof(ApplicationExtensions).Assembly);\n");
         }
 
         sb.Append($"        return services;\n");
