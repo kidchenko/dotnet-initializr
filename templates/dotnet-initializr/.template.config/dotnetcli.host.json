@@ -41,6 +41,11 @@
     "IncludeNet9":              { "isHidden": "true" },
     "IncludeNet10":             { "isHidden": "true" },
 
+    "EfCoreVersion":            { "isHidden": "true" },
+    "PomeloVersion":            { "isHidden": "true" },
+    "NpgsqlEfVersion":          { "isHidden": "true" },
+    "SwashbuckleVersion":       { "isHidden": "true" },
+
     "IncludeXunit":             { "isHidden": "true" },
     "IncludeFluentAssertions":  { "isHidden": "true" },
     "IncludeNSubstitute":       { "isHidden": "true" },

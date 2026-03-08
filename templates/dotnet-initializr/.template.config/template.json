@@ -116,7 +116,7 @@
     },
 
     "IncludeJwt":            { "type": "computed", "value": "(auth == \"Jwt\")" },
-    "IncludeAspNetIdentity": { "type": "computed", "value": "(auth == \"AspNetIdentity\")" },
+    "IncludeAspNetIdentity": { "type": "computed", "value": "(auth == \"AspNetIdentity\" && orm == \"EfCore\")" },
     "IncludeKeycloak":       { "type": "computed", "value": "(auth == \"Keycloak\")" },
     "IncludeApiKey":         { "type": "computed", "value": "(auth == \"ApiKey\")" },
     "IncludeAnyAuth":        { "type": "computed", "value": "(auth != \"None\")" },
@@ -152,6 +152,59 @@
     "IncludeNet8":  { "type": "computed", "value": "(framework == \"net8.0\")" },
     "IncludeNet9":  { "type": "computed", "value": "(framework == \"net9.0\")" },
     "IncludeNet10": { "type": "computed", "value": "(framework == \"net10.0\")" },
+
+    "EfCoreVersion": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__EfCoreVersion__",
+      "parameters": {
+        "evaluator": "C++",
+        "cases": [
+          { "condition": "(framework == \"net8.0\")", "value": "8.*" },
+          { "condition": "(framework == \"net9.0\")", "value": "9.*" },
+          { "condition": "",                          "value": "10.*" }
+        ]
+      }
+    },
+
+    "PomeloVersion": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__PomeloVersion__",
+      "parameters": {
+        "evaluator": "C++",
+        "cases": [
+          { "condition": "(framework == \"net8.0\")", "value": "8.*" },
+          { "condition": "",                          "value": "9.*" }
+        ]
+      }
+    },
+
+    "NpgsqlEfVersion": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__NpgsqlEfVersion__",
+      "parameters": {
+        "evaluator": "C++",
+        "cases": [
+          { "condition": "(framework == \"net8.0\")", "value": "8.*" },
+          { "condition": "(framework == \"net9.0\")", "value": "9.*" },
+          { "condition": "",                          "value": "10.*" }
+        ]
+      }
+    },
+
+    "SwashbuckleVersion": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__SwashbuckleVersion__",
+      "parameters": {
+        "evaluator": "C++",
+        "cases": [
+          { "condition": "", "value": "10.*" }
+        ]
+      }
+    },
 
     "testing": {
       "type": "parameter",
@@ -318,7 +371,11 @@
         },
         {
           "condition": "(!IncludeSimpleLayered)",
-          "exclude": ["src/**/Models/**", "src/**/Services/**", "src/**/Data/**"]
+          "exclude": ["src/**/Services/**"]
+        },
+        {
+          "condition": "(!IncludeSimpleLayered && !IncludeAnyOrm)",
+          "exclude": ["src/**/Models/**", "src/**/Data/**"]
         },
         {
           "condition": "(!IncludeConsole && !IncludeWorker)",
@@ -331,6 +388,10 @@
         {
           "condition": "(!IncludeWorker)",
           "exclude": ["src/**/Worker.cs"]
+        },
+        {
+          "condition": "(!IncludeApiKey)",
+          "exclude": ["src/**/Auth/**"]
         }
       ]
     },
@@ -350,6 +411,18 @@
         {
           "condition": "(!IncludeWorker)",
           "exclude": ["**/Company.ProjectName.Infrastructure/Worker.cs"]
+        },
+        {
+          "condition": "(!IncludeEfCore)",
+          "exclude": ["**/Company.ProjectName.Infrastructure/Data/AppDbContext.cs"]
+        },
+        {
+          "condition": "(!IncludeAnyOrm)",
+          "exclude": ["**/Company.ProjectName.Domain/Repositories/**"]
+        },
+        {
+          "condition": "(!IncludeApiKey)",
+          "exclude": ["**/Company.ProjectName.__EntryPoint__/Auth/**"]
         }
       ]
     },
