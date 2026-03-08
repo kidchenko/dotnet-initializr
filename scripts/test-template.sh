@@ -495,6 +495,266 @@ dotnet build "$TEST_DIR/dappg" --nologo || { echo "FAIL: Dapper+PostgreSQL build
 rm -rf "$TEST_DIR/dappg"
 echo "   OK: Dapper + PostgreSQL uses standalone Npgsql"
 
+# ===================================
+# Phase 17: Logging, Testing, and Quality
+# ===================================
+
+# Step 40: Serilog + WebApi + CleanArchitecture — verify packages and appsettings
+echo "40. Verifying Serilog + WebApi + CleanArchitecture..."
+dotnet new dotnet-initializr -n SeriWeb -o "$TEST_DIR/seriweb" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging Serilog --orm None --auth None
+# Verify Serilog packages in entry point .csproj
+grep -q 'Include="Serilog.AspNetCore"' "$TEST_DIR/seriweb/src/SeriWeb.Api/SeriWeb.Api.csproj" \
+  || { echo "FAIL: Serilog.AspNetCore missing from entry point .csproj"; exit 1; }
+grep -q 'Include="Serilog.Sinks.Console"' "$TEST_DIR/seriweb/src/SeriWeb.Api/SeriWeb.Api.csproj" \
+  || { echo "FAIL: Serilog.Sinks.Console missing"; exit 1; }
+# Verify Serilog section in appsettings.json
+grep -q '"Serilog"' "$TEST_DIR/seriweb/src/SeriWeb.Api/appsettings.json" \
+  || { echo "FAIL: Serilog section missing from appsettings.json"; exit 1; }
+# Verify NO NLog packages
+if grep -q "NLog" "$TEST_DIR/seriweb/src/SeriWeb.Api/SeriWeb.Api.csproj"; then
+    echo "FAIL: NLog package should NOT be present when Serilog selected"
+    exit 1
+fi
+# Verify UseSerilog in Program.cs
+grep -q 'UseSerilog' "$TEST_DIR/seriweb/src/SeriWeb.Api/Program.cs" \
+  || { echo "FAIL: UseSerilog missing from Program.cs"; exit 1; }
+dotnet build "$TEST_DIR/seriweb" --nologo || { echo "FAIL: Serilog+WebApi+CA build failed"; exit 1; }
+rm -rf "$TEST_DIR/seriweb"
+echo "   OK: Serilog + WebApi + CleanArchitecture compiles"
+
+# Step 41: NLog + WebApi — verify web package (NLog.Web.AspNetCore, NOT Extensions.Hosting)
+echo "41. Verifying NLog + WebApi uses NLog.Web.AspNetCore..."
+dotnet new dotnet-initializr -n NlogWeb -o "$TEST_DIR/nlogweb" \
+  --arch SimpleLayered --project-type WebApi \
+  --logging NLog --orm None --auth None
+grep -q 'Include="NLog.Web.AspNetCore"' "$TEST_DIR/nlogweb/src/NlogWeb/NlogWeb.csproj" \
+  || { echo "FAIL: NLog.Web.AspNetCore missing for WebApi"; exit 1; }
+if grep -q "NLog.Extensions.Hosting" "$TEST_DIR/nlogweb/src/NlogWeb/NlogWeb.csproj"; then
+    echo "FAIL: NLog.Extensions.Hosting should NOT appear in WebApi project"
+    exit 1
+fi
+# Verify NLog section in appsettings.json
+grep -q '"NLog"' "$TEST_DIR/nlogweb/src/NlogWeb/appsettings.json" \
+  || { echo "FAIL: NLog section missing from appsettings.json"; exit 1; }
+dotnet build "$TEST_DIR/nlogweb" --nologo || { echo "FAIL: NLog+WebApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/nlogweb"
+echo "   OK: NLog + WebApi uses correct web package"
+
+# Step 42: NLog + WorkerService — verify non-web package (NLog.Extensions.Hosting)
+echo "42. Verifying NLog + WorkerService uses NLog.Extensions.Hosting..."
+dotnet new dotnet-initializr -n NlogWrk -o "$TEST_DIR/nlogwrk" \
+  --arch SimpleLayered --project-type WorkerService \
+  --logging NLog --orm None
+grep -q 'Include="NLog.Extensions.Hosting"' "$TEST_DIR/nlogwrk/src/NlogWrk/NlogWrk.csproj" \
+  || { echo "FAIL: NLog.Extensions.Hosting missing for WorkerService"; exit 1; }
+if grep -q "NLog.Web.AspNetCore" "$TEST_DIR/nlogwrk/src/NlogWrk/NlogWrk.csproj"; then
+    echo "FAIL: NLog.Web.AspNetCore should NOT appear in WorkerService"
+    exit 1
+fi
+dotnet build "$TEST_DIR/nlogwrk" --nologo || { echo "FAIL: NLog+WorkerService build failed"; exit 1; }
+rm -rf "$TEST_DIR/nlogwrk"
+echo "   OK: NLog + WorkerService uses correct non-web package"
+
+# Step 43: Testing flags — single test project (xunit + fluentassertions)
+echo "43. Verifying testing flags produce test project..."
+dotnet new dotnet-initializr -n TestSng -o "$TEST_DIR/testsng" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --logging None --orm None --auth None \
+  --testing xunit --testing fluentassertions
+# Verify test project directory exists
+if [ ! -d "$TEST_DIR/testsng/tests/TestSng.Tests" ]; then
+    echo "FAIL: tests/TestSng.Tests directory missing"
+    exit 1
+fi
+# Verify xunit and FluentAssertions packages
+grep -q 'Include="xunit"' "$TEST_DIR/testsng/tests/TestSng.Tests/TestSng.Tests.csproj" \
+  || { echo "FAIL: xunit missing from test .csproj"; exit 1; }
+grep -q 'Include="FluentAssertions" Version="7' "$TEST_DIR/testsng/tests/TestSng.Tests/TestSng.Tests.csproj" \
+  || { echo "FAIL: FluentAssertions 7.* missing from test .csproj"; exit 1; }
+# Verify NO Testcontainers (not selected)
+if grep -q "Testcontainers" "$TEST_DIR/testsng/tests/TestSng.Tests/TestSng.Tests.csproj"; then
+    echo "FAIL: Testcontainers should NOT appear without --testing testcontainers"
+    exit 1
+fi
+# Verify test project in .slnx
+grep -q 'TestSng.Tests' "$TEST_DIR/testsng/TestSng.slnx" \
+  || { echo "FAIL: test project missing from .slnx"; exit 1; }
+dotnet build "$TEST_DIR/testsng" --nologo || { echo "FAIL: testing flags build failed"; exit 1; }
+rm -rf "$TEST_DIR/testsng"
+echo "   OK: Testing flags produce compilable test project"
+
+# Step 44: Testing with TestContainers — split into UnitTests + IntegrationTests
+echo "44. Verifying TestContainers splits test project..."
+dotnet new dotnet-initializr -n TestSpl -o "$TEST_DIR/testspl" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging None --orm EfCore --db PostgreSql --auth None \
+  --testing xunit --testing fluentassertions --testing testcontainers
+# Verify split directories
+if [ ! -d "$TEST_DIR/testspl/tests/TestSpl.UnitTests" ]; then
+    echo "FAIL: tests/TestSpl.UnitTests directory missing"
+    exit 1
+fi
+if [ ! -d "$TEST_DIR/testspl/tests/TestSpl.IntegrationTests" ]; then
+    echo "FAIL: tests/TestSpl.IntegrationTests directory missing"
+    exit 1
+fi
+# Verify Testcontainers in integration test project
+grep -q 'Include="Testcontainers"' "$TEST_DIR/testspl/tests/TestSpl.IntegrationTests/TestSpl.IntegrationTests.csproj" \
+  || { echo "FAIL: Testcontainers missing from integration test .csproj"; exit 1; }
+# Verify both test projects in .slnx
+grep -q 'TestSpl.UnitTests' "$TEST_DIR/testspl/TestSpl.slnx" \
+  || { echo "FAIL: UnitTests missing from .slnx"; exit 1; }
+grep -q 'TestSpl.IntegrationTests' "$TEST_DIR/testspl/TestSpl.slnx" \
+  || { echo "FAIL: IntegrationTests missing from .slnx"; exit 1; }
+dotnet build "$TEST_DIR/testspl" --nologo || { echo "FAIL: TestContainers split build failed"; exit 1; }
+rm -rf "$TEST_DIR/testspl"
+echo "   OK: TestContainers produces split test projects that compile"
+
+# Step 45: No testing flags — verify NO test project generated (testing defaults to 'none')
+echo "45. Verifying no test project when no testing flags..."
+dotnet new dotnet-initializr -n NoTest -o "$TEST_DIR/notest" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --logging None --orm None --auth None --testing none
+if [ -d "$TEST_DIR/notest/tests" ]; then
+    echo "FAIL: tests/ directory should NOT exist when no testing flags"
+    exit 1
+fi
+rm -rf "$TEST_DIR/notest"
+echo "   OK: No test project without testing flags"
+
+# Step 46: Validation (FluentValidation) flag
+echo "46. Verifying --validation flag..."
+dotnet new dotnet-initializr -n ValApp -o "$TEST_DIR/valapp" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging None --orm None --auth None --validation true
+grep -q 'Include="FluentValidation"' "$TEST_DIR/valapp/src/ValApp.Application/ValApp.Application.csproj" \
+  || { echo "FAIL: FluentValidation missing from Application .csproj"; exit 1; }
+# Verify SampleEntityValidator exists
+if [ ! -f "$TEST_DIR/valapp/src/ValApp.Application/SampleEntityValidator.cs" ]; then
+    echo "FAIL: SampleEntityValidator.cs missing"
+    exit 1
+fi
+dotnet build "$TEST_DIR/valapp" --nologo || { echo "FAIL: validation build failed"; exit 1; }
+rm -rf "$TEST_DIR/valapp"
+echo "   OK: Validation flag produces compilable project"
+
+# Step 47: Caching (Redis) flag
+echo "47. Verifying --caching flag..."
+dotnet new dotnet-initializr -n CshApp -o "$TEST_DIR/cshapp" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging None --orm None --auth None --caching true
+grep -q 'Include="Microsoft.Extensions.Caching.StackExchangeRedis"' \
+  "$TEST_DIR/cshapp/src/CshApp.Infrastructure/CshApp.Infrastructure.csproj" \
+  || { echo "FAIL: StackExchangeRedis missing from Infrastructure .csproj"; exit 1; }
+dotnet build "$TEST_DIR/cshapp" --nologo || { echo "FAIL: caching build failed"; exit 1; }
+rm -rf "$TEST_DIR/cshapp"
+echo "   OK: Caching flag produces compilable project"
+
+# Step 48: Resilience flag
+echo "48. Verifying --resilience flag..."
+dotnet new dotnet-initializr -n ResApp -o "$TEST_DIR/resapp" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --logging None --orm None --auth None --resilience true
+grep -q 'Include="Microsoft.Extensions.Http.Resilience"' \
+  "$TEST_DIR/resapp/src/ResApp/ResApp.csproj" \
+  || { echo "FAIL: Http.Resilience missing from .csproj"; exit 1; }
+dotnet build "$TEST_DIR/resapp" --nologo || { echo "FAIL: resilience build failed"; exit 1; }
+rm -rf "$TEST_DIR/resapp"
+echo "   OK: Resilience flag produces compilable project"
+
+# Step 49: Mapping (Mapster) flag
+echo "49. Verifying --mapping flag..."
+dotnet new dotnet-initializr -n MapApp -o "$TEST_DIR/mapapp" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging None --orm None --auth None --mapping true
+grep -q 'Include="Mapster"' "$TEST_DIR/mapapp/src/MapApp.Application/MapApp.Application.csproj" \
+  || { echo "FAIL: Mapster missing from Application .csproj"; exit 1; }
+# Verify SampleMappingConfig exists
+if [ ! -f "$TEST_DIR/mapapp/src/MapApp.Application/SampleMappingConfig.cs" ]; then
+    echo "FAIL: SampleMappingConfig.cs missing"
+    exit 1
+fi
+dotnet build "$TEST_DIR/mapapp" --nologo || { echo "FAIL: mapping build failed"; exit 1; }
+rm -rf "$TEST_DIR/mapapp"
+echo "   OK: Mapping flag produces compilable project"
+
+# Step 50: OpenTelemetry flag + WebApi
+echo "50. Verifying --openTelemetry flag..."
+dotnet new dotnet-initializr -n OtelApp -o "$TEST_DIR/otelapp" \
+  --arch SimpleLayered --project-type WebApi \
+  --logging None --orm None --auth None --openTelemetry true
+grep -q 'Include="OpenTelemetry.Extensions.Hosting"' "$TEST_DIR/otelapp/src/OtelApp/OtelApp.csproj" \
+  || { echo "FAIL: OpenTelemetry.Extensions.Hosting missing"; exit 1; }
+grep -q 'Include="OpenTelemetry.Instrumentation.AspNetCore"' "$TEST_DIR/otelapp/src/OtelApp/OtelApp.csproj" \
+  || { echo "FAIL: AspNetCore instrumentation missing for WebApi"; exit 1; }
+dotnet build "$TEST_DIR/otelapp" --nologo || { echo "FAIL: OpenTelemetry build failed"; exit 1; }
+rm -rf "$TEST_DIR/otelapp"
+echo "   OK: OpenTelemetry flag produces compilable project"
+
+# Step 51: Health checks flag + WebApi
+echo "51. Verifying --health-checks flag..."
+dotnet new dotnet-initializr -n HcApp -o "$TEST_DIR/hcapp" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --logging None --orm None --auth None --health-checks true
+grep -q 'AddHealthChecks' "$TEST_DIR/hcapp/src/HcApp/Program.cs" \
+  || { echo "FAIL: AddHealthChecks missing from Program.cs"; exit 1; }
+grep -q 'MapHealthChecks' "$TEST_DIR/hcapp/src/HcApp/Program.cs" \
+  || { echo "FAIL: MapHealthChecks missing from Program.cs"; exit 1; }
+dotnet build "$TEST_DIR/hcapp" --nologo || { echo "FAIL: health checks build failed"; exit 1; }
+rm -rf "$TEST_DIR/hcapp"
+echo "   OK: Health checks flag produces compilable project"
+
+# Step 52: Kitchen sink — all quality features + logging + testing combined
+echo "52. Verifying combined features (kitchen sink)..."
+dotnet new dotnet-initializr -n KitchenSink -o "$TEST_DIR/kitchen" \
+  --arch CleanArchitecture --project-type WebApi \
+  --logging Serilog --orm EfCore --db PostgreSql --auth Jwt \
+  --testing xunit --testing fluentassertions --testing nsubstitute \
+  --validation true --caching true --resilience true --mapping true \
+  --health-checks true --openTelemetry true
+# Verify key packages present
+grep -q 'Include="Serilog.AspNetCore"' "$TEST_DIR/kitchen/src/KitchenSink.Api/KitchenSink.Api.csproj" \
+  || { echo "FAIL: Serilog missing in kitchen sink"; exit 1; }
+grep -q 'Include="FluentValidation"' "$TEST_DIR/kitchen/src/KitchenSink.Application/KitchenSink.Application.csproj" \
+  || { echo "FAIL: FluentValidation missing in kitchen sink"; exit 1; }
+grep -q 'Include="Microsoft.Extensions.Caching.StackExchangeRedis"' \
+  "$TEST_DIR/kitchen/src/KitchenSink.Infrastructure/KitchenSink.Infrastructure.csproj" \
+  || { echo "FAIL: Redis missing in kitchen sink"; exit 1; }
+grep -q 'Include="OpenTelemetry.Extensions.Hosting"' \
+  "$TEST_DIR/kitchen/src/KitchenSink.Infrastructure/KitchenSink.Infrastructure.csproj" \
+  || { echo "FAIL: OpenTelemetry missing in kitchen sink"; exit 1; }
+# Verify test project exists
+if [ ! -d "$TEST_DIR/kitchen/tests/KitchenSink.Tests" ]; then
+    echo "FAIL: test project missing in kitchen sink"
+    exit 1
+fi
+dotnet build "$TEST_DIR/kitchen" --nologo || { echo "FAIL: kitchen sink build failed"; exit 1; }
+rm -rf "$TEST_DIR/kitchen"
+echo "   OK: All features combined compile successfully"
+
+# Step 53: Regression — logging=None, no features selected
+echo "53. Verifying regression: no features selected..."
+dotnet new dotnet-initializr -n Bare -o "$TEST_DIR/bare" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --logging None --orm None --auth None \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify NO feature packages
+if grep -q "Serilog\|NLog\|FluentValidation\|Mapster\|StackExchangeRedis\|Http.Resilience\|OpenTelemetry" "$TEST_DIR/bare/src/Bare/Bare.csproj"; then
+    echo "FAIL: feature packages should NOT appear when all features disabled"
+    exit 1
+fi
+# Verify NO Serilog/NLog sections in appsettings.json
+if grep -q '"Serilog"\|"NLog"' "$TEST_DIR/bare/src/Bare/appsettings.json"; then
+    echo "FAIL: logging sections should NOT appear when logging=None"
+    exit 1
+fi
+dotnet build "$TEST_DIR/bare" --nologo || { echo "FAIL: bare project build failed"; exit 1; }
+rm -rf "$TEST_DIR/bare"
+echo "   OK: No features selected compiles cleanly"
+
 # Cleanup
 echo ""
 echo "=== Cleaning up ==="
@@ -508,3 +768,4 @@ echo "Template generates a compilable project with correct name substitution, do
 echo "Phase 14 verification: All 18 parameters in --help, gating annotations present, multi-value testing works, Console project builds."
 echo "Phase 15 verification: All arch x type combinations generate correct folder structures and compile successfully."
 echo "Phase 16 verification: ORM (EfCore/Dapper) x DB (PostgreSQL/SqlServer/MySQL/SQLite) x Auth (JWT/ApiKey/Identity/Keycloak) x Framework (net8/net9/net10) critical combinations compile."
+echo "Phase 17 verification: Logging (Serilog/NLog), testing projects, and quality feature flags all produce compilable output."
