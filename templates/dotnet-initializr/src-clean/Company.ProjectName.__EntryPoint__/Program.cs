@@ -1,6 +1,13 @@
 #if (IncludeWebApi)
 using Company.ProjectName.Application;
 using Company.ProjectName.Infrastructure;
+#if (IncludeSerilog)
+using Serilog;
+#endif
+#if (IncludeNLog)
+using NLog;
+using NLog.Web;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,35 +15,17 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 
-#if (IncludeJwt)
-builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = builder.Configuration["Authentication:Jwt:Issuer"];
-        options.Audience = builder.Configuration["Authentication:Jwt:Audience"];
-    });
-builder.Services.AddAuthorization();
-#elif (IncludeKeycloak)
-builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        // Keycloak realm URL, e.g. http://localhost:8080/realms/myrealm
-        options.Authority = builder.Configuration["Authentication:Keycloak:Authority"];
-        options.Audience = builder.Configuration["Authentication:Keycloak:Audience"];
-        // Standard OIDC discovery — no explicit MetadataAddress needed
-    });
-builder.Services.AddAuthorization();
-#elif (IncludeAspNetIdentity)
-builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
-    .AddEntityFrameworkStores<Company.ProjectName.Infrastructure.Data.AppDbContext>()
-    .AddDefaultTokenProviders();
-builder.Services.AddAuthorization();
-// Note: No UI pages or MapIdentityApi endpoints generated — add your own as needed
-#elif (IncludeApiKey)
-builder.Services.AddAuthentication(Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler.SchemeName)
-    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler>(
-        Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler.SchemeName, null);
-builder.Services.AddAuthorization();
+#if (IncludeSerilog)
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
+#endif
+#if (IncludeNLog)
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
+#endif
+
+#if (IncludeHealthChecks)
+builder.Services.AddHealthChecks();
 #endif
 
 #if (IncludeSwaggerUI && IncludeNet8)
@@ -63,46 +52,38 @@ app.UseAuthentication();
 #endif
 app.UseAuthorization();
 app.MapControllers();
+#if (IncludeHealthChecks)
+app.MapHealthChecks("/health");
+#endif
 
 app.Run();
 #elif (IncludeMinimalApi)
 using Company.ProjectName.Application;
 using Company.ProjectName.Infrastructure;
+#if (IncludeSerilog)
+using Serilog;
+#endif
+#if (IncludeNLog)
+using NLog;
+using NLog.Web;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-#if (IncludeJwt)
-builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = builder.Configuration["Authentication:Jwt:Issuer"];
-        options.Audience = builder.Configuration["Authentication:Jwt:Audience"];
-    });
-builder.Services.AddAuthorization();
-#elif (IncludeKeycloak)
-builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        // Keycloak realm URL, e.g. http://localhost:8080/realms/myrealm
-        options.Authority = builder.Configuration["Authentication:Keycloak:Authority"];
-        options.Audience = builder.Configuration["Authentication:Keycloak:Audience"];
-        // Standard OIDC discovery — no explicit MetadataAddress needed
-    });
-builder.Services.AddAuthorization();
-#elif (IncludeAspNetIdentity)
-builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()
-    .AddEntityFrameworkStores<Company.ProjectName.Infrastructure.Data.AppDbContext>()
-    .AddDefaultTokenProviders();
-builder.Services.AddAuthorization();
-// Note: No UI pages or MapIdentityApi endpoints generated — add your own as needed
-#elif (IncludeApiKey)
-builder.Services.AddAuthentication(Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler.SchemeName)
-    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler>(
-        Company.ProjectName.__EntryPoint__.Auth.ApiKeyAuthenticationHandler.SchemeName, null);
-builder.Services.AddAuthorization();
+#if (IncludeSerilog)
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
+#endif
+#if (IncludeNLog)
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
+#endif
+
+#if (IncludeHealthChecks)
+builder.Services.AddHealthChecks();
 #endif
 
 #if (IncludeSwaggerUI && IncludeNet8)
@@ -129,6 +110,9 @@ app.UseAuthentication();
 #endif
 
 app.MapGet("/hello", () => "Hello World");
+#if (IncludeHealthChecks)
+app.MapHealthChecks("/health");
+#endif
 
 app.Run();
 #elif (IncludeConsole)
@@ -136,6 +120,12 @@ using Company.ProjectName.Application;
 using Company.ProjectName.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+#if (IncludeSerilog)
+using Serilog;
+#endif
+#if (IncludeNLog)
+using NLog.Extensions.Hosting;
+#endif
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -143,6 +133,14 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddApplication();
         services.AddInfrastructure(context.Configuration);
     })
+#if (IncludeSerilog)
+    .UseSerilog((context, config) =>
+        config.ReadFrom.Configuration(context.Configuration))
+#endif
+#if (IncludeNLog)
+    .ConfigureLogging(logging => logging.ClearProviders())
+    .UseNLog()
+#endif
     .Build();
 
 Console.WriteLine("Hello from Company.ProjectName!");
@@ -153,6 +151,12 @@ using Company.ProjectName.Application;
 using Company.ProjectName.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+#if (IncludeSerilog)
+using Serilog;
+#endif
+#if (IncludeNLog)
+using NLog.Extensions.Hosting;
+#endif
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -161,6 +165,14 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddInfrastructure(context.Configuration);
         services.AddHostedService<Worker>();
     })
+#if (IncludeSerilog)
+    .UseSerilog((context, config) =>
+        config.ReadFrom.Configuration(context.Configuration))
+#endif
+#if (IncludeNLog)
+    .ConfigureLogging(logging => logging.ClearProviders())
+    .UseNLog()
+#endif
     .Build();
 
 await host.RunAsync();
