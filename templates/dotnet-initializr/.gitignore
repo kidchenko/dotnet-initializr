@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# Publish / deployment output
+publish/
+
+# Logs
+logs/
+*.log
+
+# Local appsettings overrides
+appsettings.*.local.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
