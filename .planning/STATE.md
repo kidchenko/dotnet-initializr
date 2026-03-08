@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: dotnet new Templates
 status: unknown
-last_updated: "2026-03-08T21:47:42.295Z"
+last_updated: "2026-03-08T23:27:45.869Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 11
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 17 of 20 (Logging, Testing, and Quality)
-Plan: 1 complete (17-01 done — NuGet package refs and test project sources config)
+Plan: 3 complete (17-03 done — Test project directory structure: tests-single/ and tests-split/)
 Status: Phase 17 in progress
-Last activity: 2026-03-08 — Phase 17 Plan 01 complete: Conditional PackageReferences for Serilog/NLog/FluentValidation/Mapster/Redis/Resilience/OTel in 4 .csproj files; IncludeAnyTesting symbol and test sources in template.json; .slnx test project entries
+Last activity: 2026-03-08 — Phase 17 Plan 03 complete: tests-single/ (Company.ProjectName.Tests) and tests-split/ (Company.ProjectName.UnitTests + Company.ProjectName.IntegrationTests) with xunit/FluentAssertions/NSubstitute/Bogus/Testcontainers conditional packages
 
-Progress: [█████░░░░░] 30% (v1.3: 10/? plans complete — Phase 17 plan 01 complete)
+Progress: [█████░░░░░] 32% (v1.3: 12/? plans complete — Phase 17 plan 03 complete)
 
 ## Performance Metrics
 
@@ -43,7 +43,7 @@ Progress: [█████░░░░░] 30% (v1.3: 10/? plans complete — Ph
 | 14. Core Parameter Model | 2/2 | Complete |
 | 15. Architecture and Project Types | 2/2 | Complete |
 | 16. Data Access and Auth | 3/3 | Complete |
-| 17. Logging, Testing, and Quality | 1/? | In progress |
+| 17. Logging, Testing, and Quality | 3/? | In progress |
 | 18. DevOps, Containers, and Background Jobs | 0/? | Not started |
 | 19. Blazor CLI Panel | 0/? | Not started |
 | 20. NuGet Packaging and Distribution | 0/? | Not started |
@@ -102,6 +102,9 @@ Key decisions carried into v1.3:
 - [Phase 17-01]: IncludeAnyTesting computed value omits none — testing==none evaluates to IncludeAnyTesting=false, no test project sources included
 - [Phase 17-01]: FluentValidation 12.* in .csproj (not FluentAssertions which is for test projects in Plan 03)
 - [Phase 17-01]: OpenTelemetry.Instrumentation.AspNetCore gated on IncludeWebProject — Worker/Console do not need ASP.NET Core instrumentation
+- [Phase 17]: FluentAssertions pinned to 7.* in test projects (v8 is commercial); xunit.runner.visualstudio pinned to 2.* (.NET 10 issues with v3.x)
+- [Phase 17]: IntegrationTests references Infrastructure (not Application) for CleanArchitecture — data access testing requires Infrastructure layer
+- [Phase 17]: SampleIntegrationTests.cs uses IAsyncLifetime for async container start/stop lifecycle (xUnit idiomatic pattern)
 
 ### Pending Todos
 
@@ -114,5 +117,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 17-01-PLAN.md — Conditional PackageReferences for logging/quality/testing in 4 .csproj files; IncludeAnyTesting symbol and test sources in template.json; .slnx test project entries
+Stopped at: Completed 17-03-PLAN.md — Test project directory structure: tests-single/Company.ProjectName.Tests and tests-split/Company.ProjectName.UnitTests + Company.ProjectName.IntegrationTests with xunit/FluentAssertions/NSubstitute/Bogus/Testcontainers conditional packages
 Resume file: None
