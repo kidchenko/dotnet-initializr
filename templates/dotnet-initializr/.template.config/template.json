@@ -141,7 +141,7 @@
     "testing": {
       "type": "parameter",
       "datatype": "choice",
-      "description": "Testing libraries (comma-separated, e.g. xunit,fluentassertions) [default: xunit]",
+      "description": "Testing libraries (repeat flag for multiple, e.g. --testing xunit --testing fluentassertions) [default: xunit]",
       "allowMultipleValues": true,
       "enableQuotelessLiterals": true,
       "choices": [
