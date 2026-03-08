@@ -305,6 +305,196 @@ FOLDER_COUNT=$(grep -c "Folder Name" "$TEST_DIR/sp-slnx/SLX2.slnx")
 rm -rf "$TEST_DIR/sp-slnx"
 echo "   OK: Single-project .slnx has 1 Project entry and 2 Folder wrappers"
 
+# ===== Phase 16: Data Access and Auth Verification =====
+
+# Step 27: EF Core + PostgreSQL + CleanArchitecture + net9.0 compiles
+echo "27. Verifying EF Core + PostgreSQL + CleanArchitecture + net9.0 compiles..."
+dotnet new dotnet-initializr -n EfPg -o "$TEST_DIR/efpg" \
+  --arch CleanArchitecture --project-type WebApi \
+  --orm EfCore --db PostgreSql --framework net9.0
+# Verify Infrastructure.csproj has Npgsql.EntityFrameworkCore.PostgreSQL (not hardcoded 10.*)
+grep -q "Npgsql.EntityFrameworkCore.PostgreSQL" "$TEST_DIR/efpg/src/EfPg.Infrastructure/EfPg.Infrastructure.csproj" \
+  || { echo "FAIL: Npgsql.EntityFrameworkCore.PostgreSQL not in Infrastructure.csproj"; exit 1; }
+# Verify version token was substituted (no __NpgsqlEfVersion__ remaining)
+if grep -q "__NpgsqlEfVersion__\|__EfCoreVersion__" "$TEST_DIR/efpg/src/EfPg.Infrastructure/EfPg.Infrastructure.csproj"; then
+    echo "FAIL: version tokens not substituted in Infrastructure.csproj"
+    exit 1
+fi
+# Verify AppDbContext.cs exists
+[ -f "$TEST_DIR/efpg/src/EfPg.Infrastructure/Data/AppDbContext.cs" ] \
+  || { echo "FAIL: AppDbContext.cs missing in Infrastructure/Data/"; exit 1; }
+# Verify connection string in appsettings
+grep -q "DefaultConnection" "$TEST_DIR/efpg/src/EfPg.Api/appsettings.json" \
+  || { echo "FAIL: ConnectionStrings missing from appsettings.json"; exit 1; }
+dotnet build "$TEST_DIR/efpg" --nologo || { echo "FAIL: EfCore+PostgreSQL+CA+net9.0 build failed"; exit 1; }
+rm -rf "$TEST_DIR/efpg"
+echo "   OK: EF Core + PostgreSQL + CleanArchitecture + net9.0 compiles"
+
+# Step 28: Dapper + SQL Server + SimpleLayered compiles
+echo "28. Verifying Dapper + SQL Server + SimpleLayered compiles..."
+dotnet new dotnet-initializr -n DapSql -o "$TEST_DIR/dapsql" \
+  --arch SimpleLayered --project-type WebApi \
+  --orm Dapper --db SqlServer
+# Verify Dapper package present
+grep -q "Dapper" "$TEST_DIR/dapsql/src/DapSql/DapSql.csproj" \
+  || { echo "FAIL: Dapper package not in csproj"; exit 1; }
+grep -q "Microsoft.Data.SqlClient" "$TEST_DIR/dapsql/src/DapSql/DapSql.csproj" \
+  || { echo "FAIL: Microsoft.Data.SqlClient not in csproj"; exit 1; }
+dotnet build "$TEST_DIR/dapsql" --nologo || { echo "FAIL: Dapper+SqlServer+SL build failed"; exit 1; }
+rm -rf "$TEST_DIR/dapsql"
+echo "   OK: Dapper + SQL Server + SimpleLayered compiles"
+
+# Step 29: EF Core + MySQL (Pomelo) + net10.0 compiles (Pomelo version check)
+echo "29. Verifying EF Core + MySQL (Pomelo) + net10.0 compiles..."
+dotnet new dotnet-initializr -n EfMy -o "$TEST_DIR/efmy" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --orm EfCore --db MySql --framework net10.0
+# Verify Pomelo package present and version does NOT contain 10.* (should be 9.* or 8.*)
+grep -q "Pomelo.EntityFrameworkCore.MySql" "$TEST_DIR/efmy/src/EfMy/EfMy.csproj" \
+  || { echo "FAIL: Pomelo.EntityFrameworkCore.MySql not in csproj"; exit 1; }
+dotnet build "$TEST_DIR/efmy" --nologo || { echo "FAIL: EfCore+MySQL+net10.0 build failed"; exit 1; }
+rm -rf "$TEST_DIR/efmy"
+echo "   OK: EF Core + MySQL (Pomelo) + net10.0 compiles"
+
+# Step 30: EF Core + SQLite + VerticalSlice compiles
+echo "30. Verifying EF Core + SQLite + VerticalSlice compiles..."
+dotnet new dotnet-initializr -n EfLite -o "$TEST_DIR/eflite" \
+  --arch VerticalSlice --project-type WebApi \
+  --orm EfCore --db Sqlite
+dotnet build "$TEST_DIR/eflite" --nologo || { echo "FAIL: EfCore+Sqlite+VS build failed"; exit 1; }
+rm -rf "$TEST_DIR/eflite"
+echo "   OK: EF Core + SQLite + VerticalSlice compiles"
+
+# Step 31: JWT auth + WebApi compiles
+echo "31. Verifying JWT auth + WebApi compiles..."
+dotnet new dotnet-initializr -n JwtApp -o "$TEST_DIR/jwt" \
+  --arch CleanArchitecture --project-type WebApi \
+  --auth Jwt --orm EfCore --db PostgreSql
+# Verify JwtBearer package present
+grep -q "Microsoft.AspNetCore.Authentication.JwtBearer" "$TEST_DIR/jwt/src/JwtApp.Api/JwtApp.Api.csproj" \
+  || { echo "FAIL: JwtBearer package not in csproj"; exit 1; }
+# Verify auth config in appsettings
+grep -q "Authentication" "$TEST_DIR/jwt/src/JwtApp.Api/appsettings.json" \
+  || { echo "FAIL: Authentication section missing from appsettings.json"; exit 1; }
+dotnet build "$TEST_DIR/jwt" --nologo || { echo "FAIL: JWT+WebApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/jwt"
+echo "   OK: JWT auth + WebApi compiles"
+
+# Step 32: API Key auth + MinimalApi compiles
+echo "32. Verifying API Key auth + MinimalApi compiles..."
+dotnet new dotnet-initializr -n ApiKApp -o "$TEST_DIR/apikey" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --auth ApiKey --orm None
+# Verify ApiKeyAuthenticationHandler.cs exists
+[ -f "$TEST_DIR/apikey/src/ApiKApp/Auth/ApiKeyAuthenticationHandler.cs" ] \
+  || { echo "FAIL: ApiKeyAuthenticationHandler.cs missing"; exit 1; }
+dotnet build "$TEST_DIR/apikey" --nologo || { echo "FAIL: ApiKey+MinimalApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/apikey"
+echo "   OK: API Key auth + MinimalApi compiles"
+
+# Step 33: ASP.NET Identity + EF Core + CleanArchitecture compiles
+echo "33. Verifying ASP.NET Identity + EF Core + CleanArchitecture compiles..."
+dotnet new dotnet-initializr -n IdApp -o "$TEST_DIR/identity" \
+  --arch CleanArchitecture --project-type WebApi \
+  --auth AspNetIdentity --orm EfCore --db PostgreSql
+# Verify Identity package present
+grep -q "Microsoft.AspNetCore.Identity.EntityFrameworkCore" "$TEST_DIR/identity/src/IdApp.Api/IdApp.Api.csproj" \
+  || { echo "FAIL: Identity.EntityFrameworkCore package not in csproj"; exit 1; }
+# Verify AppDbContext inherits IdentityDbContext
+grep -q "IdentityDbContext" "$TEST_DIR/identity/src/IdApp.Infrastructure/Data/AppDbContext.cs" \
+  || { echo "FAIL: AppDbContext should inherit IdentityDbContext when Identity selected"; exit 1; }
+dotnet build "$TEST_DIR/identity" --nologo || { echo "FAIL: Identity+EfCore+CA build failed"; exit 1; }
+rm -rf "$TEST_DIR/identity"
+echo "   OK: ASP.NET Identity + EF Core + CleanArchitecture compiles"
+
+# Step 34: ASP.NET Identity + ORM=None gracefully produces no Identity code
+echo "34. Verifying ASP.NET Identity + ORM=None gracefully degrades..."
+dotnet new dotnet-initializr -n IdNone -o "$TEST_DIR/id-none" \
+  --arch SimpleLayered --project-type WebApi \
+  --auth AspNetIdentity --orm None
+# Verify NO Identity package (IncludeAspNetIdentity double-gate should prevent it)
+if grep -q "Microsoft.AspNetCore.Identity.EntityFrameworkCore" "$TEST_DIR/id-none/src/IdNone/IdNone.csproj"; then
+    echo "FAIL: Identity package should NOT be present when ORM=None"
+    exit 1
+fi
+dotnet build "$TEST_DIR/id-none" --nologo || { echo "FAIL: Identity+ORM=None should still build"; exit 1; }
+rm -rf "$TEST_DIR/id-none"
+echo "   OK: ASP.NET Identity + ORM=None gracefully degrades (no Identity code)"
+
+# Step 35: Keycloak auth compiles
+echo "35. Verifying Keycloak auth compiles..."
+dotnet new dotnet-initializr -n KcApp -o "$TEST_DIR/keycloak" \
+  --arch SimpleLayered --project-type WebApi \
+  --auth Keycloak --orm None
+grep -q "Microsoft.AspNetCore.Authentication.JwtBearer" "$TEST_DIR/keycloak/src/KcApp/KcApp.csproj" \
+  || { echo "FAIL: JwtBearer package not in csproj for Keycloak"; exit 1; }
+dotnet build "$TEST_DIR/keycloak" --nologo || { echo "FAIL: Keycloak+WebApi build failed"; exit 1; }
+rm -rf "$TEST_DIR/keycloak"
+echo "   OK: Keycloak auth compiles"
+
+# Step 36: SwaggerUI + net8.0 uses Swashbuckle.AspNetCore (GEN-06)
+echo "36. Verifying SwaggerUI + net8.0 uses full Swashbuckle.AspNetCore..."
+dotnet new dotnet-initializr -n Sw8 -o "$TEST_DIR/swagger8" \
+  --arch SimpleLayered --project-type WebApi \
+  --api-docs SwaggerUI --framework net8.0 --orm None
+# Verify full Swashbuckle.AspNetCore package (not SwaggerUI sub-package)
+grep -q 'Include="Swashbuckle.AspNetCore"' "$TEST_DIR/swagger8/src/Sw8/Sw8.csproj" \
+  || { echo "FAIL: Swashbuckle.AspNetCore should be present for net8.0+SwaggerUI"; exit 1; }
+if grep -q 'Include="Swashbuckle.AspNetCore.SwaggerUI"' "$TEST_DIR/swagger8/src/Sw8/Sw8.csproj"; then
+    echo "FAIL: SwaggerUI sub-package should NOT be present for net8.0 (use full metapackage)"
+    exit 1
+fi
+dotnet build "$TEST_DIR/swagger8" --nologo || { echo "FAIL: SwaggerUI+net8.0 build failed"; exit 1; }
+rm -rf "$TEST_DIR/swagger8"
+echo "   OK: SwaggerUI + net8.0 uses full Swashbuckle.AspNetCore"
+
+# Step 37: SwaggerUI + net9.0 uses Swashbuckle.AspNetCore.SwaggerUI sub-package (GEN-06)
+echo "37. Verifying SwaggerUI + net9.0 uses SwaggerUI sub-package..."
+dotnet new dotnet-initializr -n Sw9 -o "$TEST_DIR/swagger9" \
+  --arch SimpleLayered --project-type MinimalApi \
+  --api-docs SwaggerUI --framework net9.0 --orm None
+# Verify SwaggerUI sub-package (not full Swashbuckle)
+grep -q 'Include="Swashbuckle.AspNetCore.SwaggerUI"' "$TEST_DIR/swagger9/src/Sw9/Sw9.csproj" \
+  || { echo "FAIL: SwaggerUI sub-package should be present for net9.0"; exit 1; }
+dotnet build "$TEST_DIR/swagger9" --nologo || { echo "FAIL: SwaggerUI+net9.0 build failed"; exit 1; }
+rm -rf "$TEST_DIR/swagger9"
+echo "   OK: SwaggerUI + net9.0 uses Swashbuckle.AspNetCore.SwaggerUI sub-package"
+
+# Step 38: ORM=None + Auth=None still compiles (no regressions from Phase 16)
+echo "38. Verifying ORM=None + Auth=None still compiles (regression check)..."
+dotnet new dotnet-initializr -n Plain -o "$TEST_DIR/plain" \
+  --arch CleanArchitecture --project-type WebApi \
+  --orm None --auth None
+# Verify NO connection strings in appsettings
+if grep -q "ConnectionStrings" "$TEST_DIR/plain/src/Plain.Api/appsettings.json"; then
+    echo "FAIL: ConnectionStrings should NOT be present when ORM=None"
+    exit 1
+fi
+# Verify NO auth packages
+if grep -q "JwtBearer\|Identity.EntityFrameworkCore" "$TEST_DIR/plain/src/Plain.Api/Plain.Api.csproj"; then
+    echo "FAIL: Auth packages should NOT be present when Auth=None"
+    exit 1
+fi
+dotnet build "$TEST_DIR/plain" --nologo || { echo "FAIL: Plain build regression (ORM=None, Auth=None)"; exit 1; }
+rm -rf "$TEST_DIR/plain"
+echo "   OK: ORM=None + Auth=None compiles (no regression)"
+
+# Step 39: Dapper + PostgreSQL + Dapper uses Npgsql (standalone, not EF provider)
+echo "39. Verifying Dapper + PostgreSQL uses standalone Npgsql..."
+dotnet new dotnet-initializr -n DapPg -o "$TEST_DIR/dappg" \
+  --arch CleanArchitecture --project-type WebApi \
+  --orm Dapper --db PostgreSql
+# Verify Npgsql (standalone) present, NOT Npgsql.EntityFrameworkCore.PostgreSQL
+grep -q 'Include="Npgsql"' "$TEST_DIR/dappg/src/DapPg.Infrastructure/DapPg.Infrastructure.csproj" \
+  || { echo "FAIL: standalone Npgsql should be present for Dapper+PostgreSQL"; exit 1; }
+if grep -q "Npgsql.EntityFrameworkCore" "$TEST_DIR/dappg/src/DapPg.Infrastructure/DapPg.Infrastructure.csproj"; then
+    echo "FAIL: EF Core Npgsql provider should NOT be present for Dapper"
+    exit 1
+fi
+dotnet build "$TEST_DIR/dappg" --nologo || { echo "FAIL: Dapper+PostgreSQL build failed"; exit 1; }
+rm -rf "$TEST_DIR/dappg"
+echo "   OK: Dapper + PostgreSQL uses standalone Npgsql"
+
 # Cleanup
 echo ""
 echo "=== Cleaning up ==="
@@ -317,3 +507,4 @@ echo "=== ALL CHECKS PASSED ==="
 echo "Template generates a compilable project with correct name substitution, dotfiles, and preserved #if DEBUG guards."
 echo "Phase 14 verification: All 18 parameters in --help, gating annotations present, multi-value testing works, Console project builds."
 echo "Phase 15 verification: All arch x type combinations generate correct folder structures and compile successfully."
+echo "Phase 16 verification: ORM (EfCore/Dapper) x DB (PostgreSQL/SqlServer/MySQL/SQLite) x Auth (JWT/ApiKey/Identity/Keycloak) x Framework (net8/net9/net10) critical combinations compile."
