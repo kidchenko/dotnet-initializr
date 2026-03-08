@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "kidchenko",
+  "classifications": ["Web", "API"],
+  "identity": "Initializr.Templates.WebApi.CSharp.1.0",
+  "name": ".NET Initializr Web API",
+  "shortName": "dotnet-initializr",
+  "description": "Generates a minimal compilable .NET WebApi project.",
+  "sourceName": "Company.ProjectName",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  }
+}
