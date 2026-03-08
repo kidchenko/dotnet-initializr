@@ -1,4 +1,7 @@
-namespace Company.ProjectName.__EntryPoint__;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace Company.ProjectName.Infrastructure;
 
 public sealed class Worker : BackgroundService
 {

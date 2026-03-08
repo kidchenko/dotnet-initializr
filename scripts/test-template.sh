@@ -257,14 +257,14 @@ dotnet build "$TEST_DIR/ca-console" --nologo || { echo "FAIL: CA Console build f
 rm -rf "$TEST_DIR/ca-console"
 echo "   OK: CleanArchitecture + Console: .Console suffix, Jobs/ in Infrastructure, builds"
 
-# Step 22: Verify CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs
-echo "22. Verifying CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs..."
+# Step 22: Verify CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs in Infrastructure
+echo "22. Verifying CleanArchitecture + WorkerService generates .Worker suffix and Worker.cs in Infrastructure..."
 dotnet new dotnet-initializr -n CW1 --arch CleanArchitecture --project-type WorkerService -o "$TEST_DIR/ca-worker"
 [ -d "$TEST_DIR/ca-worker/src/CW1.Worker" ] || { echo "FAIL: CW1.Worker missing (expected .Worker suffix)"; exit 1; }
-[ -f "$TEST_DIR/ca-worker/src/CW1.Worker/Worker.cs" ] || { echo "FAIL: Worker.cs missing for WorkerService type"; exit 1; }
+[ -f "$TEST_DIR/ca-worker/src/CW1.Infrastructure/Worker.cs" ] || { echo "FAIL: Worker.cs missing in Infrastructure for WorkerService type"; exit 1; }
 dotnet build "$TEST_DIR/ca-worker" --nologo || { echo "FAIL: CA Worker build failed"; exit 1; }
 rm -rf "$TEST_DIR/ca-worker"
-echo "   OK: CleanArchitecture + WorkerService: .Worker suffix, Worker.cs present, builds"
+echo "   OK: CleanArchitecture + WorkerService: .Worker suffix, Worker.cs in Infrastructure, builds"
 
 # Step 23: Verify VerticalSlice + MinimalApi has Features/ and no Models/Services/Data/
 echo "23. Verifying VerticalSlice + MinimalApi has Features/ and no SimpleLayered folders..."

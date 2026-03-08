@@ -8,6 +8,12 @@
     <AnalysisLevel>latest-minimum</AnalysisLevel>
   </PropertyGroup>
 
+<!--#if (IncludeWorker) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
+  </ItemGroup>
+<!--#endif -->
+
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Application/Company.ProjectName.Application.csproj" />
     <ProjectReference Include="../Company.ProjectName.Domain/Company.ProjectName.Domain.csproj" />

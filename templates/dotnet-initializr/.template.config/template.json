@@ -349,7 +349,7 @@
         },
         {
           "condition": "(!IncludeWorker)",
-          "exclude": ["**/Company.ProjectName.__EntryPoint__/Worker.cs"]
+          "exclude": ["**/Company.ProjectName.Infrastructure/Worker.cs"]
         }
       ]
     },
