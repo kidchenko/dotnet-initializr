@@ -72,10 +72,10 @@ if ! grep -q "namespace MyApp" "$TEST_DIR/src/MyApp/Program.cs" 2>/dev/null && \
 fi
 echo "   OK: Company.ProjectName replaced with MyApp"
 
-# Step 9: Verify #if DEBUG preserved (TMPL-04)
-echo "9. Verifying #if DEBUG preserved..."
-if ! grep -q "#if DEBUG" "$TEST_DIR/src/MyApp/Program.cs"; then
-    echo "FAIL: #if DEBUG not found in generated Program.cs (template engine removed it)"
+# Step 9: Verify IsDevelopment check present (TMPL-04)
+echo "9. Verifying IsDevelopment check present..."
+if ! grep -q "IsDevelopment" "$TEST_DIR/src/MyApp/Program.cs"; then
+    echo "FAIL: IsDevelopment check not found in generated Program.cs"
     exit 1
 fi
 # Verify noEmit markers are NOT in the generated output (they should be consumed by the engine)

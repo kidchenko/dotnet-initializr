@@ -5,11 +5,10 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-//-:cnd:noEmit
-#if DEBUG
-app.UseDeveloperExceptionPage();
-#endif
-//+:cnd:noEmit
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
@@ -21,11 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
-//-:cnd:noEmit
-#if DEBUG
-app.UseDeveloperExceptionPage();
-#endif
-//+:cnd:noEmit
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseHttpsRedirection();
 
