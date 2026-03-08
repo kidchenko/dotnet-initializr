@@ -209,17 +209,18 @@
     "testing": {
       "type": "parameter",
       "datatype": "choice",
-      "description": "Testing libraries (repeat flag for multiple, e.g. --testing xunit --testing fluentassertions) [default: xunit]",
+      "description": "Testing libraries (repeat flag for multiple, e.g. --testing xunit --testing fluentassertions) [default: none]",
       "allowMultipleValues": true,
       "enableQuotelessLiterals": true,
       "choices": [
+        { "choice": "none",             "description": "No testing libraries" },
         { "choice": "xunit",            "description": "xUnit test framework" },
         { "choice": "fluentassertions", "description": "FluentAssertions" },
         { "choice": "nsubstitute",      "description": "NSubstitute mocking" },
         { "choice": "bogus",            "description": "Bogus fake data generator" },
         { "choice": "testcontainers",   "description": "Testcontainers integration testing" }
       ],
-      "defaultValue": "xunit"
+      "defaultValue": "none"
     },
 
     "IncludeXunit":            { "type": "computed", "value": "(testing == \"xunit\")" },
@@ -227,6 +228,7 @@
     "IncludeNSubstitute":      { "type": "computed", "value": "(testing == \"nsubstitute\")" },
     "IncludeBogus":            { "type": "computed", "value": "(testing == \"bogus\")" },
     "IncludeTestcontainers":   { "type": "computed", "value": "(testing == \"testcontainers\")" },
+    "IncludeAnyTesting":       { "type": "computed", "value": "(testing == \"xunit\" || testing == \"fluentassertions\" || testing == \"nsubstitute\" || testing == \"bogus\" || testing == \"testcontainers\")" },
 
     "containers": {
       "type": "parameter",
@@ -338,7 +340,7 @@
     "mapping": {
       "type": "parameter",
       "datatype": "bool",
-      "description": "Include object mapping library (Mapperly) [default: false]",
+      "description": "Include object mapping library (Mapster) [default: false]",
       "defaultValue": "false"
     },
     "IncludeMapping": { "type": "computed", "value": "(mapping)" }
@@ -392,6 +394,14 @@
         {
           "condition": "(!IncludeApiKey)",
           "exclude": ["src/**/Auth/**"]
+        },
+        {
+          "condition": "(!IncludeValidation)",
+          "exclude": ["src/**/Application/SampleEntityValidator.cs"]
+        },
+        {
+          "condition": "(!IncludeMapping)",
+          "exclude": ["src/**/Application/SampleMappingConfig.cs"]
         }
       ]
     },
@@ -422,7 +432,15 @@
         },
         {
           "condition": "(!IncludeApiKey)",
-          "exclude": ["**/Company.ProjectName.__EntryPoint__/Auth/**"]
+          "exclude": ["**/Company.ProjectName.Infrastructure/Auth/**"]
+        },
+        {
+          "condition": "(!IncludeValidation)",
+          "exclude": ["**/Company.ProjectName.Application/SampleEntityValidator.cs"]
+        },
+        {
+          "condition": "(!IncludeMapping)",
+          "exclude": ["**/Company.ProjectName.Application/SampleMappingConfig.cs"]
         }
       ]
     },
@@ -434,6 +452,16 @@
       "rename": {
         "Company.ProjectName.clean.slnx": "Company.ProjectName.slnx"
       }
+    },
+    {
+      "source": "./tests-single",
+      "target": "./tests",
+      "condition": "(IncludeAnyTesting && !IncludeTestcontainers)"
+    },
+    {
+      "source": "./tests-split",
+      "target": "./tests",
+      "condition": "(IncludeAnyTesting && IncludeTestcontainers)"
     }
   ]
 }

@@ -5,5 +5,13 @@
     <Project Path="src/Company.ProjectName.Infrastructure/Company.ProjectName.Infrastructure.csproj" />
     <Project Path="src/Company.ProjectName.__EntryPoint__/Company.ProjectName.__EntryPoint__.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+<!--#if (IncludeAnyTesting && !IncludeTestcontainers) -->
+    <Project Path="tests/Company.ProjectName.Tests/Company.ProjectName.Tests.csproj" />
+<!--#endif -->
+<!--#if (IncludeAnyTesting && IncludeTestcontainers) -->
+    <Project Path="tests/Company.ProjectName.UnitTests/Company.ProjectName.UnitTests.csproj" />
+    <Project Path="tests/Company.ProjectName.IntegrationTests/Company.ProjectName.IntegrationTests.csproj" />
+<!--#endif -->
+  </Folder>
 </Solution>
