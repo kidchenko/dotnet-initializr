@@ -46,6 +46,10 @@
     color: var(--folder-icon);
 }
 
+.project-folder .node-icon .fa-cube {
+    color: #a0aec0;
+}
+
 .node-name {
     overflow: hidden;
     text-overflow: ellipsis;

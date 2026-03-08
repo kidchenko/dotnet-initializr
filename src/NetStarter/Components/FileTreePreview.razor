@@ -9,9 +9,14 @@
 
         if (node.IsFolder)
         {
-            <div class="@cssClass folder-toggle" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath" @onclick="() => { node.IsExpanded = !node.IsExpanded; StateHasChanged(); }">
+            var folderCss = node.IsProject ? $"{cssClass} folder-toggle project-folder" : $"{cssClass} folder-toggle";
+            <div class="@folderCss" style="padding-left: @($"{depth * 1.25}rem")" @key="fullPath" @onclick="() => { node.IsExpanded = !node.IsExpanded; StateHasChanged(); }">
                 <span class="node-icon">
-                    @if (node.IsExpanded)
+                    @if (node.IsProject)
+                    {
+                        <i class="fa-solid fa-cube"></i>
+                    }
+                    else if (node.IsExpanded)
                     {
                         <i class="fa-solid fa-folder-open"></i>
                     }

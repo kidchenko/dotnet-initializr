@@ -52,7 +52,7 @@ public static class ObservabilityGenerator
 
     public static string GetNamespaceSuffix(ArchitecturePattern architecture, string entryPointSuffix) => architecture switch
     {
-        ArchitecturePattern.CleanArchitecture => $"{entryPointSuffix}.Telemetry",
+        ArchitecturePattern.CleanArchitecture => "Infrastructure.Telemetry",
         _ => "Telemetry",
     };
 }

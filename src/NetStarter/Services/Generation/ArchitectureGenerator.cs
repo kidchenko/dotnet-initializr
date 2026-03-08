@@ -34,8 +34,8 @@ public static class ArchitectureGenerator
 
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {
-            files[$"{src}/{name}.Application/Validation/HelloRequestValidator.cs"] =
-                GenerateHelloRequestValidator(config, $"{config.Namespace}.Application.Validation");
+            files[$"{src}/{name}.Application/Validation/SampleRequestValidator.cs"] =
+                GenerateSampleRequestValidator(config, $"{config.Namespace}.Application.Validation");
         }
 
         // Infrastructure project — references Application and Domain, owns EF Core / Dapper
@@ -53,6 +53,16 @@ public static class ArchitectureGenerator
                 ? EfCoreGenerator.GenerateIdentityDbContext(config, dbContextNs)
                 : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
         }
+
+        // Infrastructure extension methods
+        if (InfrastructureExtensionsGenerator.HasInfrastructureServices(config))
+            files[$"{src}/{name}.Infrastructure/InfrastructureServiceCollectionExtensions.cs"] =
+                InfrastructureExtensionsGenerator.GenerateInfrastructureExtensions(config);
+
+        // Application extension methods
+        if (InfrastructureExtensionsGenerator.HasApplicationServices(config))
+            files[$"{src}/{name}.Application/ApplicationServiceCollectionExtensions.cs"] =
+                InfrastructureExtensionsGenerator.GenerateApplicationExtensions(config);
 
         // Entry point project — references Infrastructure and Application
         var entryPointCsproj = config.ProjectType switch
@@ -90,16 +100,16 @@ public static class ArchitectureGenerator
         if (config.IncludeOpenTelemetry)
         {
             var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(ArchitecturePattern.CleanArchitecture, config.EntryPointSuffix);
-            files[$"{src}/{name}.{config.EntryPointSuffix}/Telemetry/OpenTelemetryExtensions.cs"] =
+            files[$"{src}/{name}.Infrastructure/Telemetry/OpenTelemetryExtensions.cs"] =
                 ObservabilityGenerator.GenerateOpenTelemetryExtensions(config, telemetryNs);
         }
 
         if (config.ProjectType == ProjectType.WebApi)
-            files[$"{src}/{name}.{config.EntryPointSuffix}/Controllers/HelloController.cs"] =
-                GenerateHelloController(config, $"{config.Namespace}.Api.Controllers");
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Controllers/SampleController.cs"] =
+                GenerateSampleController(config, $"{config.Namespace}.Api.Controllers");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            files[$"{src}/{name}.{config.EntryPointSuffix}/Endpoints/HelloEndpoint.cs"] =
-                GenerateHelloEndpoint(config, $"{config.Namespace}.Api.Endpoints");
+            files[$"{src}/{name}.{config.EntryPointSuffix}/Endpoints/SampleEndpoint.cs"] =
+                GenerateSampleEndpoint(config, $"{config.Namespace}.Api.Endpoints");
     }
 
     public static void GenerateVerticalSlice(ProjectConfiguration config, Dictionary<string, string> files, string root)
@@ -130,8 +140,8 @@ public static class ArchitectureGenerator
                 : EfCoreGenerator.GenerateDbContext(config, dbContextNs);
 
             var entityNs = EfCoreGenerator.GetEntityNamespaceSuffix(ArchitecturePattern.VerticalSlice);
-            files[$"{proj}/Features/Hello/HelloEntity.cs"] =
-                EfCoreGenerator.GenerateHelloEntity(config, entityNs);
+            files[$"{proj}/Features/Sample/SampleEntity.cs"] =
+                EfCoreGenerator.GenerateSampleEntity(config, entityNs);
         }
 
         if (config.Auth == AuthOption.Jwt)
@@ -157,22 +167,22 @@ public static class ArchitectureGenerator
         if (config.Mapping == MappingOption.Mapster)
         {
             var mappingNs = MappingGenerator.GetNamespaceSuffix(ArchitecturePattern.VerticalSlice);
-            files[$"{proj}/Features/Hello/HelloMappingConfig.cs"] =
-                MappingGenerator.GenerateHelloMappingConfig(config, mappingNs);
+            files[$"{proj}/Features/Sample/SampleMappingConfig.cs"] =
+                MappingGenerator.GenerateSampleMappingConfig(config, mappingNs);
         }
 
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {
-            files[$"{proj}/Features/Hello/HelloRequestValidator.cs"] =
-                GenerateHelloRequestValidator(config, $"{config.Namespace}.Features.Hello");
+            files[$"{proj}/Features/Sample/SampleRequestValidator.cs"] =
+                GenerateSampleRequestValidator(config, $"{config.Namespace}.Features.Sample");
         }
 
         if (config.ProjectType == ProjectType.WebApi)
-            files[$"{proj}/Features/Hello/HelloController.cs"] =
-                GenerateHelloController(config, $"{config.Namespace}.Features.Hello");
+            files[$"{proj}/Features/Sample/SampleController.cs"] =
+                GenerateSampleController(config, $"{config.Namespace}.Features.Sample");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            files[$"{proj}/Features/Hello/HelloEndpoint.cs"] =
-                GenerateHelloEndpoint(config, $"{config.Namespace}.Features.Hello");
+            files[$"{proj}/Features/Sample/SampleEndpoint.cs"] =
+                GenerateSampleEndpoint(config, $"{config.Namespace}.Features.Sample");
     }
 
     public static void GenerateSimpleLayered(ProjectConfiguration config, Dictionary<string, string> files, string root)
@@ -236,19 +246,19 @@ public static class ArchitectureGenerator
 
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {
-            files[$"{proj}/Validation/HelloRequestValidator.cs"] =
-                GenerateHelloRequestValidator(config, $"{config.Namespace}.Validation");
+            files[$"{proj}/Validation/SampleRequestValidator.cs"] =
+                GenerateSampleRequestValidator(config, $"{config.Namespace}.Validation");
         }
 
         // Layer folders
         files[$"{proj}/Services/.gitkeep"] = string.Empty;
 
         if (config.ProjectType == ProjectType.WebApi)
-            files[$"{proj}/Controllers/HelloController.cs"] =
-                GenerateHelloController(config, $"{config.Namespace}.Controllers");
+            files[$"{proj}/Controllers/SampleController.cs"] =
+                GenerateSampleController(config, $"{config.Namespace}.Controllers");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            files[$"{proj}/Endpoints/HelloEndpoint.cs"] =
-                GenerateHelloEndpoint(config, $"{config.Namespace}.Endpoints");
+            files[$"{proj}/Endpoints/SampleEndpoint.cs"] =
+                GenerateSampleEndpoint(config, $"{config.Namespace}.Endpoints");
     }
 
     public static void GenerateConsoleOrWorker(ProjectConfiguration config, Dictionary<string, string> files, string root)
@@ -269,40 +279,41 @@ public static class ArchitectureGenerator
         files[$"{proj}/Program.cs"] = ProgramCsGenerator.Generate(config);
     }
 
-    private static string GenerateHelloController(ProjectConfiguration config, string ns) =>
+    private static string GenerateSampleController(ProjectConfiguration config, string ns) =>
         $"using Microsoft.AspNetCore.Mvc;\n" +
         $"\n" +
         $"namespace {ns};\n" +
         $"\n" +
         $"[ApiController]\n" +
         $"[Route(\"api/[controller]\")]\n" +
-        $"public class HelloController : ControllerBase\n" +
+        $"public class SampleController : ControllerBase\n" +
         $"{{\n" +
         $"    [HttpGet]\n" +
         $"    public IActionResult Get() => Ok(new {{ Message = \"Hello from {config.ProjectName}!\" }});\n" +
         $"}}\n";
 
-    private static string GenerateHelloEndpoint(ProjectConfiguration config, string ns) =>
+    private static string GenerateSampleEndpoint(ProjectConfiguration config, string ns) =>
         $"namespace {ns};\n" +
         $"\n" +
-        $"public static class HelloEndpoint\n" +
+        $"public static class SampleEndpoint\n" +
         $"{{\n" +
-        $"    public static void Map(WebApplication app)\n" +
+        $"    public static WebApplication MapSampleEndpoint(this WebApplication app)\n" +
         $"    {{\n" +
-        $"        app.MapGet(\"/api/hello\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n" +
+        $"        app.MapGet(\"/api/sample\", () => new {{ Message = \"Hello from {config.ProjectName}!\" }});\n" +
+        $"        return app;\n" +
         $"    }}\n" +
         $"}}\n";
 
-    private static string GenerateHelloRequestValidator(ProjectConfiguration config, string ns) =>
+    private static string GenerateSampleRequestValidator(ProjectConfiguration config, string ns) =>
         $"using FluentValidation;\n" +
         $"\n" +
         $"namespace {ns};\n" +
         $"\n" +
-        $"public record HelloRequest(string Name);\n" +
+        $"public record SampleRequest(string Name);\n" +
         $"\n" +
-        $"public class HelloRequestValidator : AbstractValidator<HelloRequest>\n" +
+        $"public class SampleRequestValidator : AbstractValidator<SampleRequest>\n" +
         $"{{\n" +
-        $"    public HelloRequestValidator()\n" +
+        $"    public SampleRequestValidator()\n" +
         $"    {{\n" +
         $"        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);\n" +
         $"    }}\n" +

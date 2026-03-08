@@ -129,6 +129,7 @@ public class Phase05DataLayerTests
         {
             ProjectName = "TestApp",
             Namespace = "TestApp",
+            Architecture = ArchitecturePattern.SimpleLayered,
             IncludeRedis = true,
         };
         var programCs = ProgramCsGenerator.Generate(config);
@@ -203,6 +204,7 @@ public class Phase05DataLayerTests
             Database = DatabaseOption.PostgreSql,
             ProjectName = "MyApp",
             Namespace = "MyApp",
+            Architecture = ArchitecturePattern.SimpleLayered,
         };
         var programCs = ProgramCsGenerator.Generate(config);
         Assert.Contains("AddDapperConnection(builder.Configuration)", programCs);

@@ -176,6 +176,8 @@ public static class ProgramCsGenerator
         sb.Append("\n");
         AddSerilogFragment(config, sb);
         AddNLogFragment(config, sb);
+        AddApplicationFragment(config, sb);
+        AddInfrastructureFragment(config, sb);
         AddDatabaseFragment(config, sb);
         AddAuthFragment(config, sb);
         AddHealthChecksFragment(config, sb);
@@ -197,9 +199,11 @@ public static class ProgramCsGenerator
 
     private static void AddUsingsFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        var isClean = config.Architecture == ArchitecturePattern.CleanArchitecture;
         var hasUsings = false;
 
-        if (config.Orm == OrmOption.EfCore)
+        // For Clean Architecture, skip individual infra/app usings — they live in extension methods
+        if (!isClean && config.Orm == OrmOption.EfCore)
         {
             var dbContextNs = EfCoreGenerator.GetDbContextNamespaceSuffix(config.Architecture);
             sb.Append($"using Microsoft.EntityFrameworkCore;\n");
@@ -207,7 +211,7 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
-        if (config.Orm == OrmOption.Dapper)
+        if (!isClean && config.Orm == OrmOption.Dapper)
         {
             var dapperNs = DapperGenerator.GetNamespace(config);
             sb.Append($"using {dapperNs};\n");
@@ -235,7 +239,7 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
-        if (config.Auth == AuthOption.AspNetIdentity)
+        if (config.Auth == AuthOption.AspNetIdentity && !isClean)
         {
             sb.Append($"using Microsoft.AspNetCore.Identity;\n");
             hasUsings = true;
@@ -254,21 +258,21 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
-        if (config.IncludeOpenTelemetry)
+        if (!isClean && config.IncludeOpenTelemetry)
         {
             var telemetryNs = ObservabilityGenerator.GetNamespaceSuffix(config.Architecture, config.EntryPointSuffix);
             sb.Append($"using {config.Namespace}.{telemetryNs};\n");
             hasUsings = true;
         }
 
-        if (config.Mapping == MappingOption.Mapster)
+        if (!isClean && config.Mapping == MappingOption.Mapster)
         {
             sb.Append($"using Mapster;\n");
             sb.Append($"using MapsterMapper;\n");
             hasUsings = true;
         }
 
-        if (config.IncludeFluentValidation)
+        if (!isClean && config.IncludeFluentValidation)
         {
             sb.Append($"using FluentValidation;\n");
             hasUsings = true;
@@ -282,19 +286,23 @@ public static class ProgramCsGenerator
 
         if (config.BackgroundJobs == BackgroundJobsOption.Hangfire)
         {
+            // For Clean Architecture, keep only Hangfire using (needed for dashboard middleware)
             sb.Append("using Hangfire;\n");
-            var storageUsing = config.Database switch
+            if (!isClean)
             {
-                DatabaseOption.PostgreSql => "using Hangfire.PostgreSql;\n",
-                DatabaseOption.MySql      => "using Hangfire.MySql;\n",
-                _                         => null,
-            };
-            if (storageUsing is not null)
-                sb.Append(storageUsing);
+                var storageUsing = config.Database switch
+                {
+                    DatabaseOption.PostgreSql => "using Hangfire.PostgreSql;\n",
+                    DatabaseOption.MySql      => "using Hangfire.MySql;\n",
+                    _                         => null,
+                };
+                if (storageUsing is not null)
+                    sb.Append(storageUsing);
+            }
             hasUsings = true;
         }
 
-        if (config.BackgroundJobs == BackgroundJobsOption.Quartz)
+        if (!isClean && config.BackgroundJobs == BackgroundJobsOption.Quartz)
         {
             sb.Append("using Quartz;\n");
             var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
@@ -302,7 +310,7 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
-        if (config.BackgroundJobs == BackgroundJobsOption.IHostedService
+        if (!isClean && config.BackgroundJobs == BackgroundJobsOption.IHostedService
             && config.ProjectType != ProjectType.Console)
         {
             var jobsNs = BackgroundJobsGenerator.GetJobsNamespace(config);
@@ -310,11 +318,24 @@ public static class ProgramCsGenerator
             hasUsings = true;
         }
 
+        // Clean Architecture aggregate usings
+        if (isClean && InfrastructureExtensionsGenerator.HasInfrastructureServices(config))
+        {
+            sb.Append($"using {config.Namespace}.Infrastructure;\n");
+            hasUsings = true;
+        }
+
+        if (isClean && InfrastructureExtensionsGenerator.HasApplicationServices(config))
+        {
+            sb.Append($"using {config.Namespace}.Application;\n");
+            hasUsings = true;
+        }
+
         if (config.ProjectType == ProjectType.MinimalApi)
         {
             var endpointNs = config.Architecture switch
             {
-                ArchitecturePattern.VerticalSlice => $"{config.Namespace}.Features.Hello",
+                ArchitecturePattern.VerticalSlice => $"{config.Namespace}.Features.Sample",
                 ArchitecturePattern.CleanArchitecture => $"{config.Namespace}.Api.Endpoints",
                 _ => $"{config.Namespace}.Endpoints",
             };
@@ -344,6 +365,8 @@ public static class ProgramCsGenerator
 
     private static void AddDatabaseFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
+
         if (config.Orm == OrmOption.EfCore)
         {
             if (config.Database == DatabaseOption.MySql)
@@ -377,6 +400,7 @@ public static class ProgramCsGenerator
 
     private static void AddRedisCacheFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (!config.IncludeRedis) return;
         sb.Append("builder.Services.AddStackExchangeRedisCache(options =>\n");
         sb.Append("{\n");
@@ -423,9 +447,12 @@ public static class ProgramCsGenerator
                 sb.Append("builder.Services.AddAuthorization();\n");
                 break;
             case AuthOption.AspNetIdentity:
-                sb.Append("builder.Services.AddIdentity<IdentityUser, IdentityRole>()\n");
-                sb.Append("    .AddEntityFrameworkStores<AppDbContext>()\n");
-                sb.Append("    .AddDefaultTokenProviders();\n");
+                if (config.Architecture != ArchitecturePattern.CleanArchitecture)
+                {
+                    sb.Append("builder.Services.AddIdentity<IdentityUser, IdentityRole>()\n");
+                    sb.Append("    .AddEntityFrameworkStores<AppDbContext>()\n");
+                    sb.Append("    .AddDefaultTokenProviders();\n");
+                }
                 sb.Append("builder.Services.AddAuthorization();\n");
                 break;
         }
@@ -439,12 +466,14 @@ public static class ProgramCsGenerator
 
     private static void AddOpenTelemetryFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (!config.IncludeOpenTelemetry) return;
         sb.Append("builder.Services.AddAppOpenTelemetry(builder.Configuration);\n");
     }
 
     private static void AddMappingFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (config.Mapping != MappingOption.Mapster) return;
         sb.Append("builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n");
         sb.Append("builder.Services.AddScoped<IMapper, ServiceMapper>();\n");
@@ -452,12 +481,14 @@ public static class ProgramCsGenerator
 
     private static void AddFluentValidationFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (!config.IncludeFluentValidation) return;
         sb.Append("builder.Services.AddValidatorsFromAssemblyContaining<Program>();\n");
     }
 
     private static void AddResilienceFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (!config.IncludeResilience) return;
         if (config.ProjectType is not (ProjectType.WebApi or ProjectType.MinimalApi)) return;
         sb.Append($"builder.Services.AddHttpClient(\"{config.ProjectName}Client\")\n");
@@ -488,6 +519,7 @@ public static class ProgramCsGenerator
 
     private static void AddBackgroundJobsServicesFragment(ProjectConfiguration config, StringBuilder sb)
     {
+        if (config.Architecture == ArchitecturePattern.CleanArchitecture) return;
         if (config.BackgroundJobs == BackgroundJobsOption.None || config.ProjectType == ProjectType.Console) return;
 
         switch (config.BackgroundJobs)
@@ -523,6 +555,20 @@ public static class ProgramCsGenerator
                 sb.Append("builder.Services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);\n");
                 break;
         }
+    }
+
+    private static void AddApplicationFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Architecture != ArchitecturePattern.CleanArchitecture) return;
+        if (!InfrastructureExtensionsGenerator.HasApplicationServices(config)) return;
+        sb.Append("builder.Services.AddApplication();\n");
+    }
+
+    private static void AddInfrastructureFragment(ProjectConfiguration config, StringBuilder sb)
+    {
+        if (config.Architecture != ArchitecturePattern.CleanArchitecture) return;
+        if (!InfrastructureExtensionsGenerator.HasInfrastructureServices(config)) return;
+        sb.Append("builder.Services.AddInfrastructure(builder.Configuration);\n");
     }
 
     private static void AddHangfireDashboardFragment(ProjectConfiguration config, StringBuilder sb)
@@ -597,7 +643,7 @@ public static class ProgramCsGenerator
         if (config.ProjectType == ProjectType.WebApi)
             sb.Append("app.MapControllers();\n");
         else if (config.ProjectType == ProjectType.MinimalApi)
-            sb.Append("HelloEndpoint.Map(app);\n");
+            sb.Append("app.MapSampleEndpoint();\n");
 
         if (sb.Length > middlewareStart)
             sb.Append("\n");

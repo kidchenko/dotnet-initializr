@@ -20,27 +20,21 @@ public class VerticalSliceLayoutTests
     };
 
     [Fact]
-    public void VerticalSlice_EfCore_Entity_PlacedInFeaturesHello()
+    public void VerticalSlice_EfCore_Entity_PlacedInFeaturesSample()
     {
         var config = CreateVerticalSliceConfig(orm: OrmOption.EfCore);
         config.Database = DatabaseOption.PostgreSql;
         var files = _generationService.Generate(config);
 
-        // Entity should be in Features/Hello/
-        var entityKey = files.Keys.FirstOrDefault(k => k.Contains("HelloEntity.cs"));
+        var entityKey = files.Keys.FirstOrDefault(k => k.Contains("Features/Sample/SampleEntity.cs"));
         Assert.NotNull(entityKey);
-        Assert.Contains("Features/Hello/HelloEntity.cs", entityKey);
 
-        // Should NOT be in Data/Entities/
-        Assert.DoesNotContain(files.Keys, k => k.Contains("Data/Entities/SampleEntity.cs"));
-
-        // Content should declare HelloEntity class
         var content = files[entityKey];
-        Assert.Contains("public class HelloEntity", content);
+        Assert.Contains("public class SampleEntity", content);
     }
 
     [Fact]
-    public void VerticalSlice_EfCore_DbContext_ReferencesHelloEntity()
+    public void VerticalSlice_EfCore_DbContext_ReferencesSampleEntity()
     {
         var config = CreateVerticalSliceConfig(orm: OrmOption.EfCore);
         config.Database = DatabaseOption.PostgreSql;
@@ -49,27 +43,26 @@ public class VerticalSliceLayoutTests
         var dbContextKey = files.Keys.First(k => k.Contains("AppDbContext.cs"));
         var content = files[dbContextKey];
 
-        Assert.Contains("HelloEntity", content);
-        Assert.Contains("Hellos", content);
-        Assert.Contains("using " + config.Namespace + ".Features.Hello;", content);
+        Assert.Contains("SampleEntity", content);
+        Assert.Contains("Samples", content);
+        Assert.Contains("using " + config.Namespace + ".Features.Sample;", content);
     }
 
     [Fact]
-    public void VerticalSlice_Mapster_MappingConfig_PlacedInFeaturesHello()
+    public void VerticalSlice_Mapster_MappingConfig_PlacedInFeaturesSample()
     {
         var config = CreateVerticalSliceConfig(mapping: MappingOption.Mapster);
         var files = _generationService.Generate(config);
 
-        var mappingKey = files.Keys.FirstOrDefault(k => k.Contains("HelloMappingConfig.cs"));
+        var mappingKey = files.Keys.FirstOrDefault(k => k.Contains("SampleMappingConfig.cs"));
         Assert.NotNull(mappingKey);
-        Assert.Contains("Features/Hello/HelloMappingConfig.cs", mappingKey);
+        Assert.Contains("Features/Sample/SampleMappingConfig.cs", mappingKey);
 
         // Should NOT be in Mapping/
         Assert.DoesNotContain(files.Keys, k => k.Contains("Mapping/MappingConfig.cs"));
 
-        // Content should declare HelloMappingConfig class
         var content = files[mappingKey];
-        Assert.Contains("public class HelloMappingConfig", content);
+        Assert.Contains("public class SampleMappingConfig", content);
     }
 
     [Fact]
@@ -81,9 +74,9 @@ public class VerticalSliceLayoutTests
         Assert.DoesNotContain(files.Keys, k => k.Contains("Features/.gitkeep"));
     }
 
-    // Regression guards — SimpleLayered and CleanArchitecture should still use SampleEntity
+    // Regression guards — all architectures should use SampleEntity
     [Fact]
-    public void SimpleLayered_EfCore_Entity_StillUsesSampleEntity()
+    public void SimpleLayered_EfCore_Entity_UsesSampleEntity()
     {
         var config = new ProjectConfiguration
         {
@@ -103,7 +96,7 @@ public class VerticalSliceLayoutTests
     }
 
     [Fact]
-    public void CleanArchitecture_EfCore_Entity_StillUsesSampleEntity()
+    public void CleanArchitecture_EfCore_Entity_UsesSampleEntity()
     {
         var config = new ProjectConfiguration
         {
@@ -123,18 +116,18 @@ public class VerticalSliceLayoutTests
     }
 
     [Fact]
-    public void VerticalSlice_FluentValidation_GeneratesHelloRequestValidator()
+    public void VerticalSlice_FluentValidation_GeneratesSampleRequestValidator()
     {
         var config = CreateVerticalSliceConfig();
         config.IncludeFluentValidation = true;
         var files = _generationService.Generate(config);
 
-        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("SampleRequestValidator.cs"));
         Assert.NotNull(validatorKey);
-        Assert.Contains("Features/Hello/HelloRequestValidator.cs", validatorKey);
+        Assert.Contains("Features/Sample/SampleRequestValidator.cs", validatorKey);
 
         var content = files[validatorKey];
-        Assert.Contains("AbstractValidator<HelloRequest>", content);
+        Assert.Contains("AbstractValidator<SampleRequest>", content);
         Assert.Contains("RuleFor(x => x.Name)", content);
     }
 
@@ -150,9 +143,9 @@ public class VerticalSliceLayoutTests
         var src = tree[0].Children.First(n => n.Name == "src");
         var proj = src.Children.First(n => n.Name == config.ProjectName);
         var features = proj.Children.First(n => n.Name == "Features");
-        var hello = features.Children.First(n => n.Name == "Hello");
+        var sample = features.Children.First(n => n.Name == "Sample");
 
-        Assert.Contains(hello.Children, n => n.Name == "HelloRequestValidator.cs");
+        Assert.Contains(sample.Children, n => n.Name == "SampleRequestValidator.cs");
     }
 
     [Fact]
@@ -162,7 +155,7 @@ public class VerticalSliceLayoutTests
         config.IncludeFluentValidation = false;
         var files = _generationService.Generate(config);
 
-        Assert.DoesNotContain(files.Keys, k => k.Contains("HelloRequestValidator.cs"));
+        Assert.DoesNotContain(files.Keys, k => k.Contains("SampleRequestValidator.cs"));
     }
 
     [Fact]
@@ -176,12 +169,12 @@ public class VerticalSliceLayoutTests
         };
         var files = _generationService.Generate(config);
 
-        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("SampleRequestValidator.cs"));
         Assert.NotNull(validatorKey);
-        Assert.Contains("Application/Validation/HelloRequestValidator.cs", validatorKey);
+        Assert.Contains("Application/Validation/SampleRequestValidator.cs", validatorKey);
 
         var content = files[validatorKey];
-        Assert.Contains("AbstractValidator<HelloRequest>", content);
+        Assert.Contains("AbstractValidator<SampleRequest>", content);
     }
 
     [Fact]
@@ -195,16 +188,16 @@ public class VerticalSliceLayoutTests
         };
         var files = _generationService.Generate(config);
 
-        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("HelloRequestValidator.cs"));
+        var validatorKey = files.Keys.FirstOrDefault(k => k.Contains("SampleRequestValidator.cs"));
         Assert.NotNull(validatorKey);
-        Assert.Contains("Validation/HelloRequestValidator.cs", validatorKey);
+        Assert.Contains("Validation/SampleRequestValidator.cs", validatorKey);
 
         var content = files[validatorKey];
-        Assert.Contains("AbstractValidator<HelloRequest>", content);
+        Assert.Contains("AbstractValidator<SampleRequest>", content);
     }
 
     [Fact]
-    public void VerticalSlice_FileTree_HasHelloFolderInFeatures()
+    public void VerticalSlice_FileTree_HasSampleFolderInFeatures()
     {
         var config = CreateVerticalSliceConfig(
             orm: OrmOption.EfCore,
@@ -214,17 +207,17 @@ public class VerticalSliceLayoutTests
         var treeService = new FileTreeService();
         var tree = treeService.GenerateTree(config);
 
-        // Navigate: root > src > ProjectName > Features > Hello
+        // Navigate: root > src > ProjectName > Features > Sample
         var src = tree[0].Children.First(n => n.Name == "src");
         var proj = src.Children.First(n => n.Name == config.ProjectName);
         var features = proj.Children.First(n => n.Name == "Features");
-        var hello = features.Children.FirstOrDefault(n => n.Name == "Hello");
+        var sample = features.Children.FirstOrDefault(n => n.Name == "Sample");
 
-        Assert.NotNull(hello);
-        Assert.True(hello.IsFolder);
-        Assert.Contains(hello.Children, n => n.Name == "HelloEntity.cs");
-        Assert.Contains(hello.Children, n => n.Name == "HelloController.cs");
-        Assert.Contains(hello.Children, n => n.Name == "HelloMappingConfig.cs");
+        Assert.NotNull(sample);
+        Assert.True(sample.IsFolder);
+        Assert.Contains(sample.Children, n => n.Name == "SampleEntity.cs");
+        Assert.Contains(sample.Children, n => n.Name == "SampleController.cs");
+        Assert.Contains(sample.Children, n => n.Name == "SampleMappingConfig.cs");
 
         // Standalone Mapping/ folder should NOT exist
         Assert.DoesNotContain(proj.Children, n => n.Name == "Mapping");

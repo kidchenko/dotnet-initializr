@@ -37,65 +37,134 @@ public static class TestProjectGenerator
 
         var usings = GetTestUsings(config);
         var (attribute, assertion) = GetIntegrationTestParts(config);
+
+        if (config.Database == DatabaseOption.Sqlite)
+            return GenerateSqliteIntegrationTest(config, ns, dbContextNamespace, usings, attribute, assertion);
+
         var (lifecycleInterface, lifecycleMethods) = GetLifecycleParts(config);
 
-        if (config.Database == DatabaseOption.PostgreSql)
+        return config.Database switch
         {
-            return
-                $"namespace {ns}.IntegrationTests;\n" +
-                $"\n" +
-                usings +
-                $"using Microsoft.EntityFrameworkCore;\n" +
-                $"using Testcontainers.PostgreSql;\n" +
-                $"using {dbContextNamespace};\n" +
-                $"\n" +
-                $"public class DatabaseIntegrationTests{lifecycleInterface}\n" +
-                $"{{\n" +
-                $"    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(\"postgres:16-alpine\").Build();\n" +
-                $"\n" +
-                lifecycleMethods +
-                $"\n" +
-                $"    {attribute}\n" +
-                $"    public async Task Database_ShouldConnect()\n" +
-                $"    {{\n" +
-                $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
-                $"            .UseNpgsql(_container.GetConnectionString())\n" +
-                $"            .Options;\n" +
-                $"        await using var context = new AppDbContext(options);\n" +
-                $"        var canConnect = await context.Database.CanConnectAsync();\n" +
-                $"        {assertion}\n" +
-                $"    }}\n" +
-                $"}}\n";
-        }
-        else
-        {
-            return
-                $"namespace {ns}.IntegrationTests;\n" +
-                $"\n" +
-                usings +
-                $"using Microsoft.EntityFrameworkCore;\n" +
-                $"using Testcontainers.MsSql;\n" +
-                $"using {dbContextNamespace};\n" +
-                $"\n" +
-                $"public class DatabaseIntegrationTests{lifecycleInterface}\n" +
-                $"{{\n" +
-                $"    private readonly MsSqlContainer _container = new MsSqlBuilder(\"mcr.microsoft.com/mssql/server:2022-latest\").Build();\n" +
-                $"\n" +
-                lifecycleMethods +
-                $"\n" +
-                $"    {attribute}\n" +
-                $"    public async Task Database_ShouldConnect()\n" +
-                $"    {{\n" +
-                $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
-                $"            .UseSqlServer(_container.GetConnectionString())\n" +
-                $"            .Options;\n" +
-                $"        await using var context = new AppDbContext(options);\n" +
-                $"        var canConnect = await context.Database.CanConnectAsync();\n" +
-                $"        {assertion}\n" +
-                $"    }}\n" +
-                $"}}\n";
-        }
+            DatabaseOption.PostgreSql => GeneratePostgreSqlIntegrationTest(config, ns, dbContextNamespace, usings, attribute, assertion, lifecycleInterface, lifecycleMethods),
+            DatabaseOption.MySql => GenerateMySqlIntegrationTest(config, ns, dbContextNamespace, usings, attribute, assertion, lifecycleInterface, lifecycleMethods),
+            _ => GenerateSqlServerIntegrationTest(config, ns, dbContextNamespace, usings, attribute, assertion, lifecycleInterface, lifecycleMethods),
+        };
     }
+
+    private static string GeneratePostgreSqlIntegrationTest(ProjectConfiguration config, string ns, string dbContextNamespace,
+        string usings, string attribute, string assertion, string lifecycleInterface, string lifecycleMethods) =>
+        $"namespace {ns}.IntegrationTests;\n" +
+        $"\n" +
+        usings +
+        $"using Microsoft.EntityFrameworkCore;\n" +
+        $"using Testcontainers.PostgreSql;\n" +
+        $"using {dbContextNamespace};\n" +
+        $"\n" +
+        $"public class DatabaseIntegrationTests{lifecycleInterface}\n" +
+        $"{{\n" +
+        $"    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(\"postgres:16-alpine\").Build();\n" +
+        $"\n" +
+        lifecycleMethods +
+        $"\n" +
+        $"    {attribute}\n" +
+        $"    public async Task Database_ShouldConnect()\n" +
+        $"    {{\n" +
+        $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
+        $"            .UseNpgsql(_container.GetConnectionString())\n" +
+        $"            .Options;\n" +
+        $"        await using var context = new AppDbContext(options);\n" +
+        $"        var canConnect = await context.Database.CanConnectAsync();\n" +
+        $"        {assertion}\n" +
+        $"    }}\n" +
+        $"}}\n";
+
+    private static string GenerateSqlServerIntegrationTest(ProjectConfiguration config, string ns, string dbContextNamespace,
+        string usings, string attribute, string assertion, string lifecycleInterface, string lifecycleMethods) =>
+        $"namespace {ns}.IntegrationTests;\n" +
+        $"\n" +
+        usings +
+        $"using Microsoft.EntityFrameworkCore;\n" +
+        $"using Testcontainers.MsSql;\n" +
+        $"using {dbContextNamespace};\n" +
+        $"\n" +
+        $"public class DatabaseIntegrationTests{lifecycleInterface}\n" +
+        $"{{\n" +
+        $"    private readonly MsSqlContainer _container = new MsSqlBuilder(\"mcr.microsoft.com/mssql/server:2022-latest\").Build();\n" +
+        $"\n" +
+        lifecycleMethods +
+        $"\n" +
+        $"    {attribute}\n" +
+        $"    public async Task Database_ShouldConnect()\n" +
+        $"    {{\n" +
+        $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
+        $"            .UseSqlServer(_container.GetConnectionString())\n" +
+        $"            .Options;\n" +
+        $"        await using var context = new AppDbContext(options);\n" +
+        $"        var canConnect = await context.Database.CanConnectAsync();\n" +
+        $"        {assertion}\n" +
+        $"    }}\n" +
+        $"}}\n";
+
+    private static string GenerateMySqlIntegrationTest(ProjectConfiguration config, string ns, string dbContextNamespace,
+        string usings, string attribute, string assertion, string lifecycleInterface, string lifecycleMethods) =>
+        $"namespace {ns}.IntegrationTests;\n" +
+        $"\n" +
+        usings +
+        $"using Microsoft.EntityFrameworkCore;\n" +
+        $"using Testcontainers.MySql;\n" +
+        $"using {dbContextNamespace};\n" +
+        $"\n" +
+        $"public class DatabaseIntegrationTests{lifecycleInterface}\n" +
+        $"{{\n" +
+        $"    private readonly MySqlContainer _container = new MySqlBuilder(\"mysql:8.0\").Build();\n" +
+        $"\n" +
+        lifecycleMethods +
+        $"\n" +
+        $"    {attribute}\n" +
+        $"    public async Task Database_ShouldConnect()\n" +
+        $"    {{\n" +
+        $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
+        $"            .UseMySql(_container.GetConnectionString(), ServerVersion.AutoDetect(_container.GetConnectionString()))\n" +
+        $"            .Options;\n" +
+        $"        await using var context = new AppDbContext(options);\n" +
+        $"        var canConnect = await context.Database.CanConnectAsync();\n" +
+        $"        {assertion}\n" +
+        $"    }}\n" +
+        $"}}\n";
+
+    private static string GenerateSqliteIntegrationTest(ProjectConfiguration config, string ns, string dbContextNamespace,
+        string usings, string attribute, string assertion) =>
+        $"namespace {ns}.IntegrationTests;\n" +
+        $"\n" +
+        usings +
+        $"using Microsoft.Data.Sqlite;\n" +
+        $"using Microsoft.EntityFrameworkCore;\n" +
+        $"using {dbContextNamespace};\n" +
+        $"\n" +
+        $"public class DatabaseIntegrationTests : IDisposable\n" +
+        $"{{\n" +
+        $"    private readonly SqliteConnection _connection;\n" +
+        $"\n" +
+        $"    public DatabaseIntegrationTests()\n" +
+        $"    {{\n" +
+        $"        _connection = new SqliteConnection(\"DataSource=:memory:\");\n" +
+        $"        _connection.Open();\n" +
+        $"    }}\n" +
+        $"\n" +
+        $"    public void Dispose() => _connection.Dispose();\n" +
+        $"\n" +
+        $"    {attribute}\n" +
+        $"    public async Task Database_ShouldConnect()\n" +
+        $"    {{\n" +
+        $"        var options = new DbContextOptionsBuilder<AppDbContext>()\n" +
+        $"            .UseSqlite(_connection)\n" +
+        $"            .Options;\n" +
+        $"        await using var context = new AppDbContext(options);\n" +
+        $"        await context.Database.EnsureCreatedAsync();\n" +
+        $"        var canConnect = await context.Database.CanConnectAsync();\n" +
+        $"        {assertion}\n" +
+        $"    }}\n" +
+        $"}}\n";
 
     private static string GetTestUsings(ProjectConfiguration config)
     {

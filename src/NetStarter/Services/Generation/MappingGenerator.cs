@@ -22,7 +22,7 @@ public static class MappingGenerator
             $"}}\n";
     }
 
-    public static string GenerateHelloMappingConfig(ProjectConfiguration config, string namespaceSuffix)
+    public static string GenerateSampleMappingConfig(ProjectConfiguration config, string namespaceSuffix)
     {
         var ns = $"{config.Namespace}.{namespaceSuffix}";
         return
@@ -30,7 +30,7 @@ public static class MappingGenerator
             $"\n" +
             $"using Mapster;\n" +
             $"\n" +
-            $"public class HelloMappingConfig : IRegister\n" +
+            $"public class SampleMappingConfig : IRegister\n" +
             $"{{\n" +
             $"    public void Register(TypeAdapterConfig config)\n" +
             $"    {{\n" +
@@ -43,7 +43,7 @@ public static class MappingGenerator
     public static string GetNamespaceSuffix(ArchitecturePattern architecture) => architecture switch
     {
         ArchitecturePattern.CleanArchitecture => "Application.Mapping",
-        ArchitecturePattern.VerticalSlice => "Features.Hello",
+        ArchitecturePattern.VerticalSlice => "Features.Sample",
         _ => "Mapping",
     };
 }

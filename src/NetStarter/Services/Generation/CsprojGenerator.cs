@@ -132,13 +132,14 @@ public static class CsprojGenerator
             packages.Add((nlogPackage, NuGetVersionMap.GetPackageVersion(config.SdkVersion, nlogPackage)));
         }
 
-        if (config.IncludeResilience && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        if (config.IncludeResilience && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi
+            && config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
             packages.Add(("Microsoft.Extensions.Http.Resilience",
                 NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Http.Resilience")));
         }
 
-        if (config.IncludeOpenTelemetry)
+        if (config.IncludeOpenTelemetry && config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
             packages.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));
             packages.Add(("OpenTelemetry.Instrumentation.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.AspNetCore")));
@@ -149,12 +150,13 @@ public static class CsprojGenerator
                 packages.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "1.*-*"));
         }
 
-        if (config.IncludeRedis)
+        if (config.IncludeRedis && config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
             packages.Add(("Microsoft.Extensions.Caching.StackExchangeRedis", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Caching.StackExchangeRedis")));
         }
 
-        if (config.IncludeFluentValidation)
+        // FluentValidation packages: skip for Clean Architecture (owned by Application layer)
+        if (config.IncludeFluentValidation && config.Architecture != ArchitecturePattern.CleanArchitecture)
         {
             packages.Add(("FluentValidation", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation")));
             packages.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
@@ -261,6 +263,13 @@ public static class CsprojGenerator
             pkgList.Add(("Mapster.DependencyInjection", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Mapster.DependencyInjection")));
         }
 
+        // For Application layer: add FluentValidation package
+        if (projectSuffix is "Application" && config.IncludeFluentValidation)
+        {
+            pkgList.Add(("FluentValidation", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation")));
+            pkgList.Add(("FluentValidation.DependencyInjectionExtensions", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "FluentValidation.DependencyInjectionExtensions")));
+        }
+
         // For Infrastructure layer: add EF Core packages
         if (projectSuffix is "Infrastructure" && config.Orm == OrmOption.EfCore)
         {
@@ -271,6 +280,10 @@ public static class CsprojGenerator
                 pkgList.Add(("Npgsql.EntityFrameworkCore.PostgreSQL", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Npgsql.EntityFrameworkCore.PostgreSQL")));
             else if (config.Database == DatabaseOption.SqlServer)
                 pkgList.Add(("Microsoft.EntityFrameworkCore.SqlServer", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.SqlServer")));
+            else if (config.Database == DatabaseOption.MySql)
+                pkgList.Add(("Pomelo.EntityFrameworkCore.MySql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Pomelo.EntityFrameworkCore.MySql")));
+            else if (config.Database == DatabaseOption.Sqlite)
+                pkgList.Add(("Microsoft.EntityFrameworkCore.Sqlite", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Sqlite")));
 
             if (config.Auth == AuthOption.AspNetIdentity)
                 pkgList.Add(("Microsoft.AspNetCore.Identity.EntityFrameworkCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.AspNetCore.Identity.EntityFrameworkCore")));
@@ -290,6 +303,32 @@ public static class CsprojGenerator
                 _ => "Npgsql",  // PostgreSQL default
             };
             pkgList.Add((driver, NuGetVersionMap.GetPackageVersion(config.SdkVersion, driver)));
+        }
+
+        // For Infrastructure layer: add OpenTelemetry packages
+        if (projectSuffix is "Infrastructure" && config.IncludeOpenTelemetry)
+        {
+            pkgList.Add(("OpenTelemetry.Extensions.Hosting", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Extensions.Hosting")));
+            pkgList.Add(("OpenTelemetry.Instrumentation.AspNetCore", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.AspNetCore")));
+            pkgList.Add(("OpenTelemetry.Instrumentation.Http", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Instrumentation.Http")));
+            pkgList.Add(("OpenTelemetry.Exporter.OpenTelemetryProtocol", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "OpenTelemetry.Exporter.OpenTelemetryProtocol")));
+
+            if (config.Orm == OrmOption.EfCore)
+                pkgList.Add(("OpenTelemetry.Instrumentation.EntityFrameworkCore", "1.*-*"));
+        }
+
+        // For Infrastructure layer: add Redis package
+        if (projectSuffix is "Infrastructure" && config.IncludeRedis)
+        {
+            pkgList.Add(("Microsoft.Extensions.Caching.StackExchangeRedis", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Caching.StackExchangeRedis")));
+        }
+
+        // For Infrastructure layer: add Resilience package
+        if (projectSuffix is "Infrastructure" && config.IncludeResilience
+            && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
+        {
+            pkgList.Add(("Microsoft.Extensions.Http.Resilience",
+                NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.Extensions.Http.Resilience")));
         }
 
         // For Infrastructure layer: add Background Jobs packages
@@ -374,6 +413,10 @@ public static class CsprojGenerator
             packages.Add(("Testcontainers.PostgreSql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Testcontainers.PostgreSql")));
         else if (config.Database == DatabaseOption.SqlServer)
             packages.Add(("Testcontainers.MsSql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Testcontainers.MsSql")));
+        else if (config.Database == DatabaseOption.MySql)
+            packages.Add(("Testcontainers.MySql", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Testcontainers.MySql")));
+        else if (config.Database == DatabaseOption.Sqlite && config.Orm == OrmOption.EfCore)
+            packages.Add(("Microsoft.EntityFrameworkCore.Sqlite", NuGetVersionMap.GetPackageVersion(config.SdkVersion, "Microsoft.EntityFrameworkCore.Sqlite")));
 
         sb.Append(BuildPackageReferences(packages));
         sb.Append(BuildProjectReference(mainProjectPath));

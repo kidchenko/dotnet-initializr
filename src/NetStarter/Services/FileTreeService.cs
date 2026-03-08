@@ -8,6 +8,7 @@ public class FileTreeNode
     public bool IsFolder { get; set; }
     public List<FileTreeNode> Children { get; set; } = new();
     public bool IsExpanded { get; set; } = true;
+    public bool IsProject { get; set; }
 }
 
 public class FileTreeService
@@ -46,7 +47,7 @@ public class FileTreeService
         if (config.HasTestFramework)
         {
             var testsFolder = new FileTreeNode { Name = "tests", IsFolder = true };
-            var unitTestProject = new FileTreeNode { Name = $"{config.ProjectName}.Tests", IsFolder = true };
+            var unitTestProject = new FileTreeNode { Name = $"{config.ProjectName}.Tests", IsFolder = true, IsProject = true };
             unitTestProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Tests.csproj", IsFolder = false });
             unitTestProject.Children.Add(new FileTreeNode { Name = "UnitTest1.cs", IsFolder = false });
             testsFolder.Children.Add(unitTestProject);
@@ -54,7 +55,7 @@ public class FileTreeService
             // Testcontainers integration tests (requires database)
             if (config.IncludeTestcontainers && config.Database.HasValue)
             {
-                var integrationTestProject = new FileTreeNode { Name = $"{config.ProjectName}.IntegrationTests", IsFolder = true };
+                var integrationTestProject = new FileTreeNode { Name = $"{config.ProjectName}.IntegrationTests", IsFolder = true, IsProject = true };
                 integrationTestProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.IntegrationTests.csproj", IsFolder = false });
                 integrationTestProject.Children.Add(new FileTreeNode { Name = "IntegrationTest1.cs", IsFolder = false });
                 testsFolder.Children.Add(integrationTestProject);
@@ -102,12 +103,12 @@ public class FileTreeService
     private void BuildCleanArchitectureStructure(ProjectConfiguration config, FileTreeNode srcFolder)
     {
         // Domain project
-        var domainProject = new FileTreeNode { Name = $"{config.ProjectName}.Domain", IsFolder = true };
+        var domainProject = new FileTreeNode { Name = $"{config.ProjectName}.Domain", IsFolder = true, IsProject = true };
         domainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Domain.csproj", IsFolder = false });
         srcFolder.Children.Add(domainProject);
 
         // Application project
-        var appProject = new FileTreeNode { Name = $"{config.ProjectName}.Application", IsFolder = true };
+        var appProject = new FileTreeNode { Name = $"{config.ProjectName}.Application", IsFolder = true, IsProject = true };
         appProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Application.csproj", IsFolder = false });
 
         // Mapster in Application
@@ -121,15 +122,19 @@ public class FileTreeService
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {
             var validationFolder = new FileTreeNode { Name = "Validation", IsFolder = true };
-            validationFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
+            validationFolder.Children.Add(new FileTreeNode { Name = "SampleRequestValidator.cs", IsFolder = false });
             appProject.Children.Add(validationFolder);
         }
+
+        if (config.Mapping == MappingOption.Mapster || config.IncludeFluentValidation)
+            appProject.Children.Add(new FileTreeNode { Name = "ApplicationServiceCollectionExtensions.cs", IsFolder = false });
 
         srcFolder.Children.Add(appProject);
 
         // Infrastructure project
-        var infraProject = new FileTreeNode { Name = $"{config.ProjectName}.Infrastructure", IsFolder = true };
+        var infraProject = new FileTreeNode { Name = $"{config.ProjectName}.Infrastructure", IsFolder = true, IsProject = true };
         infraProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.Infrastructure.csproj", IsFolder = false });
+        infraProject.Children.Add(new FileTreeNode { Name = "InfrastructureServiceCollectionExtensions.cs", IsFolder = false });
 
         // EF Core in Infrastructure
         if (config.Orm == OrmOption.EfCore)
@@ -147,10 +152,18 @@ public class FileTreeService
             infraProject.Children.Add(dataFolder);
         }
 
+        // OpenTelemetry in Infrastructure
+        if (config.IncludeOpenTelemetry)
+        {
+            var telemetryFolder = new FileTreeNode { Name = "Telemetry", IsFolder = true };
+            telemetryFolder.Children.Add(new FileTreeNode { Name = "OpenTelemetryExtensions.cs", IsFolder = false });
+            infraProject.Children.Add(telemetryFolder);
+        }
+
         srcFolder.Children.Add(infraProject);
 
         // Entry point project
-        var apiProject = new FileTreeNode { Name = config.EntryPointProjectName, IsFolder = true };
+        var apiProject = new FileTreeNode { Name = config.EntryPointProjectName, IsFolder = true, IsProject = true };
         apiProject.Children.Add(new FileTreeNode { Name = $"{config.EntryPointProjectName}.csproj", IsFolder = false });
         apiProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
         if (config.ProjectType == ProjectType.Console)
@@ -161,13 +174,13 @@ public class FileTreeService
         if (config.ProjectType == ProjectType.WebApi)
         {
             var controllersFolder = new FileTreeNode { Name = "Controllers", IsFolder = true };
-            controllersFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+            controllersFolder.Children.Add(new FileTreeNode { Name = "SampleController.cs", IsFolder = false });
             apiProject.Children.Add(controllersFolder);
         }
         else if (config.ProjectType == ProjectType.MinimalApi)
         {
             var endpointsFolder = new FileTreeNode { Name = "Endpoints", IsFolder = true };
-            endpointsFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+            endpointsFolder.Children.Add(new FileTreeNode { Name = "SampleEndpoint.cs", IsFolder = false });
             apiProject.Children.Add(endpointsFolder);
         }
 
@@ -179,23 +192,15 @@ public class FileTreeService
             apiProject.Children.Add(authFolder);
         }
 
-        // OpenTelemetry in API
-        if (config.IncludeOpenTelemetry)
-        {
-            var telemetryFolder = new FileTreeNode { Name = "Telemetry", IsFolder = true };
-            telemetryFolder.Children.Add(new FileTreeNode { Name = "OpenTelemetryExtensions.cs", IsFolder = false });
-            apiProject.Children.Add(telemetryFolder);
-        }
-
         // .NET Aspire projects
         if (config.IncludeDotNetAspire)
         {
-            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true };
+            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true, IsProject = true };
             appHostProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.AppHost.csproj", IsFolder = false });
             appHostProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
             srcFolder.Children.Add(appHostProject);
 
-            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true };
+            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true, IsProject = true };
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults.csproj", IsFolder = false });
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = "Extensions.cs", IsFolder = false });
             srcFolder.Children.Add(serviceDefaultsProject);
@@ -223,7 +228,7 @@ public class FileTreeService
 
     private void BuildVerticalSliceStructure(ProjectConfiguration config, FileTreeNode srcFolder)
     {
-        var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true };
+        var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true, IsProject = true };
         mainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.csproj", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
         if (config.ProjectType == ProjectType.Console)
@@ -233,21 +238,21 @@ public class FileTreeService
 
         // Features folder with Hello slice
         var featuresFolder = new FileTreeNode { Name = "Features", IsFolder = true };
-        var helloFolder = new FileTreeNode { Name = "Hello", IsFolder = true };
+        var helloFolder = new FileTreeNode { Name = "Sample", IsFolder = true };
 
         if (config.Orm == OrmOption.EfCore)
-            helloFolder.Children.Add(new FileTreeNode { Name = "HelloEntity.cs", IsFolder = false });
+            helloFolder.Children.Add(new FileTreeNode { Name = "SampleEntity.cs", IsFolder = false });
 
         if (config.ProjectType == ProjectType.WebApi)
-            helloFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+            helloFolder.Children.Add(new FileTreeNode { Name = "SampleController.cs", IsFolder = false });
         else if (config.ProjectType == ProjectType.MinimalApi)
-            helloFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+            helloFolder.Children.Add(new FileTreeNode { Name = "SampleEndpoint.cs", IsFolder = false });
 
         if (config.Mapping == MappingOption.Mapster)
-            helloFolder.Children.Add(new FileTreeNode { Name = "HelloMappingConfig.cs", IsFolder = false });
+            helloFolder.Children.Add(new FileTreeNode { Name = "SampleMappingConfig.cs", IsFolder = false });
 
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
-            helloFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
+            helloFolder.Children.Add(new FileTreeNode { Name = "SampleRequestValidator.cs", IsFolder = false });
 
         featuresFolder.Children.Add(helloFolder);
         mainProject.Children.Add(featuresFolder);
@@ -287,12 +292,12 @@ public class FileTreeService
         // .NET Aspire projects
         if (config.IncludeDotNetAspire)
         {
-            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true };
+            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true, IsProject = true };
             appHostProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.AppHost.csproj", IsFolder = false });
             appHostProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
             srcFolder.Children.Add(appHostProject);
 
-            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true };
+            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true, IsProject = true };
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults.csproj", IsFolder = false });
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = "Extensions.cs", IsFolder = false });
             srcFolder.Children.Add(serviceDefaultsProject);
@@ -320,7 +325,7 @@ public class FileTreeService
 
     private void BuildSimpleLayeredStructure(ProjectConfiguration config, FileTreeNode srcFolder)
     {
-        var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true };
+        var mainProject = new FileTreeNode { Name = config.ProjectName, IsFolder = true, IsProject = true };
         mainProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.csproj", IsFolder = false });
         mainProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
         if (config.ProjectType == ProjectType.Console)
@@ -332,13 +337,13 @@ public class FileTreeService
         if (config.ProjectType == ProjectType.MinimalApi)
         {
             var endpointsFolder = new FileTreeNode { Name = "Endpoints", IsFolder = true };
-            endpointsFolder.Children.Add(new FileTreeNode { Name = "HelloEndpoint.cs", IsFolder = false });
+            endpointsFolder.Children.Add(new FileTreeNode { Name = "SampleEndpoint.cs", IsFolder = false });
             mainProject.Children.Add(endpointsFolder);
         }
         else if (config.ProjectType == ProjectType.WebApi)
         {
             var controllersFolder = new FileTreeNode { Name = "Controllers", IsFolder = true };
-            controllersFolder.Children.Add(new FileTreeNode { Name = "HelloController.cs", IsFolder = false });
+            controllersFolder.Children.Add(new FileTreeNode { Name = "SampleController.cs", IsFolder = false });
             mainProject.Children.Add(controllersFolder);
         }
 
@@ -383,7 +388,7 @@ public class FileTreeService
         if (config.IncludeFluentValidation && config.ProjectType is ProjectType.WebApi or ProjectType.MinimalApi)
         {
             var validationFolder = new FileTreeNode { Name = "Validation", IsFolder = true };
-            validationFolder.Children.Add(new FileTreeNode { Name = "HelloRequestValidator.cs", IsFolder = false });
+            validationFolder.Children.Add(new FileTreeNode { Name = "SampleRequestValidator.cs", IsFolder = false });
             mainProject.Children.Add(validationFolder);
         }
 
@@ -398,12 +403,12 @@ public class FileTreeService
         // .NET Aspire projects
         if (config.IncludeDotNetAspire)
         {
-            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true };
+            var appHostProject = new FileTreeNode { Name = $"{config.ProjectName}.AppHost", IsFolder = true, IsProject = true };
             appHostProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.AppHost.csproj", IsFolder = false });
             appHostProject.Children.Add(new FileTreeNode { Name = "Program.cs", IsFolder = false });
             srcFolder.Children.Add(appHostProject);
 
-            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true };
+            var serviceDefaultsProject = new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults", IsFolder = true, IsProject = true };
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = $"{config.ProjectName}.ServiceDefaults.csproj", IsFolder = false });
             serviceDefaultsProject.Children.Add(new FileTreeNode { Name = "Extensions.cs", IsFolder = false });
             srcFolder.Children.Add(serviceDefaultsProject);

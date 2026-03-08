@@ -229,7 +229,11 @@ public class Phase07NLogPollyTests
     [Fact] // RESIL-02: WebApi + IncludeResilience -> csproj contains Microsoft.Extensions.Http.Resilience
     public void GenerateWebProject_Resilience_IncludesHttpResilience()
     {
-        var config = CreateWebConfig(c => c.IncludeResilience = true);
+        var config = CreateWebConfig(c =>
+        {
+            c.Architecture = ArchitecturePattern.SimpleLayered;
+            c.IncludeResilience = true;
+        });
         var result = CsprojGenerator.GenerateWebProject(config);
         Assert.Contains("Microsoft.Extensions.Http.Resilience", result);
     }
@@ -239,6 +243,7 @@ public class Phase07NLogPollyTests
     {
         var config = CreateWebConfig(c =>
         {
+            c.Architecture = ArchitecturePattern.SimpleLayered;
             c.ProjectType = ProjectType.MinimalApi;
             c.IncludeResilience = true;
         });
@@ -283,7 +288,11 @@ public class Phase07NLogPollyTests
     [Fact] // RESIL-03: WebApi + Resilience -> Program.cs contains AddHttpClient
     public void GenerateProgram_WebApi_Resilience_IncludesAddHttpClient()
     {
-        var config = CreateWebConfig(c => c.IncludeResilience = true);
+        var config = CreateWebConfig(c =>
+        {
+            c.Architecture = ArchitecturePattern.SimpleLayered;
+            c.IncludeResilience = true;
+        });
         var result = ProgramCsGenerator.Generate(config);
         Assert.Contains("AddHttpClient", result);
     }
@@ -291,7 +300,11 @@ public class Phase07NLogPollyTests
     [Fact] // RESIL-03: WebApi + Resilience -> Program.cs contains AddStandardResilienceHandler()
     public void GenerateProgram_WebApi_Resilience_IncludesAddStandardResilienceHandler()
     {
-        var config = CreateWebConfig(c => c.IncludeResilience = true);
+        var config = CreateWebConfig(c =>
+        {
+            c.Architecture = ArchitecturePattern.SimpleLayered;
+            c.IncludeResilience = true;
+        });
         var result = ProgramCsGenerator.Generate(config);
         Assert.Contains("AddStandardResilienceHandler()", result);
     }
@@ -301,6 +314,7 @@ public class Phase07NLogPollyTests
     {
         var config = CreateWebConfig(c =>
         {
+            c.Architecture = ArchitecturePattern.SimpleLayered;
             c.ProjectName = "TestApp";
             c.IncludeResilience = true;
         });

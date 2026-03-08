@@ -74,36 +74,14 @@ public static class EfCoreGenerator
         _ => "Data",
     };
 
-    public static string GenerateHelloEntity(ProjectConfiguration config, string namespaceSuffix)
-    {
-        var ns = $"{config.Namespace}.{namespaceSuffix}";
-        return
-            $"namespace {ns};\n" +
-            $"\n" +
-            $"public class HelloEntity\n" +
-            $"{{\n" +
-            $"    public int Id {{ get; set; }}\n" +
-            $"    public string Name {{ get; set; }} = string.Empty;\n" +
-            $"    public DateTime CreatedAt {{ get; set; }} = DateTime.UtcNow;\n" +
-            $"}}\n";
-    }
+    public static string GetEntityClassName(ArchitecturePattern architecture) => "SampleEntity";
 
-    public static string GetEntityClassName(ArchitecturePattern architecture) => architecture switch
-    {
-        ArchitecturePattern.VerticalSlice => "HelloEntity",
-        _ => "SampleEntity",
-    };
-
-    public static string GetDbSetPropertyName(ArchitecturePattern architecture) => architecture switch
-    {
-        ArchitecturePattern.VerticalSlice => "Hellos",
-        _ => "Samples",
-    };
+    public static string GetDbSetPropertyName(ArchitecturePattern architecture) => "Samples";
 
     public static string GetEntityNamespaceSuffix(ArchitecturePattern architecture) => architecture switch
     {
         ArchitecturePattern.CleanArchitecture => "Domain.Entities",
-        ArchitecturePattern.VerticalSlice => "Features.Hello",
-        _ => "Data",
+        ArchitecturePattern.VerticalSlice => "Features.Sample",
+        _ => "Data.Entities",
     };
 }

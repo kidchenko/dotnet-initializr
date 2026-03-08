@@ -81,28 +81,37 @@ public class ProgramCsGeneratorBaselineTests
         var config = AllFeaturesConfig();
         var result = ProgramCsGenerator.Generate(config);
 
-        // Usings
-        Assert.Contains("using Microsoft.EntityFrameworkCore;\n", result);
-        Assert.Contains("using MyProject.Infrastructure.Data;\n", result);
+        // Clean Architecture aggregate usings (no individual infra/app usings)
+        Assert.Contains("using MyProject.Infrastructure;\n", result);
+        Assert.Contains("using MyProject.Application;\n", result);
+        Assert.DoesNotContain("using Microsoft.EntityFrameworkCore;", result);
+        Assert.DoesNotContain("using MyProject.Infrastructure.Data;", result);
+        Assert.DoesNotContain("using MyProject.Infrastructure.Telemetry;", result);
+        Assert.DoesNotContain("using Mapster;", result);
+        Assert.DoesNotContain("using MapsterMapper;", result);
+
+        // Auth and logging usings stay
         Assert.Contains("using Microsoft.AspNetCore.Authentication.JwtBearer;\n", result);
         Assert.Contains("using Microsoft.IdentityModel.Tokens;\n", result);
         Assert.Contains("using System.Text;\n", result);
         Assert.Contains("using Serilog;\n", result);
-        Assert.Contains("using MyProject.Api.Telemetry;\n", result);
-        Assert.Contains("using Mapster;\n", result);
-        Assert.Contains("using MapsterMapper;\n", result);
 
         // Builder creation
         Assert.Contains("var builder = WebApplication.CreateBuilder(args);\n", result);
 
-        // Service registrations
-        Assert.Contains("builder.Host.UseSerilog((context, cfg) =>\n    cfg.ReadFrom.Configuration(context.Configuration));\n", result);
-        Assert.Contains("builder.Services.AddDbContext<AppDbContext>(options =>\n    options.UseNpgsql(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n", result);
+        // Clean Architecture extension method calls
+        Assert.Contains("builder.Services.AddApplication();\n", result);
+        Assert.Contains("builder.Services.AddInfrastructure(builder.Configuration);\n", result);
+
+        // Inline registrations should NOT appear
+        Assert.DoesNotContain("builder.Services.AddDbContext<AppDbContext>", result);
+        Assert.DoesNotContain("builder.Services.AddAppOpenTelemetry", result);
+        Assert.DoesNotContain("builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings)", result);
+        Assert.DoesNotContain("builder.Services.AddScoped<IMapper, ServiceMapper>()", result);
+
+        // Auth still inline (composition root concern)
         Assert.Contains("builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n", result);
         Assert.Contains("builder.Services.AddHealthChecks();\n", result);
-        Assert.Contains("builder.Services.AddAppOpenTelemetry(builder.Configuration);\n", result);
-        Assert.Contains("builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n", result);
-        Assert.Contains("builder.Services.AddScoped<IMapper, ServiceMapper>();\n", result);
         Assert.Contains("builder.Services.AddControllers();\n", result);
 
         // App build
@@ -125,23 +134,20 @@ public class ProgramCsGeneratorBaselineTests
         var result = ProgramCsGenerator.Generate(config);
 
         const string expected =
-            "using Microsoft.EntityFrameworkCore;\n" +
-            "using MyProject.Infrastructure.Data;\n" +
             "using Microsoft.AspNetCore.Authentication.JwtBearer;\n" +
             "using Microsoft.IdentityModel.Tokens;\n" +
             "using System.Text;\n" +
             "using Serilog;\n" +
-            "using MyProject.Api.Telemetry;\n" +
-            "using Mapster;\n" +
-            "using MapsterMapper;\n" +
+            "using MyProject.Infrastructure;\n" +
+            "using MyProject.Application;\n" +
             "\n" +
             "var builder = WebApplication.CreateBuilder(args);\n" +
             "\n" +
             "builder.Host.UseSerilog((context, cfg) =>\n" +
             "    cfg.ReadFrom.Configuration(context.Configuration));\n" +
             "\n" +
-            "builder.Services.AddDbContext<AppDbContext>(options =>\n" +
-            "    options.UseNpgsql(builder.Configuration.GetConnectionString(\"DefaultConnection\")));\n" +
+            "builder.Services.AddApplication();\n" +
+            "builder.Services.AddInfrastructure(builder.Configuration);\n" +
             "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n" +
             "    .AddJwtBearer(options =>\n" +
             "    {\n" +
@@ -159,9 +165,6 @@ public class ProgramCsGeneratorBaselineTests
             "    });\n" +
             "builder.Services.AddAuthorization();\n" +
             "builder.Services.AddHealthChecks();\n" +
-            "builder.Services.AddAppOpenTelemetry(builder.Configuration);\n" +
-            "builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);\n" +
-            "builder.Services.AddScoped<IMapper, ServiceMapper>();\n" +
             "builder.Services.AddControllers();\n" +
             "\n" +
             "var app = builder.Build();\n" +
@@ -191,7 +194,7 @@ public class ProgramCsGeneratorBaselineTests
             "\n" +
             "var app = builder.Build();\n" +
             "\n" +
-            "HelloEndpoint.Map(app);\n" +
+            "app.MapSampleEndpoint();\n" +
             "\n" +
             "app.Run();\n";
 

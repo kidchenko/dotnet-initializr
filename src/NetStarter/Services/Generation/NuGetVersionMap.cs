@@ -334,6 +334,12 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "4.*",
             [DotNetSdkVersion.Net10] = "4.*",
         },
+        ["Testcontainers.MySql"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "4.*",
+            [DotNetSdkVersion.Net9] = "4.*",
+            [DotNetSdkVersion.Net10] = "4.*",
+        },
         ["Microsoft.NET.Test.Sdk"] = new()
         {
             [DotNetSdkVersion.Net8] = "17.*",
