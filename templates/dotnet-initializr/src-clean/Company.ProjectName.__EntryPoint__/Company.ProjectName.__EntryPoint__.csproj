@@ -55,6 +55,27 @@
     <PackageReference Include="NLog.Extensions.Hosting" Version="6.*" />
   </ItemGroup>
 <!--#endif -->
+<!--#if (IncludeScalar) -->
+  <ItemGroup>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.*" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeRedoc && IncludeNet8) -->
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="__SwashbuckleVersion__" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="__SwashbuckleVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeRedoc && !IncludeNet8) -->
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="__SwashbuckleVersion__" />
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeHangfire && IncludeWebProject) -->
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.*" />
+  </ItemGroup>
+<!--#endif -->
 
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Infrastructure/Company.ProjectName.Infrastructure.csproj" />

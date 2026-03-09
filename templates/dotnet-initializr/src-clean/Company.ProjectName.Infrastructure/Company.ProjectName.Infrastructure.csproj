@@ -83,6 +83,28 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.*" />
   </ItemGroup>
 <!--#endif -->
+<!--#if (IncludeHangfire) -->
+  <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.*" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.*" />
+<!--#if (IncludePostgreSql) -->
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.*" />
+<!--#elif (IncludeSqlServer) -->
+    <PackageReference Include="Hangfire.SqlServer" Version="1.*" />
+<!--#elif (IncludeMySql) -->
+    <PackageReference Include="Hangfire.MySqlStorage" Version="2.*" />
+<!--#elif (IncludeSqlite) -->
+    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.*" />
+<!--#endif -->
+  </ItemGroup>
+<!--#endif -->
+<!--#if (IncludeQuartz) -->
+  <ItemGroup>
+    <PackageReference Include="Quartz" Version="3.*" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.*" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.*" />
+  </ItemGroup>
+<!--#endif -->
 
   <ItemGroup>
     <ProjectReference Include="../Company.ProjectName.Application/Company.ProjectName.Application.csproj" />

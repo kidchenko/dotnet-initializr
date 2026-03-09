@@ -1,7 +1,7 @@
 using Quartz;
 using Microsoft.Extensions.Logging;
 
-namespace Company.ProjectName.Infrastructure.Jobs;
+namespace Company.ProjectName.Jobs;
 
 public class SampleJob : IJob
 {
