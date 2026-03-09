@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.*" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAspireHost>true</IsAspireHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.*" />
+<!--#if (IncludePostgreSql) -->
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.*" />
+<!--#endif -->
+<!--#if (IncludeSqlServer) -->
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.*" />
+<!--#endif -->
+<!--#if (IncludeCaching) -->
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.*" />
+<!--#endif -->
+  </ItemGroup>
+
+<!--#if (!IncludeCleanArchitecture) -->
+  <ItemGroup>
+    <ProjectReference Include="../src/Company.ProjectName/Company.ProjectName.csproj" />
+  </ItemGroup>
+<!--#else -->
+  <ItemGroup>
+    <ProjectReference Include="../src/Company.ProjectName.__EntryPoint__/Company.ProjectName.__EntryPoint__.csproj" />
+  </ItemGroup>
+<!--#endif -->
+
+</Project>

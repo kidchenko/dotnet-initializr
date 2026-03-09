@@ -1,0 +1,22 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '__DotNetSdkVersion__'
+
+  - script: dotnet restore
+    displayName: 'Restore dependencies'
+
+  - script: dotnet build --no-restore --configuration Release
+    displayName: 'Build'
+
+  - script: dotnet test --no-build --configuration Release --verbosity normal
+    displayName: 'Test'
