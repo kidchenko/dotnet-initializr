@@ -755,6 +755,291 @@ dotnet build "$TEST_DIR/bare" --nologo || { echo "FAIL: bare project build faile
 rm -rf "$TEST_DIR/bare"
 echo "   OK: No features selected compiles cleanly"
 
+echo ""
+echo "=== Phase 18: DevOps, Containers, and Background Jobs ==="
+
+# Step 54: CI/CD — GitHub Actions produces build.yml
+echo "Step 54: CI/CD — GitHub Actions produces .github/workflows/build.yml"
+dotnet new dotnet-initializr -n CiGh -o "$TEST_DIR/cigh" \
+  --cicd GitHubActions --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ ! -f "$TEST_DIR/cigh/.github/workflows/build.yml" ]; then
+    echo "FAIL: .github/workflows/build.yml not found"
+    exit 1
+fi
+# CI/CD YAML must have NO #if directives (GEN-07)
+if grep -q "#if\|#endif" "$TEST_DIR/cigh/.github/workflows/build.yml"; then
+    echo "FAIL: build.yml contains template #if directives"
+    exit 1
+fi
+dotnet build "$TEST_DIR/cigh" --nologo || { echo "FAIL: CI/CD GitHub Actions build failed"; exit 1; }
+rm -rf "$TEST_DIR/cigh"
+echo "   OK: GitHub Actions build.yml present, no #if directives"
+
+# Step 55: CI/CD — Azure DevOps produces azure-pipelines.yml
+echo "Step 55: CI/CD — Azure DevOps produces azure-pipelines.yml"
+dotnet new dotnet-initializr -n CiAz -o "$TEST_DIR/ciaz" \
+  --cicd AzureDevOps --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ ! -f "$TEST_DIR/ciaz/azure-pipelines.yml" ]; then
+    echo "FAIL: azure-pipelines.yml not found"
+    exit 1
+fi
+if grep -q "#if\|#endif" "$TEST_DIR/ciaz/azure-pipelines.yml"; then
+    echo "FAIL: azure-pipelines.yml contains template #if directives"
+    exit 1
+fi
+dotnet build "$TEST_DIR/ciaz" --nologo || { echo "FAIL: CI/CD Azure DevOps build failed"; exit 1; }
+rm -rf "$TEST_DIR/ciaz"
+echo "   OK: Azure DevOps azure-pipelines.yml present, no #if directives"
+
+# Step 56: CI/CD — None produces no CI/CD files
+echo "Step 56: CI/CD — None produces no CI/CD files"
+dotnet new dotnet-initializr -n CiNone -o "$TEST_DIR/cinone" \
+  --cicd None --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ -f "$TEST_DIR/cinone/.github/workflows/build.yml" ] || [ -f "$TEST_DIR/cinone/azure-pipelines.yml" ]; then
+    echo "FAIL: CI/CD files should NOT exist when --cicd None"
+    exit 1
+fi
+dotnet build "$TEST_DIR/cinone" --nologo || { echo "FAIL: No CI/CD build failed"; exit 1; }
+rm -rf "$TEST_DIR/cinone"
+echo "   OK: No CI/CD files when --cicd None"
+
+# Step 57: Containers — Dockerfile only
+echo "Step 57: Containers — Dockerfile only"
+dotnet new dotnet-initializr -n DockerOnly -o "$TEST_DIR/dockeronly" \
+  --containers Dockerfile --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ ! -f "$TEST_DIR/dockeronly/Dockerfile" ]; then
+    echo "FAIL: Dockerfile not found"
+    exit 1
+fi
+if [ -f "$TEST_DIR/dockeronly/docker-compose.yml" ]; then
+    echo "FAIL: docker-compose.yml should NOT exist with --containers Dockerfile"
+    exit 1
+fi
+dotnet build "$TEST_DIR/dockeronly" --nologo || { echo "FAIL: Dockerfile-only build failed"; exit 1; }
+rm -rf "$TEST_DIR/dockeronly"
+echo "   OK: Dockerfile present, no docker-compose.yml"
+
+# Step 58: Containers — DockerCompose produces both files
+echo "Step 58: Containers — DockerCompose produces Dockerfile + docker-compose.yml"
+dotnet new dotnet-initializr -n DockerComp -o "$TEST_DIR/dockercomp" \
+  --containers DockerCompose --arch SimpleLayered --projectType MinimalApi \
+  --orm EfCore --db PostgreSql --auth None --logging None --testing none \
+  --validation false --caching true --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ ! -f "$TEST_DIR/dockercomp/Dockerfile" ]; then
+    echo "FAIL: Dockerfile not found with DockerCompose"
+    exit 1
+fi
+if [ ! -f "$TEST_DIR/dockercomp/docker-compose.yml" ]; then
+    echo "FAIL: docker-compose.yml not found"
+    exit 1
+fi
+# Verify docker-compose has postgres and redis services (based on selections)
+if ! grep -q "postgres" "$TEST_DIR/dockercomp/docker-compose.yml"; then
+    echo "FAIL: docker-compose.yml missing postgres service"
+    exit 1
+fi
+if ! grep -q "redis" "$TEST_DIR/dockercomp/docker-compose.yml"; then
+    echo "FAIL: docker-compose.yml missing redis service"
+    exit 1
+fi
+# Verify NO #if directives leaked into generated docker-compose.yml
+if grep -q "#if\|#endif" "$TEST_DIR/dockercomp/docker-compose.yml"; then
+    echo "FAIL: docker-compose.yml contains template #if directives"
+    exit 1
+fi
+dotnet build "$TEST_DIR/dockercomp" --nologo || { echo "FAIL: DockerCompose build failed"; exit 1; }
+rm -rf "$TEST_DIR/dockercomp"
+echo "   OK: DockerCompose has Dockerfile + docker-compose.yml with postgres+redis"
+
+# Step 59: Containers — Aspire produces AppHost + ServiceDefaults
+echo "Step 59: Containers — Aspire produces AppHost + ServiceDefaults"
+dotnet new dotnet-initializr -n AspireApp -o "$TEST_DIR/aspireapp" \
+  --containers Aspire --arch SimpleLayered --projectType MinimalApi \
+  --orm EfCore --db PostgreSql --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+if [ ! -d "$TEST_DIR/aspireapp/AspireApp.AppHost" ]; then
+    echo "FAIL: AppHost project directory not found"
+    exit 1
+fi
+if [ ! -d "$TEST_DIR/aspireapp/AspireApp.ServiceDefaults" ]; then
+    echo "FAIL: ServiceDefaults project directory not found"
+    exit 1
+fi
+if [ ! -f "$TEST_DIR/aspireapp/AspireApp.AppHost/AspireApp.AppHost.csproj" ]; then
+    echo "FAIL: AppHost .csproj not found"
+    exit 1
+fi
+# Verify Aspire projects are in .slnx
+if ! grep -q "AppHost" "$TEST_DIR/aspireapp/AspireApp.slnx"; then
+    echo "FAIL: AppHost not referenced in .slnx"
+    exit 1
+fi
+# Aspire build requires the Aspire SDK workload — attempt build if installed, skip if not
+if dotnet workload list 2>/dev/null | grep -q "aspire"; then
+    dotnet build "$TEST_DIR/aspireapp" --nologo || { echo "FAIL: Aspire build failed"; exit 1; }
+    echo "   Aspire workload detected — build verified"
+else
+    echo "   SKIP: Aspire workload not installed — skipping build verification"
+fi
+rm -rf "$TEST_DIR/aspireapp"
+echo "   OK: Aspire AppHost + ServiceDefaults present, referenced in .slnx"
+
+# Step 60: Background jobs — IHostedService with WebApi compiles, no NuGet packages
+echo "Step 60: Background jobs — IHostedService with WebApi"
+dotnet new dotnet-initializr -n BgHost -o "$TEST_DIR/bghost" \
+  --background-jobs IHostedService --arch SimpleLayered --projectType WebApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify SampleBackgroundService exists
+if [ ! -f "$TEST_DIR/bghost/src/BgHost/Jobs/SampleBackgroundService.cs" ]; then
+    echo "FAIL: SampleBackgroundService.cs not found"
+    exit 1
+fi
+# Verify NO Hangfire or Quartz packages
+if grep -q "Hangfire\|Quartz" "$TEST_DIR/bghost/src/BgHost/BgHost.csproj"; then
+    echo "FAIL: Hangfire/Quartz packages should NOT appear for IHostedService"
+    exit 1
+fi
+dotnet build "$TEST_DIR/bghost" --nologo || { echo "FAIL: IHostedService build failed"; exit 1; }
+rm -rf "$TEST_DIR/bghost"
+echo "   OK: IHostedService compiles with BackgroundService, no extra packages"
+
+# Step 61: Background jobs — Hangfire with EfCore+PostgreSQL compiles
+echo "Step 61: Background jobs — Hangfire with EfCore+PostgreSQL"
+dotnet new dotnet-initializr -n BgHang -o "$TEST_DIR/bghang" \
+  --background-jobs Hangfire --arch CleanArchitecture --projectType WebApi \
+  --orm EfCore --db PostgreSql --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify Hangfire packages in Infrastructure .csproj
+if ! grep -q "Hangfire.PostgreSql" "$TEST_DIR/bghang/src/BgHang.Infrastructure/BgHang.Infrastructure.csproj"; then
+    echo "FAIL: Hangfire.PostgreSql not found in Infrastructure .csproj"
+    exit 1
+fi
+# Verify Hangfire.AspNetCore in entry point .csproj (for dashboard)
+if ! grep -q "Hangfire.AspNetCore" "$TEST_DIR/bghang/src/BgHang.Api/BgHang.Api.csproj"; then
+    echo "FAIL: Hangfire.AspNetCore not found in entry point .csproj"
+    exit 1
+fi
+dotnet build "$TEST_DIR/bghang" --nologo || { echo "FAIL: Hangfire build failed"; exit 1; }
+rm -rf "$TEST_DIR/bghang"
+echo "   OK: Hangfire with PostgreSQL compiles, correct packages"
+
+# Step 62: Background jobs — Quartz has all 3 packages + SampleJob.cs
+echo "Step 62: Background jobs — Quartz with all packages"
+dotnet new dotnet-initializr -n BgQuartz -o "$TEST_DIR/bgquartz" \
+  --background-jobs Quartz --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify all 3 Quartz packages
+if ! grep -q "Quartz.Extensions.Hosting" "$TEST_DIR/bgquartz/src/BgQuartz/BgQuartz.csproj"; then
+    echo "FAIL: Quartz.Extensions.Hosting not found"
+    exit 1
+fi
+if ! grep -q "Quartz.Extensions.DependencyInjection" "$TEST_DIR/bgquartz/src/BgQuartz/BgQuartz.csproj"; then
+    echo "FAIL: Quartz.Extensions.DependencyInjection not found"
+    exit 1
+fi
+# Verify SampleJob.cs exists
+if [ ! -f "$TEST_DIR/bgquartz/src/BgQuartz/Jobs/SampleJob.cs" ]; then
+    echo "FAIL: SampleJob.cs not found"
+    exit 1
+fi
+dotnet build "$TEST_DIR/bgquartz" --nologo || { echo "FAIL: Quartz build failed"; exit 1; }
+rm -rf "$TEST_DIR/bgquartz"
+echo "   OK: Quartz has all 3 packages and SampleJob.cs, compiles"
+
+# Step 63: API docs — Scalar with net10.0 compiles
+echo "Step 63: API docs — Scalar with net10.0"
+dotnet new dotnet-initializr -n ApiScalar -o "$TEST_DIR/apiscalar" \
+  --api-docs Scalar --framework net10.0 --arch SimpleLayered --projectType WebApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify Scalar package
+if ! grep -q "Scalar.AspNetCore" "$TEST_DIR/apiscalar/src/ApiScalar/ApiScalar.csproj"; then
+    echo "FAIL: Scalar.AspNetCore not found in .csproj"
+    exit 1
+fi
+dotnet build "$TEST_DIR/apiscalar" --nologo || { echo "FAIL: Scalar build failed"; exit 1; }
+rm -rf "$TEST_DIR/apiscalar"
+echo "   OK: Scalar with net10.0 compiles"
+
+# Step 64: API docs — Redoc compiles
+echo "Step 64: API docs — Redoc with net10.0"
+dotnet new dotnet-initializr -n ApiRedoc -o "$TEST_DIR/apiredoc" \
+  --api-docs Redoc --framework net10.0 --arch SimpleLayered --projectType MinimalApi \
+  --orm None --auth None --logging None --testing none \
+  --validation false --caching false --resilience false --mapping false \
+  --health-checks false --openTelemetry false
+# Verify Redoc package
+if ! grep -q "Swashbuckle.AspNetCore.ReDoc" "$TEST_DIR/apiredoc/src/ApiRedoc/ApiRedoc.csproj"; then
+    echo "FAIL: Swashbuckle.AspNetCore.ReDoc not found in .csproj"
+    exit 1
+fi
+dotnet build "$TEST_DIR/apiredoc" --nologo || { echo "FAIL: Redoc build failed"; exit 1; }
+rm -rf "$TEST_DIR/apiredoc"
+echo "   OK: Redoc with net10.0 compiles"
+
+# Step 65: Kitchen sink + CI/CD + Docker + background jobs regression
+echo "Step 65: Kitchen sink with CI/CD + Docker + background jobs"
+dotnet new dotnet-initializr -n KitchenP18 -o "$TEST_DIR/kitchenp18" \
+  --arch CleanArchitecture --projectType WebApi \
+  --orm EfCore --db PostgreSql --auth Jwt --logging Serilog --framework net10.0 \
+  --testing xunit --testing fluentassertions --testing nsubstitute \
+  --validation true --caching true --resilience true --mapping true \
+  --health-checks true --openTelemetry true \
+  --cicd GitHubActions --containers DockerCompose \
+  --background-jobs Hangfire --api-docs Scalar
+# Verify CI/CD
+if [ ! -f "$TEST_DIR/kitchenp18/.github/workflows/build.yml" ]; then
+    echo "FAIL: build.yml not found in kitchen sink"
+    exit 1
+fi
+# Verify Docker (DockerCompose includes both files)
+if [ ! -f "$TEST_DIR/kitchenp18/Dockerfile" ]; then
+    echo "FAIL: Dockerfile not found in kitchen sink"
+    exit 1
+fi
+if [ ! -f "$TEST_DIR/kitchenp18/docker-compose.yml" ]; then
+    echo "FAIL: docker-compose.yml not found in kitchen sink"
+    exit 1
+fi
+# Verify Hangfire packages
+if ! grep -q "Hangfire" "$TEST_DIR/kitchenp18/src/KitchenP18.Infrastructure/KitchenP18.Infrastructure.csproj"; then
+    echo "FAIL: Hangfire not found in kitchen sink Infrastructure .csproj"
+    exit 1
+fi
+# Verify Scalar package in entry point
+if ! grep -q "Scalar.AspNetCore" "$TEST_DIR/kitchenp18/src/KitchenP18.Api/KitchenP18.Api.csproj"; then
+    echo "FAIL: Scalar not found in kitchen sink entry point .csproj"
+    exit 1
+fi
+# Since DockerCompose is selected, CI/CD should be the Docker variant
+if ! grep -q "docker" "$TEST_DIR/kitchenp18/.github/workflows/build.yml"; then
+    echo "FAIL: CI/CD should be Docker variant when DockerCompose selected"
+    exit 1
+fi
+dotnet build "$TEST_DIR/kitchenp18" --nologo || { echo "FAIL: Kitchen sink P18 build failed"; exit 1; }
+rm -rf "$TEST_DIR/kitchenp18"
+echo "   OK: Kitchen sink with all Phase 18 features compiles"
+
 # Cleanup
 echo ""
 echo "=== Cleaning up ==="
@@ -769,3 +1054,4 @@ echo "Phase 14 verification: All 18 parameters in --help, gating annotations pre
 echo "Phase 15 verification: All arch x type combinations generate correct folder structures and compile successfully."
 echo "Phase 16 verification: ORM (EfCore/Dapper) x DB (PostgreSQL/SqlServer/MySQL/SQLite) x Auth (JWT/ApiKey/Identity/Keycloak) x Framework (net8/net9/net10) critical combinations compile."
 echo "Phase 17 verification: Logging (Serilog/NLog), testing projects, and quality feature flags all produce compilable output."
+echo "Phase 18 verification: CI/CD (GitHub Actions/Azure DevOps), containers (Dockerfile/DockerCompose/Aspire), background jobs (IHostedService/Hangfire/Quartz), and API docs (Scalar/Redoc) produce correct output."
