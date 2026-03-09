@@ -17,6 +17,15 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
 #endif
+#if (IncludeQuartz)
+using Quartz;
+#endif
+#if (IncludeHangfire && IncludeMySql)
+using Hangfire.MySql;
+#endif
+#if (IncludeScalar)
+using Scalar.AspNetCore;
+#endif
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -88,6 +97,44 @@ builder.Services.AddOpenTelemetry()
 Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 #endif
 
+#if (IncludeHangfire)
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+#if (IncludePostgreSql)
+    .UsePostgreSqlStorage(c => c.UseConnectionString(
+        builder.Configuration.GetConnectionString("DefaultConnection")!)));
+#elif (IncludeSqlServer)
+    .UseSqlServerStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+#elif (IncludeMySql)
+    .UseStorage(new MySqlStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection")!,
+        new MySqlStorageOptions { TablesPrefix = "Hangfire" })));
+#elif (IncludeSqlite)
+    .UseSQLiteStorage());
+#endif
+builder.Services.AddHangfireServer();
+#endif
+#if (IncludeQuartz)
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("SampleJob");
+    q.AddJob<Company.ProjectName.Jobs.SampleJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("SampleJob-trigger")
+        .WithSimpleSchedule(x => x
+            .WithIntervalInSeconds(5)
+            .RepeatForever()));
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+#endif
+#if (IncludeIHostedService)
+builder.Services.AddHostedService<Company.ProjectName.Jobs.SampleBackgroundService>();
+#endif
+
 #if (IncludeJwt)
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -123,7 +170,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 #endif
 
-#if (IncludeSwaggerUI && IncludeNet8)
+#if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
 
@@ -139,8 +186,23 @@ if (app.Environment.IsDevelopment())
     // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
+#if (IncludeRedoc && IncludeNet8)
+    app.UseSwagger();
+    app.UseReDoc(c => c.SpecUrl("/swagger/v1/swagger.json"));
+#elif (IncludeRedoc && !IncludeNet8)
+    app.UseReDoc(c => c.SpecUrl("/openapi/v1.json"));
+#endif
+#if (IncludeScalar && IncludeNet8)
+    app.MapScalarApiReference(options => options
+        .WithOpenApiRoutePattern("/swagger/v1/swagger.json"));
+#elif (IncludeScalar && !IncludeNet8)
+    app.MapScalarApiReference();
+#endif
 }
 
+#if (IncludeHangfire)
+app.UseHangfireDashboard("/hangfire");
+#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -170,6 +232,15 @@ using FluentValidation;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
+#endif
+#if (IncludeQuartz)
+using Quartz;
+#endif
+#if (IncludeHangfire && IncludeMySql)
+using Hangfire.MySql;
+#endif
+#if (IncludeScalar)
+using Scalar.AspNetCore;
 #endif
 var builder = WebApplication.CreateBuilder(args);
 
@@ -240,6 +311,44 @@ builder.Services.AddOpenTelemetry()
 Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 #endif
 
+#if (IncludeHangfire)
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+#if (IncludePostgreSql)
+    .UsePostgreSqlStorage(c => c.UseConnectionString(
+        builder.Configuration.GetConnectionString("DefaultConnection")!)));
+#elif (IncludeSqlServer)
+    .UseSqlServerStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+#elif (IncludeMySql)
+    .UseStorage(new MySqlStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection")!,
+        new MySqlStorageOptions { TablesPrefix = "Hangfire" })));
+#elif (IncludeSqlite)
+    .UseSQLiteStorage());
+#endif
+builder.Services.AddHangfireServer();
+#endif
+#if (IncludeQuartz)
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("SampleJob");
+    q.AddJob<Company.ProjectName.Jobs.SampleJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("SampleJob-trigger")
+        .WithSimpleSchedule(x => x
+            .WithIntervalInSeconds(5)
+            .RepeatForever()));
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+#endif
+#if (IncludeIHostedService)
+builder.Services.AddHostedService<Company.ProjectName.Jobs.SampleBackgroundService>();
+#endif
+
 #if (IncludeJwt)
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -275,7 +384,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 #endif
 
-#if (IncludeSwaggerUI && IncludeNet8)
+#if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
 
@@ -291,8 +400,23 @@ if (app.Environment.IsDevelopment())
     // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
+#if (IncludeRedoc && IncludeNet8)
+    app.UseSwagger();
+    app.UseReDoc(c => c.SpecUrl("/swagger/v1/swagger.json"));
+#elif (IncludeRedoc && !IncludeNet8)
+    app.UseReDoc(c => c.SpecUrl("/openapi/v1.json"));
+#endif
+#if (IncludeScalar && IncludeNet8)
+    app.MapScalarApiReference(options => options
+        .WithOpenApiRoutePattern("/swagger/v1/swagger.json"));
+#elif (IncludeScalar && !IncludeNet8)
+    app.MapScalarApiReference();
+#endif
 }
 
+#if (IncludeHangfire)
+app.UseHangfireDashboard("/hangfire");
+#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -413,6 +537,12 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
 #endif
+#if (IncludeQuartz)
+using Quartz;
+#endif
+#if (IncludeHangfire && IncludeMySql)
+using Hangfire.MySql;
+#endif
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -472,6 +602,43 @@ var host = Host.CreateDefaultBuilder(args)
 #endif
 #if (IncludeMapping)
         Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+#endif
+#if (IncludeHangfire)
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+#if (IncludePostgreSql)
+            .UsePostgreSqlStorage(c => c.UseConnectionString(
+                context.Configuration.GetConnectionString("DefaultConnection")!)));
+#elif (IncludeSqlServer)
+            .UseSqlServerStorage(
+                context.Configuration.GetConnectionString("DefaultConnection")));
+#elif (IncludeMySql)
+            .UseStorage(new MySqlStorage(
+                context.Configuration.GetConnectionString("DefaultConnection")!,
+                new MySqlStorageOptions { TablesPrefix = "Hangfire" })));
+#elif (IncludeSqlite)
+            .UseSQLiteStorage());
+#endif
+        services.AddHangfireServer();
+#endif
+#if (IncludeQuartz)
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("SampleJob");
+            q.AddJob<Company.ProjectName.Jobs.SampleJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("SampleJob-trigger")
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(5)
+                    .RepeatForever()));
+        });
+        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+#endif
+#if (IncludeIHostedService)
+        services.AddHostedService<Company.ProjectName.Jobs.SampleBackgroundService>();
 #endif
     })
 #if (IncludeSerilog)

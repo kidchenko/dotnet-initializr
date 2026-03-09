@@ -8,6 +8,9 @@ using Serilog;
 using NLog;
 using NLog.Web;
 #endif
+#if (IncludeScalar)
+using Scalar.AspNetCore;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +31,7 @@ builder.Host.UseNLog();
 builder.Services.AddHealthChecks();
 #endif
 
-#if (IncludeSwaggerUI && IncludeNet8)
+#if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
 
@@ -44,8 +47,23 @@ if (app.Environment.IsDevelopment())
     // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
+#if (IncludeRedoc && IncludeNet8)
+    app.UseSwagger();
+    app.UseReDoc(c => c.SpecUrl("/swagger/v1/swagger.json"));
+#elif (IncludeRedoc && !IncludeNet8)
+    app.UseReDoc(c => c.SpecUrl("/openapi/v1.json"));
+#endif
+#if (IncludeScalar && IncludeNet8)
+    app.MapScalarApiReference(options => options
+        .WithOpenApiRoutePattern("/swagger/v1/swagger.json"));
+#elif (IncludeScalar && !IncludeNet8)
+    app.MapScalarApiReference();
+#endif
 }
 
+#if (IncludeHangfire)
+app.UseHangfireDashboard("/hangfire");
+#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -67,6 +85,9 @@ using Serilog;
 using NLog;
 using NLog.Web;
 #endif
+#if (IncludeScalar)
+using Scalar.AspNetCore;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,7 +107,7 @@ builder.Host.UseNLog();
 builder.Services.AddHealthChecks();
 #endif
 
-#if (IncludeSwaggerUI && IncludeNet8)
+#if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
 
@@ -102,8 +123,23 @@ if (app.Environment.IsDevelopment())
     // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
+#if (IncludeRedoc && IncludeNet8)
+    app.UseSwagger();
+    app.UseReDoc(c => c.SpecUrl("/swagger/v1/swagger.json"));
+#elif (IncludeRedoc && !IncludeNet8)
+    app.UseReDoc(c => c.SpecUrl("/openapi/v1.json"));
+#endif
+#if (IncludeScalar && IncludeNet8)
+    app.MapScalarApiReference(options => options
+        .WithOpenApiRoutePattern("/swagger/v1/swagger.json"));
+#elif (IncludeScalar && !IncludeNet8)
+    app.MapScalarApiReference();
+#endif
 }
 
+#if (IncludeHangfire)
+app.UseHangfireDashboard("/hangfire");
+#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();

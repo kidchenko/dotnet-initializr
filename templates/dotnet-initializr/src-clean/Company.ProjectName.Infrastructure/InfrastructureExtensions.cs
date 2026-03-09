@@ -34,6 +34,19 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
 #endif
+#if (IncludeHangfire)
+using Hangfire;
+#if (IncludeMySql)
+using Hangfire.MySql;
+#endif
+#endif
+#if (IncludeQuartz)
+using Quartz;
+using Company.ProjectName.Infrastructure.Jobs;
+#endif
+#if (IncludeIHostedService)
+using Company.ProjectName.Infrastructure.Jobs;
+#endif
 
 namespace Company.ProjectName.Infrastructure;
 
@@ -133,6 +146,43 @@ public static class InfrastructureExtensions
 #endif
                 .AddHttpClientInstrumentation()
                 .AddConsoleExporter());
+#endif
+#if (IncludeHangfire)
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+#if (IncludePostgreSql)
+            .UsePostgreSqlStorage(c => c.UseConnectionString(
+                configuration.GetConnectionString("DefaultConnection")!)));
+#elif (IncludeSqlServer)
+            .UseSqlServerStorage(
+                configuration.GetConnectionString("DefaultConnection")));
+#elif (IncludeMySql)
+            .UseStorage(new MySqlStorage(
+                configuration.GetConnectionString("DefaultConnection")!,
+                new MySqlStorageOptions { TablesPrefix = "Hangfire" })));
+#elif (IncludeSqlite)
+            .UseSQLiteStorage());
+#endif
+        services.AddHangfireServer();
+#endif
+#if (IncludeQuartz)
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("SampleJob");
+            q.AddJob<SampleJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("SampleJob-trigger")
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(5)
+                    .RepeatForever()));
+        });
+        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+#endif
+#if (IncludeIHostedService)
+        services.AddHostedService<SampleBackgroundService>();
 #endif
 
         return services;

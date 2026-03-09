@@ -276,7 +276,7 @@
     },
 
     "IncludeIHostedService": { "type": "computed", "value": "(backgroundJobs == \"IHostedService\")" },
-    "IncludeHangfire":       { "type": "computed", "value": "(backgroundJobs == \"Hangfire\")" },
+    "IncludeHangfire":       { "type": "computed", "value": "(backgroundJobs == \"Hangfire\" && orm != \"None\")" },
     "IncludeQuartz":         { "type": "computed", "value": "(backgroundJobs == \"Quartz\")" },
 
     "apiDocs": {
@@ -347,6 +347,14 @@
 
   },
 
+  "constraints": {
+    "api-docs-requires-web": {
+      "type": "expression",
+      "condition": "(apiDocs == \"None\" || projectType == \"WebApi\" || projectType == \"MinimalApi\")",
+      "message": "The --api-docs option requires --project-type WebApi or MinimalApi. Console and WorkerService project types do not support API documentation."
+    }
+  },
+
   "sources": [
     {
       "source": "./",
@@ -380,8 +388,16 @@
           "exclude": ["src/**/Models/**", "src/**/Data/**"]
         },
         {
-          "condition": "(!IncludeConsole && !IncludeWorker)",
+          "condition": "(!IncludeIHostedService && !IncludeHangfire && !IncludeQuartz && !IncludeWorker && !IncludeConsole)",
           "exclude": ["src/**/Jobs/**"]
+        },
+        {
+          "condition": "(!IncludeIHostedService)",
+          "exclude": ["src/**/Jobs/SampleBackgroundService.cs"]
+        },
+        {
+          "condition": "(!IncludeQuartz)",
+          "exclude": ["src/**/Jobs/SampleJob.cs"]
         },
         {
           "condition": "(!IncludeWebApi)",
@@ -411,8 +427,16 @@
       "condition": "(IncludeCleanArchitecture)",
       "modifiers": [
         {
-          "condition": "(!IncludeConsole && !IncludeWorker)",
+          "condition": "(!IncludeIHostedService && !IncludeHangfire && !IncludeQuartz && !IncludeWorker && !IncludeConsole)",
           "exclude": ["**/Company.ProjectName.Infrastructure/Jobs/**", "**/Company.ProjectName.__EntryPoint__/Jobs/**"]
+        },
+        {
+          "condition": "(!IncludeIHostedService)",
+          "exclude": ["**/Jobs/SampleBackgroundService.cs"]
+        },
+        {
+          "condition": "(!IncludeQuartz)",
+          "exclude": ["**/Jobs/SampleJob.cs"]
         },
         {
           "condition": "(!IncludeWebApi)",
