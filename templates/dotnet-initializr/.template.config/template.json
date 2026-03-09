@@ -206,6 +206,21 @@
       }
     },
 
+    "DotNetSdkVersion": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "__DotNetSdkVersion__",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          { "condition": "(framework == 'net8.0')",  "value": "8.0.x" },
+          { "condition": "(framework == 'net9.0')",  "value": "9.0.x" },
+          { "condition": "(framework == 'net10.0')", "value": "10.0.x" }
+        ]
+      }
+    },
+
     "testing": {
       "type": "parameter",
       "datatype": "choice",
@@ -486,6 +501,53 @@
       "source": "./tests-split",
       "target": "./tests",
       "condition": "(IncludeAnyTesting && IncludeTestcontainers)"
+    },
+    {
+      "source": "./.github/workflows",
+      "target": "./.github/workflows",
+      "condition": "(IncludeGitHubActions && !IncludeDockerfile && !IncludeDockerCompose)",
+      "include": ["build.yml"]
+    },
+    {
+      "source": "./.github/workflows",
+      "target": "./.github/workflows",
+      "condition": "(IncludeGitHubActions && (IncludeDockerfile || IncludeDockerCompose))",
+      "include": ["build-docker.yml"],
+      "rename": {
+        "build-docker.yml": "build.yml"
+      }
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(IncludeAzureDevOps && !IncludeDockerfile && !IncludeDockerCompose)",
+      "include": ["azure-pipelines.yml"]
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(IncludeAzureDevOps && (IncludeDockerfile || IncludeDockerCompose))",
+      "include": ["azure-pipelines-docker.yml"],
+      "rename": {
+        "azure-pipelines-docker.yml": "azure-pipelines.yml"
+      }
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(IncludeDockerfile || IncludeDockerCompose)",
+      "include": ["Dockerfile", ".dockerignore"]
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "condition": "(IncludeDockerCompose)",
+      "include": ["docker-compose.yml"]
+    },
+    {
+      "source": "./aspire",
+      "target": "./",
+      "condition": "(IncludeAspire)"
     }
   ]
 }

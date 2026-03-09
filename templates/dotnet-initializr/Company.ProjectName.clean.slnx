@@ -14,4 +14,10 @@
     <Project Path="tests/Company.ProjectName.IntegrationTests/Company.ProjectName.IntegrationTests.csproj" />
 <!--#endif -->
   </Folder>
+<!--#if (IncludeAspire) -->
+  <Folder Name="/aspire/">
+    <Project Path="Company.ProjectName.AppHost/Company.ProjectName.AppHost.csproj" />
+    <Project Path="Company.ProjectName.ServiceDefaults/Company.ProjectName.ServiceDefaults.csproj" />
+  </Folder>
+<!--#endif -->
 </Solution>
