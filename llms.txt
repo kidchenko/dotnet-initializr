@@ -1,0 +1,68 @@
+# .NET initializr
+
+> Browser-based .NET project scaffolding tool at https://starter.dotnetth.com
+
+## What it does
+
+.NET initializr generates production-ready .NET solution structures. Users configure their project options in the browser and download a fully structured solution as a zip file. Everything runs client-side via Blazor WebAssembly — no server round-trips.
+
+It also provides the equivalent `dotnet new` CLI command so users can reproduce the same project from the terminal.
+
+## Configurable Options
+
+### Project Basics
+- **Project Name**: Custom project and namespace naming
+- **.NET SDK**: .NET 8 (LTS), .NET 9, .NET 10 (LTS)
+- **Project Type**: Minimal API, Controller-based Web API, Console, Worker Service
+
+### Architecture
+- **Clean Architecture**: Multi-project (Domain / Application / Infrastructure / API)
+- **Vertical Slice Architecture**
+- **Simple Layered**: Single project
+
+### Data Access
+- **ORM**: Entity Framework Core, Dapper, or None
+- **Database**: PostgreSQL, SQL Server, MySQL, SQLite
+
+### Authentication
+- JWT Bearer
+- ASP.NET Core Identity (requires EF Core)
+- Keycloak OIDC
+- API Key (custom middleware)
+
+### Logging
+- Serilog (file sink)
+- NLog
+
+### API Documentation
+- Scalar
+- Swagger UI
+- ReDoc
+
+### Background Jobs
+- IHostedService
+- Hangfire (requires a database)
+- Quartz.NET
+
+### Containers & DevOps
+- Dockerfile + .dockerignore
+- Docker Compose
+- .NET Aspire orchestration
+- GitHub Actions CI/CD
+- Azure DevOps Pipelines
+
+### Observability & Quality
+- Health Checks
+- OpenTelemetry (tracing + metrics)
+- Redis caching
+- FluentValidation
+- HTTP Resilience (Polly)
+
+### Testing
+- **Frameworks**: xUnit, NUnit
+- **Assertions**: Shouldly
+- **Add-ons**: NSubstitute, Bogus, Testcontainers
+
+## Links
+- Website: https://starter.dotnetth.com
+- Source: https://github.com/dotnetthailand/starter-net

@@ -1,0 +1,254 @@
+/* /Components/CliCommandPanel.razor.rz.scp.css */
+.cli-panel[b-gdc28rjyy4] {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.cli-header[b-gdc28rjyy4] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+.cli-header:hover[b-gdc28rjyy4] {
+    background-color: var(--border-hover);
+}
+
+.cli-label[b-gdc28rjyy4] {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.cli-chevron[b-gdc28rjyy4] {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.cli-body[b-gdc28rjyy4] {
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.cli-commands-wrapper[b-gdc28rjyy4] {
+    position: relative;
+    padding: 1rem;
+}
+
+.cli-commands[b-gdc28rjyy4] {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin: 0;
+    white-space: pre;
+}
+
+.cli-commands code[b-gdc28rjyy4] {
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+.copy-button[b-gdc28rjyy4] {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.copy-button:hover[b-gdc28rjyy4] {
+    background-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+/* /Components/DotNetNewPanel.razor.rz.scp.css */
+.cli-panel[b-nwu18e1ozp] {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.cli-header[b-nwu18e1ozp] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+.cli-header:hover[b-nwu18e1ozp] {
+    background-color: var(--border-hover);
+}
+
+.cli-label[b-nwu18e1ozp] {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.cli-chevron[b-nwu18e1ozp] {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.cli-body[b-nwu18e1ozp] {
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.cli-commands-wrapper[b-nwu18e1ozp] {
+    position: relative;
+    padding: 1rem;
+}
+
+.cli-commands[b-nwu18e1ozp] {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin: 0;
+    white-space: pre;
+}
+
+.cli-commands code[b-nwu18e1ozp] {
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+.copy-button[b-nwu18e1ozp] {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.copy-button:hover[b-nwu18e1ozp] {
+    background-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+/* /Components/FileTreePreview.razor.rz.scp.css */
+.file-tree-container[b-itb9zzhr1p] {
+    padding: 0 0.5rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.75;
+}
+
+.file-tree-node[b-itb9zzhr1p] {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.file-tree-node:hover[b-itb9zzhr1p] {
+    background-color: rgba(148, 163, 184, 0.1);
+}
+
+/* Clickable file nodes */
+.file-clickable[b-itb9zzhr1p] {
+    cursor: pointer;
+}
+
+.file-clickable:hover[b-itb9zzhr1p] {
+    background-color: rgba(148, 163, 184, 0.15);
+    cursor: pointer;
+}
+
+/* Clickable folder toggle nodes */
+.folder-toggle[b-itb9zzhr1p] {
+    cursor: pointer;
+}
+
+.node-icon[b-itb9zzhr1p] {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 1rem;
+    color: var(--text-tertiary);
+}
+
+.node-icon .fa-folder-open[b-itb9zzhr1p] {
+    color: var(--folder-icon);
+}
+
+.project-folder .node-icon .fa-cube[b-itb9zzhr1p] {
+    color: #a0aec0;
+}
+
+.node-name[b-itb9zzhr1p] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Green flash for newly added nodes */
+.file-tree-node-added[b-itb9zzhr1p] {
+    animation: flashGreen-b-itb9zzhr1p 1.2s ease-out forwards;
+}
+
+@keyframes flashGreen-b-itb9zzhr1p {
+    0% { background-color: rgba(34, 197, 94, 0.35); }
+    100% { background-color: transparent; }
+}
+
+/* Fade out for removed nodes */
+.file-tree-node-removed[b-itb9zzhr1p] {
+    animation: fadeOut-b-itb9zzhr1p 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut-b-itb9zzhr1p {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* RESP-02: 44px minimum touch targets for file tree nodes on mobile */
+@media (max-width: 768px) {
+    .file-clickable[b-itb9zzhr1p],
+    .folder-toggle[b-itb9zzhr1p] {
+        min-height: 44px;
+        align-items: center;
+    }
+}
+/* /Layout/MainLayout.razor.rz.scp.css */
+.layout-container[b-29qb74r0dl] {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}

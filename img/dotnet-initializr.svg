@@ -1,0 +1,21 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Partial circle arc (orbit) -->
+  <path d="M 100 28 A 72 72 0 0 1 172 100 A 72 72 0 0 1 100 172"
+        fill="none" stroke="#4C1D95" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 5" opacity="0.6"/>
+  <!-- Left curly brace -->
+  <path d="M 94 44 
+           Q 70 44 70 65
+           L 70 87
+           Q 70 100 56 100
+           Q 70 100 70 113
+           L 70 135
+           Q 70 156 94 156"
+        fill="none" stroke="#7C3AED" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Lightning bolt -->
+  <polygon points="116,62 101,97 114,97 98,136 140,86 122,86 138,62"
+           fill="#A78BFA"/>
+  <!-- Orbit dots -->
+  <circle cx="100" cy="28" r="5" fill="#7C3AED"/>
+  <circle cx="172" cy="100" r="5" fill="#7C3AED"/>
+  <circle cx="100" cy="172" r="5" fill="#4C1D95" opacity="0.5"/>
+</svg>
