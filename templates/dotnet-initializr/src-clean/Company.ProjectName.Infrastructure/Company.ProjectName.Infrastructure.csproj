@@ -8,14 +8,11 @@
     <AnalysisLevel>latest-minimum</AnalysisLevel>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.*" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.*" />
 <!--#if (IncludeWorker) -->
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
-<!--#endif -->
   </ItemGroup>
+<!--#endif -->
 
 <!--#if (IncludeEfCore) -->
   <ItemGroup>
@@ -53,7 +50,7 @@
   </ItemGroup>
 <!--#endif -->
 
-<!--#if (IncludeJwt || IncludeKeycloak) -->
+<!--#if (IncludeKeycloak) -->
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="__EfCoreVersion__" />
   </ItemGroup>
@@ -81,12 +78,12 @@
 <!--#endif -->
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.*" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.*" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.*" />
   </ItemGroup>
 <!--#endif -->
 <!--#if (IncludeHangfire) -->
   <ItemGroup>
     <PackageReference Include="Hangfire" Version="1.*" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.*" />
 <!--#if (IncludePostgreSql) -->
     <PackageReference Include="Hangfire.PostgreSql" Version="1.*" />
 <!--#elif (IncludeSqlServer) -->

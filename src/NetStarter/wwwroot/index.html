@@ -63,6 +63,28 @@
             }
         })();
     </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": ".NET initializr",
+        "url": "https://starter.dotnetth.com",
+        "description": "Browser-based .NET project scaffolding tool. Pick your architecture, ORM, auth, testing, and DevOps options — download a fully structured solution as a zip.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "browserRequirements": "Requires WebAssembly support",
+        "creator": {
+            "@type": "Organization",
+            "name": "dotnetth",
+            "url": "https://starter.dotnetth.com"
+        }
+    }
+    </script>
     <script type="importmap"></script>
 </head>
 
@@ -84,6 +106,13 @@
             <div class="loading-spinner"></div>
         </div>
     </div>
+
+    <noscript>
+        <h1>.NET initializr</h1>
+        <p>A browser-based .NET project scaffolding tool. Configure your architecture, ORM, database, authentication, testing, and DevOps options — then download a fully structured solution as a zip.</p>
+        <p>Supports Clean Architecture, Vertical Slice, and Simple Layered patterns with Entity Framework Core, Dapper, PostgreSQL, SQL Server, MySQL, SQLite, Serilog, OpenTelemetry, Docker, .NET Aspire, GitHub Actions, and more.</p>
+        <p>This application requires JavaScript and WebAssembly to run. Please enable JavaScript in your browser.</p>
+    </noscript>
 
     <div id="blazor-error-ui">
         Failed to load. Check your connection and try again.

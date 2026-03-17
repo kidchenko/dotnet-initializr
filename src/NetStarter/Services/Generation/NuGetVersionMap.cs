@@ -250,6 +250,12 @@ public static class NuGetVersionMap
             [DotNetSdkVersion.Net9] = "7.*",
             [DotNetSdkVersion.Net10] = "7.*",
         },
+        ["OpenTelemetry.Exporter.Console"] = new()
+        {
+            [DotNetSdkVersion.Net8] = "1.*",
+            [DotNetSdkVersion.Net9] = "1.*",
+            [DotNetSdkVersion.Net10] = "1.*",
+        },
         ["OpenTelemetry.Exporter.OpenTelemetryProtocol"] = new()
         {
             [DotNetSdkVersion.Net8] = "1.*",

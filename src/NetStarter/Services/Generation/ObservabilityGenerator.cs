@@ -34,12 +34,14 @@ public static class ObservabilityGenerator
             $"            .WithTracing(tracing =>\n" +
             $"            {{\n" +
             $"                tracing.AddAspNetCoreInstrumentation()\n" +
-            $"                       .AddHttpClientInstrumentation(){efCoreInstrumentation};\n" +
-            $"                tracing.AddOtlpExporter();\n" +
+            $"                       .AddHttpClientInstrumentation(){efCoreInstrumentation}\n" +
+            $"                       .AddConsoleExporter()\n" +
+            $"                       .AddOtlpExporter();\n" +
             $"            }})\n" +
             $"            .WithMetrics(metrics =>\n" +
             $"            {{\n" +
             $"                metrics.AddAspNetCoreInstrumentation()\n" +
+            $"                       .AddConsoleExporter()\n" +
             $"                       .AddOtlpExporter();\n" +
             $"            }});\n" +
             $"        return services;\n" +

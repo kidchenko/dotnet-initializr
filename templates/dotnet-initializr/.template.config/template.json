@@ -400,7 +400,11 @@
         },
         {
           "condition": "(!IncludeSimpleLayered && !IncludeAnyOrm)",
-          "exclude": ["src/**/Models/**", "src/**/Data/**"]
+          "exclude": ["src/**/Models/**"]
+        },
+        {
+          "condition": "(!IncludeAnyOrm)",
+          "exclude": ["src/**/Data/**"]
         },
         {
           "condition": "(!IncludeIHostedService && !IncludeHangfire && !IncludeQuartz && !IncludeWorker && !IncludeConsole)",
@@ -413,6 +417,10 @@
         {
           "condition": "(!IncludeQuartz)",
           "exclude": ["src/**/Jobs/SampleJob.cs"]
+        },
+        {
+          "condition": "(!IncludeHangfire)",
+          "exclude": ["src/**/Jobs/SampleHangfireJob.cs"]
         },
         {
           "condition": "(!IncludeWebApi)",
@@ -452,6 +460,10 @@
         {
           "condition": "(!IncludeQuartz)",
           "exclude": ["**/Jobs/SampleJob.cs"]
+        },
+        {
+          "condition": "(!IncludeHangfire)",
+          "exclude": ["**/Jobs/SampleHangfireJob.cs"]
         },
         {
           "condition": "(!IncludeWebApi)",

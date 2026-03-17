@@ -10,11 +10,11 @@ public static class ApplicationExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
 #if (IncludeValidation)
-        services.AddValidatorsFromAssemblyContaining<ApplicationExtensions>();
+        services.AddValidatorsFromAssembly(typeof(ApplicationExtensions).Assembly);
 #endif
 #if (IncludeMapping)
-        Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(ApplicationExtensions).Assembly);
-        services.AddMapster();
+        services.AddSingleton(Mapster.TypeAdapterConfig.GlobalSettings);
+        services.AddScoped<MapsterMapper.IMapper, MapsterMapper.ServiceMapper>();
 #endif
         // Register additional application services here
         return services;

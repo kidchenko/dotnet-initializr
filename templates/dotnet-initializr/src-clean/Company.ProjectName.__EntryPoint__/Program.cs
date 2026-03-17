@@ -11,6 +11,9 @@ using NLog.Web;
 #if (IncludeScalar)
 using Scalar.AspNetCore;
 #endif
+#if (IncludeHangfire)
+using Hangfire;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +30,25 @@ builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 #endif
 
+#if (IncludeJwt)
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+builder.Services.AddAuthorization();
+#endif
+
 #if (IncludeHealthChecks)
 builder.Services.AddHealthChecks();
 #endif
@@ -34,17 +56,22 @@ builder.Services.AddHealthChecks();
 #if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+builder.Services.AddOpenApi();
+#endif
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+    app.MapOpenApi();
+#endif
 #if (IncludeSwaggerUI && IncludeNet8)
     app.UseSwagger();
     app.UseSwaggerUI();
 #elif (IncludeSwaggerUI && !IncludeNet8)
-    // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
 #if (IncludeRedoc && IncludeNet8)
@@ -59,11 +86,11 @@ if (app.Environment.IsDevelopment())
 #elif (IncludeScalar && !IncludeNet8)
     app.MapScalarApiReference();
 #endif
+#if (IncludeHangfire)
+    app.UseHangfireDashboard("/hangfire");
+#endif
 }
 
-#if (IncludeHangfire)
-app.UseHangfireDashboard("/hangfire");
-#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -88,6 +115,9 @@ using NLog.Web;
 #if (IncludeScalar)
 using Scalar.AspNetCore;
 #endif
+#if (IncludeHangfire)
+using Hangfire;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +133,25 @@ builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 #endif
 
+#if (IncludeJwt)
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+builder.Services.AddAuthorization();
+#endif
+
 #if (IncludeHealthChecks)
 builder.Services.AddHealthChecks();
 #endif
@@ -110,17 +159,22 @@ builder.Services.AddHealthChecks();
 #if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+builder.Services.AddOpenApi();
+#endif
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+    app.MapOpenApi();
+#endif
 #if (IncludeSwaggerUI && IncludeNet8)
     app.UseSwagger();
     app.UseSwaggerUI();
 #elif (IncludeSwaggerUI && !IncludeNet8)
-    // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
 #if (IncludeRedoc && IncludeNet8)
@@ -135,11 +189,11 @@ if (app.Environment.IsDevelopment())
 #elif (IncludeScalar && !IncludeNet8)
     app.MapScalarApiReference();
 #endif
+#if (IncludeHangfire)
+    app.UseHangfireDashboard("/hangfire");
+#endif
 }
 
-#if (IncludeHangfire)
-app.UseHangfireDashboard("/hangfire");
-#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();

@@ -19,7 +19,7 @@ using Microsoft.Data.Sqlite;
 #if (IncludeAnyOrm)
 using Company.ProjectName.Domain.Repositories;
 #endif
-#if (IncludeJwt || IncludeKeycloak)
+#if (IncludeKeycloak)
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 #endif
 #if (IncludeAspNetIdentity)
@@ -36,7 +36,9 @@ using OpenTelemetry.Metrics;
 #endif
 #if (IncludeHangfire)
 using Hangfire;
-#if (IncludeMySql)
+#if (IncludePostgreSql)
+using Hangfire.PostgreSql;
+#elif (IncludeMySql)
 using Hangfire.MySql;
 #endif
 #endif
@@ -91,15 +93,7 @@ public static class InfrastructureExtensions
         services.AddScoped<ISampleRepository, SampleRepository>();
 #endif
 
-#if (IncludeJwt)
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.Authority = configuration["Authentication:Jwt:Issuer"];
-                options.Audience = configuration["Authentication:Jwt:Audience"];
-            });
-        services.AddAuthorization();
-#elif (IncludeKeycloak)
+#if (IncludeKeycloak)
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -125,11 +119,12 @@ public static class InfrastructureExtensions
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "Company.ProjectName:";
         });
 #endif
 #if (IncludeResilience)
-        services.ConfigureHttpClientDefaults(http =>
-            http.AddStandardResilienceHandler());
+        services.AddHttpClient("Company.ProjectNameClient")
+            .AddStandardResilienceHandler();
 #endif
 #if (IncludeOpenTelemetry)
         services.AddOpenTelemetry()
@@ -139,13 +134,14 @@ public static class InfrastructureExtensions
                 .AddAspNetCoreInstrumentation()
 #endif
                 .AddHttpClientInstrumentation()
-                .AddConsoleExporter())
+                .AddConsoleExporter()
+                .AddOtlpExporter())
             .WithMetrics(m => m
 #if (IncludeWebProject)
                 .AddAspNetCoreInstrumentation()
 #endif
-                .AddHttpClientInstrumentation()
-                .AddConsoleExporter());
+                .AddConsoleExporter()
+                .AddOtlpExporter());
 #endif
 #if (IncludeHangfire)
         services.AddHangfire(config => config
@@ -153,8 +149,9 @@ public static class InfrastructureExtensions
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
 #if (IncludePostgreSql)
-            .UsePostgreSqlStorage(c => c.UseConnectionString(
-                configuration.GetConnectionString("DefaultConnection")!)));
+            .UsePostgreSqlStorage(options =>
+                options.UseNpgsqlConnection(
+                    configuration.GetConnectionString("DefaultConnection")!)));
 #elif (IncludeSqlServer)
             .UseSqlServerStorage(
                 configuration.GetConnectionString("DefaultConnection")));

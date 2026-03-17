@@ -75,11 +75,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Company.ProjectName:";
 });
 #endif
 #if (IncludeResilience)
-builder.Services.ConfigureHttpClientDefaults(http =>
-    http.AddStandardResilienceHandler());
+builder.Services.AddHttpClient("Company.ProjectNameClient")
+    .AddStandardResilienceHandler();
 #endif
 #if (IncludeOpenTelemetry)
 builder.Services.AddOpenTelemetry()
@@ -87,14 +88,16 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(t => t
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddConsoleExporter())
+        .AddConsoleExporter()
+        .AddOtlpExporter())
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddConsoleExporter());
+        .AddConsoleExporter()
+        .AddOtlpExporter());
 #endif
 #if (IncludeMapping)
-Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+builder.Services.AddSingleton(Mapster.TypeAdapterConfig.GlobalSettings);
+builder.Services.AddScoped<MapsterMapper.IMapper, MapsterMapper.ServiceMapper>();
 #endif
 
 #if (IncludeHangfire)
@@ -103,8 +106,9 @@ builder.Services.AddHangfire(config => config
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
 #if (IncludePostgreSql)
-    .UsePostgreSqlStorage(c => c.UseConnectionString(
-        builder.Configuration.GetConnectionString("DefaultConnection")!)));
+    .UsePostgreSqlStorage(options =>
+        options.UseNpgsqlConnection(
+            builder.Configuration.GetConnectionString("DefaultConnection")!)));
 #elif (IncludeSqlServer)
     .UseSqlServerStorage(
         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -139,18 +143,25 @@ builder.Services.AddHostedService<Company.ProjectName.Jobs.SampleBackgroundServi
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Authentication:Jwt:Issuer"];
-        options.Audience = builder.Configuration["Authentication:Jwt:Audience"];
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
     });
 builder.Services.AddAuthorization();
 #elif (IncludeKeycloak)
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        // Keycloak realm URL, e.g. http://localhost:8080/realms/myrealm
         options.Authority = builder.Configuration["Authentication:Keycloak:Authority"];
         options.Audience = builder.Configuration["Authentication:Keycloak:Audience"];
-        // Standard OIDC discovery — no explicit MetadataAddress needed
     });
 builder.Services.AddAuthorization();
 #elif (IncludeAspNetIdentity)
@@ -158,7 +169,6 @@ builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microso
     .AddEntityFrameworkStores<Company.ProjectName.Data.AppDbContext>()
     .AddDefaultTokenProviders();
 builder.Services.AddAuthorization();
-// Note: No UI pages or MapIdentityApi endpoints generated — add your own as needed
 #elif (IncludeApiKey)
 builder.Services.AddAuthentication(Company.ProjectName.Auth.ApiKeyAuthenticationHandler.SchemeName)
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Company.ProjectName.Auth.ApiKeyAuthenticationHandler>(
@@ -173,17 +183,22 @@ builder.Services.AddHealthChecks();
 #if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+builder.Services.AddOpenApi();
+#endif
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+    app.MapOpenApi();
+#endif
 #if (IncludeSwaggerUI && IncludeNet8)
     app.UseSwagger();
     app.UseSwaggerUI();
 #elif (IncludeSwaggerUI && !IncludeNet8)
-    // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
 #if (IncludeRedoc && IncludeNet8)
@@ -198,11 +213,11 @@ if (app.Environment.IsDevelopment())
 #elif (IncludeScalar && !IncludeNet8)
     app.MapScalarApiReference();
 #endif
+#if (IncludeHangfire)
+    app.UseHangfireDashboard("/hangfire");
+#endif
 }
 
-#if (IncludeHangfire)
-app.UseHangfireDashboard("/hangfire");
-#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -289,11 +304,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Company.ProjectName:";
 });
 #endif
 #if (IncludeResilience)
-builder.Services.ConfigureHttpClientDefaults(http =>
-    http.AddStandardResilienceHandler());
+builder.Services.AddHttpClient("Company.ProjectNameClient")
+    .AddStandardResilienceHandler();
 #endif
 #if (IncludeOpenTelemetry)
 builder.Services.AddOpenTelemetry()
@@ -301,14 +317,16 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(t => t
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddConsoleExporter())
+        .AddConsoleExporter()
+        .AddOtlpExporter())
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddConsoleExporter());
+        .AddConsoleExporter()
+        .AddOtlpExporter());
 #endif
 #if (IncludeMapping)
-Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+builder.Services.AddSingleton(Mapster.TypeAdapterConfig.GlobalSettings);
+builder.Services.AddScoped<MapsterMapper.IMapper, MapsterMapper.ServiceMapper>();
 #endif
 
 #if (IncludeHangfire)
@@ -317,8 +335,9 @@ builder.Services.AddHangfire(config => config
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
 #if (IncludePostgreSql)
-    .UsePostgreSqlStorage(c => c.UseConnectionString(
-        builder.Configuration.GetConnectionString("DefaultConnection")!)));
+    .UsePostgreSqlStorage(options =>
+        options.UseNpgsqlConnection(
+            builder.Configuration.GetConnectionString("DefaultConnection")!)));
 #elif (IncludeSqlServer)
     .UseSqlServerStorage(
         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -353,18 +372,25 @@ builder.Services.AddHostedService<Company.ProjectName.Jobs.SampleBackgroundServi
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Authentication:Jwt:Issuer"];
-        options.Audience = builder.Configuration["Authentication:Jwt:Audience"];
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
     });
 builder.Services.AddAuthorization();
 #elif (IncludeKeycloak)
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        // Keycloak realm URL, e.g. http://localhost:8080/realms/myrealm
         options.Authority = builder.Configuration["Authentication:Keycloak:Authority"];
         options.Audience = builder.Configuration["Authentication:Keycloak:Audience"];
-        // Standard OIDC discovery — no explicit MetadataAddress needed
     });
 builder.Services.AddAuthorization();
 #elif (IncludeAspNetIdentity)
@@ -372,7 +398,6 @@ builder.Services.AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microso
     .AddEntityFrameworkStores<Company.ProjectName.Data.AppDbContext>()
     .AddDefaultTokenProviders();
 builder.Services.AddAuthorization();
-// Note: No UI pages or MapIdentityApi endpoints generated — add your own as needed
 #elif (IncludeApiKey)
 builder.Services.AddAuthentication(Company.ProjectName.Auth.ApiKeyAuthenticationHandler.SchemeName)
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Company.ProjectName.Auth.ApiKeyAuthenticationHandler>(
@@ -387,17 +412,22 @@ builder.Services.AddHealthChecks();
 #if ((IncludeSwaggerUI || IncludeRedoc) && IncludeNet8)
 builder.Services.AddSwaggerGen();
 #endif
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+builder.Services.AddOpenApi();
+#endif
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8)
+    app.MapOpenApi();
+#endif
 #if (IncludeSwaggerUI && IncludeNet8)
     app.UseSwagger();
     app.UseSwaggerUI();
 #elif (IncludeSwaggerUI && !IncludeNet8)
-    // net9/net10: OpenAPI document at /openapi/v1.json (from AddOpenApi)
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API v1"));
 #endif
 #if (IncludeRedoc && IncludeNet8)
@@ -412,11 +442,11 @@ if (app.Environment.IsDevelopment())
 #elif (IncludeScalar && !IncludeNet8)
     app.MapScalarApiReference();
 #endif
+#if (IncludeHangfire)
+    app.UseHangfireDashboard("/hangfire");
+#endif
 }
 
-#if (IncludeHangfire)
-app.UseHangfireDashboard("/hangfire");
-#endif
 app.UseHttpsRedirection();
 #if (IncludeAnyAuth)
 app.UseAuthentication();
@@ -486,24 +516,27 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = context.Configuration.GetConnectionString("Redis");
+            options.InstanceName = "Company.ProjectName:";
         });
 #endif
 #if (IncludeResilience)
-        services.ConfigureHttpClientDefaults(http =>
-            http.AddStandardResilienceHandler());
+        services.AddHttpClient("Company.ProjectNameClient")
+            .AddStandardResilienceHandler();
 #endif
 #if (IncludeOpenTelemetry)
         services.AddOpenTelemetry()
             .ConfigureResource(r => r.AddService("Company.ProjectName"))
             .WithTracing(t => t
                 .AddHttpClientInstrumentation()
-                .AddConsoleExporter())
+                .AddConsoleExporter()
+                .AddOtlpExporter())
             .WithMetrics(m => m
-                .AddHttpClientInstrumentation()
-                .AddConsoleExporter());
+                .AddConsoleExporter()
+                .AddOtlpExporter());
 #endif
 #if (IncludeMapping)
-        Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+        services.AddSingleton(Mapster.TypeAdapterConfig.GlobalSettings);
+        services.AddScoped<MapsterMapper.IMapper, MapsterMapper.ServiceMapper>();
 #endif
     })
 #if (IncludeSerilog)
@@ -584,24 +617,27 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = context.Configuration.GetConnectionString("Redis");
+            options.InstanceName = "Company.ProjectName:";
         });
 #endif
 #if (IncludeResilience)
-        services.ConfigureHttpClientDefaults(http =>
-            http.AddStandardResilienceHandler());
+        services.AddHttpClient("Company.ProjectNameClient")
+            .AddStandardResilienceHandler();
 #endif
 #if (IncludeOpenTelemetry)
         services.AddOpenTelemetry()
             .ConfigureResource(r => r.AddService("Company.ProjectName"))
             .WithTracing(t => t
                 .AddHttpClientInstrumentation()
-                .AddConsoleExporter())
+                .AddConsoleExporter()
+                .AddOtlpExporter())
             .WithMetrics(m => m
-                .AddHttpClientInstrumentation()
-                .AddConsoleExporter());
+                .AddConsoleExporter()
+                .AddOtlpExporter());
 #endif
 #if (IncludeMapping)
-        Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+        services.AddSingleton(Mapster.TypeAdapterConfig.GlobalSettings);
+        services.AddScoped<MapsterMapper.IMapper, MapsterMapper.ServiceMapper>();
 #endif
 #if (IncludeHangfire)
         services.AddHangfire(config => config

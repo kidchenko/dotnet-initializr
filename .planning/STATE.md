@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: dotnet new Templates
 status: unknown
-last_updated: "2026-03-08T23:35:40.446Z"
+last_updated: "2026-03-09T15:42:21.490Z"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Users can generate a fully configured .NET project with their chosen architecture, ORM, auth, observability, and testing setup in seconds — no manual scaffolding.
-**Current focus:** v1.3 — Phase 17: Logging, Testing, and Quality
+**Current focus:** v1.3 — Phase 19: Blazor CLI Panel
 
 ## Current Position
 
-Phase: 17 of 20 (Logging, Testing, and Quality)
-Plan: 4 complete (17-04 done — Phase 17 verification steps 40-53 added to test-template.sh)
-Status: Phase 17 complete (all 4 plans done)
-Last activity: 2026-03-08 — Phase 17 Plan 04 complete: 14 verification steps (40-53) added to test-template.sh covering Serilog, NLog (web/non-web), testing projects (single/split/none), validation, caching, resilience, mapping, OpenTelemetry, health-checks, kitchen sink, regression
+Phase: 19 of 20 (Blazor CLI Panel)
+Plan: 2 complete (19-02 done — Phase19DotNetNewCommandTests: 43 unit tests for DotNetNewCommandService flag mapping)
+Status: Phase 19 in progress (2/? plans done)
+Last activity: 2026-03-09 — Phase 19 Plan 02 complete: 43 comprehensive unit tests for DotNetNewCommandService; all 306 tests pass; CLI-01, CLI-02, CLI-03 verified
 
-Progress: [██████░░░░] 36% (v1.3: 13/? plans complete — Phase 17 plan 04 complete)
+Progress: [████████░░] 58% (v1.3: 18/? plans complete — Phase 19 in progress)
 
 ## Performance Metrics
 
@@ -44,8 +44,8 @@ Progress: [██████░░░░] 36% (v1.3: 13/? plans complete — Ph
 | 15. Architecture and Project Types | 2/2 | Complete |
 | 16. Data Access and Auth | 3/3 | Complete |
 | 17. Logging, Testing, and Quality | 4/4 | Complete |
-| 18. DevOps, Containers, and Background Jobs | 0/? | Not started |
-| 19. Blazor CLI Panel | 0/? | Not started |
+| 18. DevOps, Containers, and Background Jobs | 3/3 | Complete |
+| 19. Blazor CLI Panel | 2/? | In progress |
 | 20. NuGet Packaging and Distribution | 0/? | Not started |
 
 ## Accumulated Context
@@ -111,6 +111,20 @@ Key decisions carried into v1.3:
 - [Phase 17]: SampleIntegrationTests.cs uses IAsyncLifetime for async container start/stop lifecycle (xUnit idiomatic pattern)
 - [Phase 17]: --openTelemetry (camelCase) used as CLI flag — no longName override in dotnetcli.host.json
 - [Phase 17]: Kitchen sink step 52 uses xunit+fluentassertions+nsubstitute (no testcontainers) — produces single Tests/ project
+- [Phase 18]: IncludeHangfire double-gated on (backgroundJobs == 'Hangfire' && orm \!= 'None') — Hangfire requires database storage; no ORM means no storage backend
+- [Phase 18]: Jobs/ exclusion updated from project-type-only check to strategy-aware: (\!IncludeIHostedService && \!IncludeHangfire && \!IncludeQuartz && \!IncludeWorker && \!IncludeConsole)
+- [Phase 18]: Template constraints block with type:expression for api-docs non-web project type validation — produces explicit error for Console/WorkerService
+- [Phase 18]: CI/CD YAML files have no #if directives — two physical files per provider selected via condition-based source blocks with rename (GEN-07 compliance)
+- [Phase 18]: DotNetSdkVersion switch generator maps net8.0/net9.0/net10.0 to 8.0.x/9.0.x/10.0.x via __DotNetSdkVersion__ token replacement in CI/CD YAML
+- [Phase 18]: Aspire selection does NOT trigger Docker CI/CD variant — Aspire is dev-time orchestration, not Docker deployment strategy
+- [Phase 18]: Aspire AppHost uses AddProject(name, path) overload — path-based approach works with sourceName and __EntryPoint__ template replacements
+- [Phase 18-devops-containers-and-background-jobs]: Aspire build step conditional on workload availability — skip if aspire workload not installed to avoid CI failures
+- [Phase 19-01]: Flag emission compares against template.json defaults (not Blazor defaults) — orm defaults EfCore in template, None in Blazor
+- [Phase 19-01]: healthChecks and validation default true in template.json — must emit --flag false when Blazor booleans are false
+- [Phase 19-01]: containers is single-choice (priority: Aspire > DockerCompose > Dockerfile); cicd is single-choice (priority: GitHubActions > AzureDevOps)
+- [Phase 19-01]: DotNetNewPanel expanded by default (true) vs CliCommandPanel collapsed by default (false)
+- [Phase 19-02]: Test CreateConfig factory uses Blazor-matching defaults to make default-omission intent explicit in each test
+- [Phase 19-02]: GetFlagString helper extracts second command (dotnet new dotnet-initializr line) for concise Assert.Contains/DoesNotContain assertions
 
 ### Pending Todos
 
@@ -122,6 +136,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: Completed 17-04-PLAN.md — Phase 17 verification steps 40-53 added to test-template.sh (14 steps covering Serilog, NLog, testing, validation, caching, resilience, mapping, OpenTelemetry, health-checks, kitchen sink, regression)
+Last session: 2026-03-09
+Stopped at: Completed 19-02-PLAN.md — Phase19DotNetNewCommandTests: 43 unit tests for DotNetNewCommandService flag mapping; all 306 tests pass; 1 task, 1 file, commit 1658e75
 Resume file: None

@@ -17,9 +17,9 @@
 <!--#endif -->
   </PropertyGroup>
 
-<!--#if (IncludeWebApi || IncludeMinimalApi) -->
+<!--#if ((IncludeScalar || IncludeSwaggerUI || IncludeRedoc) && !IncludeNet8) -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.*" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="__EfCoreVersion__" />
   </ItemGroup>
 <!--#endif -->
 
@@ -80,9 +80,8 @@
 <!--#endif -->
 <!--#if (IncludeSerilog) -->
   <ItemGroup>
-    <PackageReference Include="Serilog.AspNetCore" Version="10.*" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.*" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+    <PackageReference Include="Serilog.AspNetCore" Version="__EfCoreVersion__" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.*" />
   </ItemGroup>
 <!--#endif -->
 <!--#if (IncludeNLog && IncludeWebProject) -->
@@ -124,6 +123,7 @@
 <!--#endif -->
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.*" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.*" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.*" />
   </ItemGroup>
 <!--#endif -->
 <!--#if (IncludeHangfire) -->

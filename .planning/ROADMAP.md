@@ -49,8 +49,8 @@
 - [x] **Phase 15: Architecture and Project Types** - Correct folder structures and .slnx for all arch + type combinations (completed 2026-03-08)
 - [x] **Phase 16: Data Access and Auth** - ORM, database, auth, and SDK-version-aware NuGet references (completed 2026-03-08)
 - [x] **Phase 17: Logging, Testing, and Quality** - Logging choice, testing flags, and all boolean feature flags (Plan 01 complete 2026-03-08) (completed 2026-03-08)
-- [ ] **Phase 18: DevOps, Containers, and Background Jobs** - CI/CD, container files, background jobs, and API docs via sources.modifiers
-- [ ] **Phase 19: Blazor CLI Panel** - Blazor app displays `dotnet new dotnet-initializr --flags` command
+- [x] **Phase 18: DevOps, Containers, and Background Jobs** - CI/CD, container files, background jobs, and API docs via sources.modifiers (completed 2026-03-09)
+- [x] **Phase 19: Blazor CLI Panel** - Blazor app displays `dotnet new dotnet-initializr --flags` command (completed 2026-03-09)
 - [ ] **Phase 20: NuGet Packaging and Distribution** - Build verification, NuGet.org publish, GitHub release artifact
 
 ## Phase Details
@@ -226,7 +226,11 @@ Plans:
   3. `--background-jobs hangfire` generates Hangfire registration with the storage package matching the selected database; `--background-jobs quartz` generates all three Quartz packages and a sample `IJob`
   4. `--background-jobs ihostedservice` generates a `BackgroundService` subclass with `AddHostedService<>` and zero NuGet packages
   5. `--api-docs` (Scalar/SwaggerUI/Redoc) is only active for WebApi and MinimalApi project types — Console and WorkerService receive no API docs content regardless of flag
-**Plans**: TBD
+**Plans:** 3/3 plans complete
+Plans:
+- [x] 18-01-PLAN.md — Background jobs scaffolding (IHostedService, Hangfire, Quartz) and API docs (Scalar, Redoc)
+- [x] 18-02-PLAN.md — CI/CD workflow files (GitHub Actions, Azure DevOps) and container files (Dockerfile, docker-compose, Aspire)
+- [x] 18-03-PLAN.md — Phase 18 verification steps 54-65 in test-template.sh
 
 ### Phase 19: Blazor CLI Panel
 **Goal**: The Blazor app displays a `dotnet new dotnet-initializr --flags` command that exactly matches the current configuration, alongside the existing `dotnet add` commands
@@ -236,7 +240,10 @@ Plans:
   1. The Blazor generator page shows a CLI panel containing `dotnet new install Initializr.Templates` and `dotnet new dotnet-initializr -n <name> --flags` built from the current `ProjectConfiguration`
   2. The `--flags` in the displayed command use the same parameter names and PascalCase choice values as the finalized `template.json` (e.g., `--arch CleanArchitecture`, not `--arch clean-architecture`)
   3. The existing `dotnet add` package commands panel remains visible and unchanged alongside the new `dotnet new` panel
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [ ] 19-01-PLAN.md — DotNetNewCommandService, DotNetNewPanel.razor component, Home.razor + Program.cs wiring
+- [ ] 19-02-PLAN.md — Comprehensive unit tests for DotNetNewCommandService flag mapping
 
 ### Phase 20: NuGet Packaging and Distribution
 **Goal**: `Initializr.Templates` is published to NuGet.org as a pre-release and then stable package, with a GitHub Actions workflow and a `.nupkg` artifact attached to the GitHub release
@@ -275,6 +282,6 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 15. Architecture and Project Types | 2/2 | Complete    | 2026-03-08 | - |
 | 16. Data Access and Auth | 3/3 | Complete    | 2026-03-08 | - |
 | 17. Logging, Testing, and Quality | 4/4 | Complete   | 2026-03-08 | - |
-| 18. DevOps, Containers, and Background Jobs | v1.3 | 0/? | Not started | - |
-| 19. Blazor CLI Panel | v1.3 | 0/? | Not started | - |
+| 18. DevOps, Containers, and Background Jobs | 3/3 | Complete   | 2026-03-09 | - |
+| 19. Blazor CLI Panel | 2/2 | Complete    | 2026-03-09 | - |
 | 20. NuGet Packaging and Distribution | v1.3 | 0/? | Not started | - |
